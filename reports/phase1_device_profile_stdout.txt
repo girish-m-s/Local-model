@@ -1,0 +1,648 @@
+=== SECTION 0: RAW SOURCE DUMP ===
+$ lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 57 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  4
+On-line CPU(s) list:                     0-3
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Processor
+CPU family:                              6
+Model:                                   207
+Thread(s) per core:                      1
+Core(s) per socket:                      4
+Socket(s):                               1
+Stepping:                                2
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Virtualization:                          VT-x
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               192 KiB (4 instances)
+L1i cache:                               128 KiB (4 instances)
+L2 cache:                                8 MiB (4 instances)
+L3 cache:                                320 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-3
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Mitigation; TSX disabled
+Vulnerability Vmscape:                   Not affected
+
+
+$ head -30 /proc/cpuinfo
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 207
+model name	: Intel(R) Xeon(R) Processor
+stepping	: 2
+microcode	: 0x1
+cpu MHz		: 2400.000
+cache size	: 327680 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 32
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+vmx flags	: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling
+bugs		: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret
+bogomips	: 4800.00
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 46 bits physical, 57 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+
+[TRUNCATED: showing first 30 of 112 lines of /proc/cpuinfo]
+
+$ cat /proc/meminfo | head -8
+MemTotal:       16398452 kB
+MemFree:         7895352 kB
+MemAvailable:   15472216 kB
+Buffers:          188404 kB
+Cached:          7118564 kB
+SwapCached:            0 kB
+Active:           306152 kB
+Inactive:        7428312 kB
+
+[TRUNCATED: showing first 8 of 53 lines of /proc/meminfo]
+
+$ lscpu -e
+CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE
+  0    0      0    0 0:0:0:0          yes
+  1    0      0    1 1:1:1:0          yes
+  2    0      0    2 2:2:2:0          yes
+  3    0      0    3 3:3:3:0          yes
+
+$ numactl --hardware
+[numactl not present in PATH — skipped]
+
+=== SECTION 1: IDENTITY ===
+model_name: Intel(R) Xeon(R) Processor
+  <- Model name:                              Intel(R) Xeon(R) Processor
+vendor / family / model / stepping: GenuineIntel / 6 / 207 / 2
+  <- vendor: Vendor ID:                               GenuineIntel
+  <- family: CPU family:                              6
+  <- model: Model:                                   207
+  <- stepping: Stepping:                                2
+arch (uname -m): x86_64
+  <- uname -m → x86_64
+base_mhz / max_mhz: UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base) / UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')
+  <- base_mhz: UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)
+  <- max_mhz: UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')
+
+=== SECTION 2: TOPOLOGY ===
+logical_cores / physical_cores / threads_per_core / sockets: 4 / 4 / 1 / 1
+  <- logical_cores: CPU(s):                                  4
+  <- physical_cores: Core(s) per socket * Socket(s) = 4 * 1 = 4; from [Core(s) per socket:                      4] [Socket(s):                               1]
+  <- threads_per_core: Thread(s) per core:                      1
+  <- sockets: Socket(s):                               1
+smt_enabled: False
+  <- /sys/devices/system/cpu/smt/active: 0; control: notsupported
+hybrid: False
+  <- no sysfs topology/core_type or cpu_capacity present; lscpu -e has no core-type column → treated as non-hybrid (direct absence of hybrid signals, not a guessed default)
+numa_nodes + cpu-to-node map: single node
+  <- NUMA node(s):                            1; NUMA node0 CPU(s):                       0-3
+  <- cpu-to-node map: NUMA node0 CPU(s):                       0-3
+  map value: {0: [0, 1, 2, 3]}
+cache L1d / L1i / L2 / L3 (bytes): 49152 / 32768 / 2097152 / 335544320; L2 sharing: per-core
+  <- L1d: /sys/devices/system/cpu/cpu0/cache/index0/size: 48K
+  <- L1i: /sys/devices/system/cpu/cpu0/cache/index1/size: 32K
+  <- L2: /sys/devices/system/cpu/cpu0/cache/index2/size: 2048K
+  <- L2 sharing: /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list: 0 → per-core
+  <- L3: /sys/devices/system/cpu/cpu0/cache/index3/size: 327680K
+
+=== SECTION 3: ISA FLAGS ===
+sse4_2: PRESENT  <- sse4_2
+avx: PRESENT  <- avx
+avx2: PRESENT  <- avx2
+fma: PRESENT  <- fma
+f16c: PRESENT  <- f16c
+avx512f: PRESENT  <- avx512f
+avx512bw: PRESENT  <- avx512bw
+avx512vl: PRESENT  <- avx512vl
+avx512_vnni: PRESENT  <- avx512_vnni
+avx512_bf16: PRESENT  <- avx512_bf16
+amx_tile: PRESENT  <- amx_tile
+amx_int8: PRESENT  <- amx_int8
+amx_bf16: PRESENT  <- amx_bf16
+quant_kernel_tier: AMX
+  reasoning: amx_tile/amx_int8 PRESENT → AMX (highest x86 integer-matmul tier)
+
+=== SECTION 4: MEMORY ===
+mem_total_bytes / mem_available_bytes / mem_free_bytes: 16792014848 / 15843549184 / 8084840448
+  <- MemTotal: MemTotal:       16398452 kB
+  <- MemAvailable: MemAvailable:   15472216 kB
+  <- MemFree: MemFree:         7895352 kB
+  <- note: MemAvailable used as primary availability metric because the kernel accounts for reclaimable cache/buffers; MemFree is also reported raw.
+swap_total / swap_used / swappiness: 0 / 0 / 60
+  <- swap_total: SwapTotal:             0 kB
+  <- swap_used: SwapTotal - SwapFree = 0 - 0 from [SwapTotal:             0 kB] [SwapFree:              0 kB]
+  <- swappiness: /proc/sys/vm/swappiness: 60
+page_size; hugepages configured (count, size): 4096; count=0, size_bytes=2097152
+  <- page_size: getconf PAGE_SIZE → 4096
+  <- hugepages_count: HugePages_Total:       0
+  <- hugepages_size: Hugepagesize:       2048 kB
+memory channels / DIMM count / DIMM speed: UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.) / UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped) / UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)
+  <- channels: UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)
+  <- DIMM count: UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)
+  <- DIMM speed: UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)
+theoretical_peak_bandwidth_GBps: UNDETECTED (reason: need memory_channels, bus width, and DIMM MT/s; channels/width unavailable)
+  formula: channels * width_bytes * MT/s / 1e9 — inputs incomplete (channels=UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.), dimm_speed=UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped), width_bytes=UNDETECTED)
+  confidence: guess — no DMI channel/width data on this host; formula not evaluated
+
+=== SECTION 5: CROSS-CHECKS ===
+physical_cores * threads_per_core == logical_cores: PASS
+  left:  physical_cores (4) * threads_per_core (1) = 4
+  right: logical_cores = 4
+sum(per-core-type counts) == total cores (hybrid): PASS
+  left:  non-hybrid; type counts {'homogeneous': 4} sum=4
+  right: physical_cores = 4
+MemTotal - MemAvailable <= MemTotal: PASS
+  left:  MemTotal - MemAvailable = 16792014848 - 15843549184 = 948465664
+  right: MemTotal = 16792014848
+ISA flags internally consistent: PASS
+  left:  avx512_vnni=True → avx512f=True (ok); amx_any=True → avx512f=True (ok)
+  right: implication rules: avx512_vnni⇒avx512f; amx⇒avx512f; i8mm⇒asimd
+logical core count agrees across ≥2 independent sources: PASS
+  left:  {'lscpu CPU(s)': 4, 'os.cpu_count()': 4, '/proc/cpuinfo processor entry count': 4}
+  right: unique values=[4]
+core_count_sources (all):
+  lscpu CPU(s): 4
+  os.cpu_count(): 4
+  /proc/cpuinfo processor entry count: 4
+  lscpu Core(s) per socket * Socket(s): 4
+  /proc/cpuinfo unique (physical id, core id) pairs: 4
+
+=== SECTION 6: DERIVED DEFAULTS (provisional) ===
+suggested_thread_count: 4
+  formula: logical_cores (4) because smt_enabled=false; provisional pending Phase 2
+  note: provisional; to be REPLACED by the measured saturation point in Phase 2
+usable_ram_for_model_bytes: 13467016806
+  formula: 0.85 * mem_available_bytes = 0.85 * 15843549184 = 13467016806
+
+=== SECTION 7: SELF-CRITIQUE ===
+- fields that are heuristic, not directly read:
+  - suggested_thread_count (provisional formula from topology, not measured)
+  - usable_ram_for_model_bytes (0.85 * MemAvailable headroom factor is a policy choice)
+  - quant_kernel_tier (priority ladder over detected flags, not a kernel probe)
+  - hybrid=false when sysfs core_type/cpu_capacity absent (absence-of-signal, not a positive non-hybrid attestation)
+  - L2 sharing classification from shared_cpu_list length or lscpu instance counts
+  - physical_cores computed as Core(s) per socket * Socket(s) rather than a single key
+  - smt_enabled falls back to Thread(s) per core when /sys/.../smt/active is absent (on this host active=0 was read directly; control=notsupported)
+- platform code paths not exercised on this machine:
+  - macOS sysctl/vm_stat path
+  - Windows WMIC/PowerShell CIM path
+  - ARM ISA flag set and ARM quant tiers
+  - hybrid P/E core_type and cpu_capacity parsing (no such sysfs nodes here)
+  - multi-node NUMA mapping (only 1 node present)
+  - dmidecode DIMM/channel parsing (dmidecode not installed)
+  - cpufreq base/max frequency sysfs (directory absent under KVM)
+  - numactl --hardware (binary not installed)
+- places a default could have been silently substituted:
+  - base_mhz: could have used /proc/cpuinfo cpu MHz=2400 as 'base' — intentionally NOT done
+  - mem_available_bytes: could have fallen back to MemFree — intentionally NOT done
+  - theoretical_peak_bandwidth_GBps: could have assumed dual-channel DDR4 — intentionally UNDETECTED
+  - memory_channels / dimm_count / dimm_speed: no fabrication when dmidecode missing
+  - threads_per_core: could default to 1 — only reported if lscpu provided it
+- known parsing fragility:
+  - lscpu key matching is exact English locale; LANG changes can break keys
+  - Flags token regex assumes whitespace-separated cpuid names; vendor-specific aliases may differ
+  - sysfs cache index numbering is not guaranteed stable across arches
+  - KVM/hypervisor may expose synthetic cache sizes (e.g. very large L3) that do not reflect host silicon
+  - HugePages_Total parsed as integer count; unit-less vs kB confusion possible on exotic kernels
+  - Model vs Model name disambiguation depends on exact lscpu key match
+
+=== SECTION 8: PROFILE JSON ===
+{
+  "platform": "linux",
+  "python_version": "3.12.3",
+  "detection_libraries": [
+    "Python stdlib only (platform=3.12.3, subprocess, os, copy of /proc and lscpu). No third-party detection libs."
+  ],
+  "commands_run": [
+    "lscpu",
+    "head -30 /proc/cpuinfo",
+    "cat /proc/meminfo | head -8",
+    "lscpu -e",
+    "numactl --hardware  # SKIPPED: numactl not in PATH",
+    "lscpu",
+    "lscpu -e",
+    "read /proc/cpuinfo",
+    "read /proc/meminfo",
+    "uname -m",
+    "read /sys/devices/system/cpu/cpu0/cpufreq/base_frequency",
+    "read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq",
+    "read /sys/devices/system/cpu/smt/active",
+    "read /sys/devices/system/cpu/smt/control",
+    "list /sys/devices/system/cpu/cpuN",
+    "read /sys/devices/system/cpu/cpu0/topology/core_type",
+    "read /sys/devices/system/cpu/cpu0/cpu_capacity",
+    "read /sys/devices/system/cpu/cpu1/topology/core_type",
+    "read /sys/devices/system/cpu/cpu1/cpu_capacity",
+    "read /sys/devices/system/cpu/cpu2/topology/core_type",
+    "read /sys/devices/system/cpu/cpu2/cpu_capacity",
+    "read /sys/devices/system/cpu/cpu3/topology/core_type",
+    "read /sys/devices/system/cpu/cpu3/cpu_capacity",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/level",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/type",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/size",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/shared_cpu_list",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/level",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/type",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/size",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/shared_cpu_list",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/level",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/type",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/size",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/level",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/type",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/size",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/shared_cpu_list",
+    "read /proc/sys/vm/swappiness",
+    "getconf PAGE_SIZE",
+    "dmidecode -t memory  # SKIPPED: dmidecode not in PATH",
+    "python os.cpu_count() (Python 3.12.3)"
+  ],
+  "raw_source_dump": "$ lscpu\nArchitecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Processor\nCPU family:                              6\nModel:                                   207\nThread(s) per core:                      1\nCore(s) per socket:                      4\nSocket(s):                               1\nStepping:                                2\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nVirtualization:                          VT-x\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               192 KiB (4 instances)\nL1i cache:                               128 KiB (4 instances)\nL2 cache:                                8 MiB (4 instances)\nL3 cache:                                320 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Mitigation; TSX disabled\nVulnerability Vmscape:                   Not affected\n\n\n$ head -30 /proc/cpuinfo\nprocessor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\n\n[TRUNCATED: showing first 30 of 112 lines of /proc/cpuinfo]\n\n$ cat /proc/meminfo | head -8\nMemTotal:       16398452 kB\nMemFree:         7895352 kB\nMemAvailable:   15472216 kB\nBuffers:          188404 kB\nCached:          7118564 kB\nSwapCached:            0 kB\nActive:           306152 kB\nInactive:        7428312 kB\n\n[TRUNCATED: showing first 8 of 53 lines of /proc/meminfo]\n\n$ lscpu -e\nCPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE\n  0    0      0    0 0:0:0:0          yes\n  1    0      0    1 1:1:1:0          yes\n  2    0      0    2 2:2:2:0          yes\n  3    0      0    3 3:3:3:0          yes\n\n$ numactl --hardware\n[numactl not present in PATH \u2014 skipped]",
+  "model_name": {
+    "value": "Intel(R) Xeon(R) Processor",
+    "evidence": "Model name:                              Intel(R) Xeon(R) Processor"
+  },
+  "vendor": {
+    "value": "GenuineIntel",
+    "evidence": "Vendor ID:                               GenuineIntel"
+  },
+  "cpu_family": {
+    "value": "6",
+    "evidence": "CPU family:                              6"
+  },
+  "model": {
+    "value": "207",
+    "evidence": "Model:                                   207"
+  },
+  "stepping": {
+    "value": "2",
+    "evidence": "Stepping:                                2"
+  },
+  "arch": {
+    "value": "x86_64",
+    "evidence": "uname -m \u2192 x86_64"
+  },
+  "base_mhz": {
+    "value": "UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)",
+    "evidence": "UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)"
+  },
+  "max_mhz": {
+    "value": "UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')",
+    "evidence": "UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')"
+  },
+  "logical_cores": {
+    "value": 4,
+    "evidence": "CPU(s):                                  4"
+  },
+  "physical_cores": {
+    "value": 4,
+    "evidence": "Core(s) per socket * Socket(s) = 4 * 1 = 4; from [Core(s) per socket:                      4] [Socket(s):                               1]"
+  },
+  "threads_per_core": {
+    "value": 1,
+    "evidence": "Thread(s) per core:                      1"
+  },
+  "sockets": {
+    "value": 1,
+    "evidence": "Socket(s):                               1"
+  },
+  "smt_enabled": {
+    "value": false,
+    "evidence": "/sys/devices/system/cpu/smt/active: 0; control: notsupported"
+  },
+  "hybrid": {
+    "is_hybrid": {
+      "value": false,
+      "evidence": "no sysfs topology/core_type or cpu_capacity present; lscpu -e has no core-type column \u2192 treated as non-hybrid (direct absence of hybrid signals, not a guessed default)"
+    },
+    "p_core_count": null,
+    "e_core_count": null,
+    "p_core_logical_ids": null,
+    "e_core_logical_ids": null
+  },
+  "numa_nodes": {
+    "value": "single node",
+    "evidence": "NUMA node(s):                            1; NUMA node0 CPU(s):                       0-3"
+  },
+  "cpu_to_node_map": {
+    "value": {
+      "0": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "evidence": "NUMA node0 CPU(s):                       0-3"
+  },
+  "cache": {
+    "l1d_bytes": {
+      "value": 49152,
+      "evidence": "/sys/devices/system/cpu/cpu0/cache/index0/size: 48K"
+    },
+    "l1i_bytes": {
+      "value": 32768,
+      "evidence": "/sys/devices/system/cpu/cpu0/cache/index1/size: 32K"
+    },
+    "l2_bytes": {
+      "value": 2097152,
+      "evidence": "/sys/devices/system/cpu/cpu0/cache/index2/size: 2048K"
+    },
+    "l2_sharing": {
+      "value": "per-core",
+      "evidence": "/sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list: 0 \u2192 per-core"
+    },
+    "l3_bytes": {
+      "value": 335544320,
+      "evidence": "/sys/devices/system/cpu/cpu0/cache/index3/size: 327680K"
+    }
+  },
+  "isa": {
+    "arch_family": "x86",
+    "flags": {
+      "sse4_2": {
+        "value": "PRESENT",
+        "evidence": "sse4_2"
+      },
+      "avx": {
+        "value": "PRESENT",
+        "evidence": "avx"
+      },
+      "avx2": {
+        "value": "PRESENT",
+        "evidence": "avx2"
+      },
+      "fma": {
+        "value": "PRESENT",
+        "evidence": "fma"
+      },
+      "f16c": {
+        "value": "PRESENT",
+        "evidence": "f16c"
+      },
+      "avx512f": {
+        "value": "PRESENT",
+        "evidence": "avx512f"
+      },
+      "avx512bw": {
+        "value": "PRESENT",
+        "evidence": "avx512bw"
+      },
+      "avx512vl": {
+        "value": "PRESENT",
+        "evidence": "avx512vl"
+      },
+      "avx512_vnni": {
+        "value": "PRESENT",
+        "evidence": "avx512_vnni"
+      },
+      "avx512_bf16": {
+        "value": "PRESENT",
+        "evidence": "avx512_bf16"
+      },
+      "amx_tile": {
+        "value": "PRESENT",
+        "evidence": "amx_tile"
+      },
+      "amx_int8": {
+        "value": "PRESENT",
+        "evidence": "amx_int8"
+      },
+      "amx_bf16": {
+        "value": "PRESENT",
+        "evidence": "amx_bf16"
+      }
+    },
+    "quant_kernel_tier": {
+      "value": "AMX",
+      "evidence": "derived from flags in lscpu Flags line; amx_tile/amx_int8 PRESENT \u2192 AMX (highest x86 integer-matmul tier)"
+    },
+    "quant_kernel_reasoning": "amx_tile/amx_int8 PRESENT \u2192 AMX (highest x86 integer-matmul tier)"
+  },
+  "mem_total_bytes": {
+    "value": 16792014848,
+    "evidence": "MemTotal:       16398452 kB"
+  },
+  "mem_available_bytes": {
+    "value": 15843549184,
+    "evidence": "MemAvailable:   15472216 kB"
+  },
+  "mem_free_bytes": {
+    "value": 8084840448,
+    "evidence": "MemFree:         7895352 kB"
+  },
+  "mem_available_source_note": "MemAvailable used as primary availability metric because the kernel accounts for reclaimable cache/buffers; MemFree is also reported raw.",
+  "swap_total_bytes": {
+    "value": 0,
+    "evidence": "SwapTotal:             0 kB"
+  },
+  "swap_used_bytes": {
+    "value": 0,
+    "evidence": "SwapTotal - SwapFree = 0 - 0 from [SwapTotal:             0 kB] [SwapFree:              0 kB]"
+  },
+  "swappiness": {
+    "value": 60,
+    "evidence": "/proc/sys/vm/swappiness: 60"
+  },
+  "page_size_bytes": {
+    "value": 4096,
+    "evidence": "getconf PAGE_SIZE \u2192 4096"
+  },
+  "hugepages_count": {
+    "value": 0,
+    "evidence": "HugePages_Total:       0"
+  },
+  "hugepages_size_bytes": {
+    "value": 2097152,
+    "evidence": "Hugepagesize:       2048 kB"
+  },
+  "memory_channels": {
+    "value": "UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)",
+    "evidence": "UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)"
+  },
+  "dimm_count": {
+    "value": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)",
+    "evidence": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)"
+  },
+  "dimm_speed_mts": {
+    "value": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)",
+    "evidence": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)"
+  },
+  "theoretical_peak_bandwidth_GBps": {
+    "value": "UNDETECTED (reason: need memory_channels, bus width, and DIMM MT/s; channels/width unavailable)",
+    "evidence": "UNDETECTED (reason: need memory_channels, bus width, and DIMM MT/s; channels/width unavailable)"
+  },
+  "bandwidth_formula": "channels * width_bytes * MT/s / 1e9 \u2014 inputs incomplete (channels=UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.), dimm_speed=UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped), width_bytes=UNDETECTED)",
+  "bandwidth_confidence": "guess \u2014 no DMI channel/width data on this host; formula not evaluated",
+  "suggested_thread_count": {
+    "value": 4,
+    "evidence": "derived (provisional): logical_cores (4) because smt_enabled=false; provisional pending Phase 2"
+  },
+  "suggested_thread_formula": "logical_cores (4) because smt_enabled=false; provisional pending Phase 2",
+  "usable_ram_for_model_bytes": {
+    "value": 13467016806,
+    "evidence": "0.85 * MemAvailable = 0.85 * 15843549184 = 13467016806 (provisional headroom factor)"
+  },
+  "usable_ram_formula": "0.85 * mem_available_bytes = 0.85 * 15843549184 = 13467016806",
+  "cross_checks": [
+    {
+      "name": "physical_cores * threads_per_core == logical_cores",
+      "left": "physical_cores (4) * threads_per_core (1) = 4",
+      "right": "logical_cores = 4",
+      "result": "PASS"
+    },
+    {
+      "name": "sum(per-core-type counts) == total cores (hybrid)",
+      "left": "non-hybrid; type counts {'homogeneous': 4} sum=4",
+      "right": "physical_cores = 4",
+      "result": "PASS"
+    },
+    {
+      "name": "MemTotal - MemAvailable <= MemTotal",
+      "left": "MemTotal - MemAvailable = 16792014848 - 15843549184 = 948465664",
+      "right": "MemTotal = 16792014848",
+      "result": "PASS"
+    },
+    {
+      "name": "ISA flags internally consistent",
+      "left": "avx512_vnni=True \u2192 avx512f=True (ok); amx_any=True \u2192 avx512f=True (ok)",
+      "right": "implication rules: avx512_vnni\u21d2avx512f; amx\u21d2avx512f; i8mm\u21d2asimd",
+      "result": "PASS"
+    },
+    {
+      "name": "logical core count agrees across \u22652 independent sources",
+      "left": "{'lscpu CPU(s)': 4, 'os.cpu_count()': 4, '/proc/cpuinfo processor entry count': 4}",
+      "right": "unique values=[4]",
+      "result": "PASS"
+    }
+  ],
+  "core_count_sources": {
+    "lscpu CPU(s)": 4,
+    "os.cpu_count()": 4,
+    "/proc/cpuinfo processor entry count": 4,
+    "lscpu Core(s) per socket * Socket(s)": 4,
+    "/proc/cpuinfo unique (physical id, core id) pairs": 4
+  },
+  "self_critique": {
+    "fields that are heuristic, not directly read": [
+      "suggested_thread_count (provisional formula from topology, not measured)",
+      "usable_ram_for_model_bytes (0.85 * MemAvailable headroom factor is a policy choice)",
+      "quant_kernel_tier (priority ladder over detected flags, not a kernel probe)",
+      "hybrid=false when sysfs core_type/cpu_capacity absent (absence-of-signal, not a positive non-hybrid attestation)",
+      "L2 sharing classification from shared_cpu_list length or lscpu instance counts",
+      "physical_cores computed as Core(s) per socket * Socket(s) rather than a single key",
+      "smt_enabled falls back to Thread(s) per core when /sys/.../smt/active is absent (on this host active=0 was read directly; control=notsupported)"
+    ],
+    "platform code paths not exercised on this machine": [
+      "macOS sysctl/vm_stat path",
+      "Windows WMIC/PowerShell CIM path",
+      "ARM ISA flag set and ARM quant tiers",
+      "hybrid P/E core_type and cpu_capacity parsing (no such sysfs nodes here)",
+      "multi-node NUMA mapping (only 1 node present)",
+      "dmidecode DIMM/channel parsing (dmidecode not installed)",
+      "cpufreq base/max frequency sysfs (directory absent under KVM)",
+      "numactl --hardware (binary not installed)"
+    ],
+    "places a default could have been silently substituted": [
+      "base_mhz: could have used /proc/cpuinfo cpu MHz=2400 as 'base' \u2014 intentionally NOT done",
+      "mem_available_bytes: could have fallen back to MemFree \u2014 intentionally NOT done",
+      "theoretical_peak_bandwidth_GBps: could have assumed dual-channel DDR4 \u2014 intentionally UNDETECTED",
+      "memory_channels / dimm_count / dimm_speed: no fabrication when dmidecode missing",
+      "threads_per_core: could default to 1 \u2014 only reported if lscpu provided it"
+    ],
+    "known parsing fragility": [
+      "lscpu key matching is exact English locale; LANG changes can break keys",
+      "Flags token regex assumes whitespace-separated cpuid names; vendor-specific aliases may differ",
+      "sysfs cache index numbering is not guaranteed stable across arches",
+      "KVM/hypervisor may expose synthetic cache sizes (e.g. very large L3) that do not reflect host silicon",
+      "HugePages_Total parsed as integer count; unit-less vs kB confusion possible on exotic kernels",
+      "Model vs Model name disambiguation depends on exact lscpu key match"
+    ]
+  },
+  "per_core_type_counts": {
+    "homogeneous": 4
+  }
+}
+
+=== META: COMMANDS & VERSIONS ===
+Python: 3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]
+platform.python_version(): 3.12.3
+platform.platform(): Linux-6.12.94+-x86_64-with-glibc2.39
+Detection libraries:
+  - Python stdlib only (platform=3.12.3, subprocess, os, copy of /proc and lscpu). No third-party detection libs.
+Why no third-party lib: raw /proc, sysfs, and lscpu were available; stdlib subprocess/os suffice and keep evidence verbatim.
+Commands shelled out to (in order, including re-reads):
+  $ lscpu
+  $ head -30 /proc/cpuinfo
+  $ cat /proc/meminfo | head -8
+  $ lscpu -e
+  $ numactl --hardware  # SKIPPED: numactl not in PATH
+  $ lscpu
+  $ lscpu -e
+  $ read /proc/cpuinfo
+  $ read /proc/meminfo
+  $ uname -m
+  $ read /sys/devices/system/cpu/cpu0/cpufreq/base_frequency
+  $ read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq
+  $ read /sys/devices/system/cpu/smt/active
+  $ read /sys/devices/system/cpu/smt/control
+  $ list /sys/devices/system/cpu/cpuN
+  $ read /sys/devices/system/cpu/cpu0/topology/core_type
+  $ read /sys/devices/system/cpu/cpu0/cpu_capacity
+  $ read /sys/devices/system/cpu/cpu1/topology/core_type
+  $ read /sys/devices/system/cpu/cpu1/cpu_capacity
+  $ read /sys/devices/system/cpu/cpu2/topology/core_type
+  $ read /sys/devices/system/cpu/cpu2/cpu_capacity
+  $ read /sys/devices/system/cpu/cpu3/topology/core_type
+  $ read /sys/devices/system/cpu/cpu3/cpu_capacity
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/level
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/type
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/size
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/shared_cpu_list
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/level
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/type
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/size
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/shared_cpu_list
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/level
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/type
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/size
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/level
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/type
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/size
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/shared_cpu_list
+  $ read /proc/sys/vm/swappiness
+  $ getconf PAGE_SIZE
+  $ dmidecode -t memory  # SKIPPED: dmidecode not in PATH
+  $ python os.cpu_count() (Python 3.12.3)
