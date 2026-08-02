@@ -1,4 +1,4 @@
-"""Exact stdout report formatter for Phase 1 DeviceProfile detection."""
+"""Exact stdout report formatter for Phase 1 / 1.5 DeviceProfile detection."""
 
 from __future__ import annotations
 
@@ -21,30 +21,28 @@ def format_report(profile: DeviceProfile) -> str:
     lines: list[str] = []
     p = profile
 
+    if p.is_development_proxy and p.proxy_banner:
+        lines.append("=" * 72)
+        lines.append(p.proxy_banner)
+        lines.append("=" * 72)
+        lines.append("")
+
     lines.append("=== SECTION 0: RAW SOURCE DUMP ===")
     lines.append(p.raw_source_dump)
     lines.append("")
 
     lines.append("=== SECTION 1: IDENTITY ===")
-    lines.append(f"model_name: { _fmt_val(p.model_name) }")
+    lines.append(f"model_name: {_fmt_val(p.model_name)}")
     lines.append(_evid(p.model_name))
     lines.append(
         f"vendor / family / model / stepping: "
         f"{_fmt_val(p.vendor)} / {_fmt_val(p.cpu_family)} / "
         f"{_fmt_val(p.model)} / {_fmt_val(p.stepping)}"
     )
-    lines.append(
-        f"  <- vendor: {p.vendor.evidence}"
-    )
-    lines.append(
-        f"  <- family: {p.cpu_family.evidence}"
-    )
-    lines.append(
-        f"  <- model: {p.model.evidence}"
-    )
-    lines.append(
-        f"  <- stepping: {p.stepping.evidence}"
-    )
+    lines.append(f"  <- vendor: {p.vendor.evidence}")
+    lines.append(f"  <- family: {p.cpu_family.evidence}")
+    lines.append(f"  <- model: {p.model.evidence}")
+    lines.append(f"  <- stepping: {p.stepping.evidence}")
     lines.append(f"arch (uname -m): {_fmt_val(p.arch)}")
     lines.append(_evid(p.arch))
     lines.append(
@@ -52,6 +50,14 @@ def format_report(profile: DeviceProfile) -> str:
     )
     lines.append(f"  <- base_mhz: {p.base_mhz.evidence}")
     lines.append(f"  <- max_mhz: {p.max_mhz.evidence}")
+    lines.append(
+        f"uarch (HOST-LEVEL INFORMATION ONLY): {_fmt_val(p.uarch_host_level)}"
+    )
+    lines.append(_evid(p.uarch_host_level))
+    lines.append(
+        "  note: any host memory-channel or L3 figure this uarch implies "
+        "does NOT describe this guest's available share."
+    )
     lines.append("")
 
     lines.append("=== SECTION 2: TOPOLOGY ===")
@@ -94,7 +100,7 @@ def format_report(profile: DeviceProfile) -> str:
 
     c = p.cache
     lines.append(
-        f"cache L1d / L1i / L2 / L3 (bytes): "
+        f"cache L1d / L1i / L2 / L3 (bytes, sysfs per-instance): "
         f"{_fmt_val(c.l1d_bytes)} / {_fmt_val(c.l1i_bytes)} / "
         f"{_fmt_val(c.l2_bytes)} / {_fmt_val(c.l3_bytes)}; "
         f"L2 sharing: {_fmt_val(c.l2_sharing)}"
@@ -104,13 +110,162 @@ def format_report(profile: DeviceProfile) -> str:
     lines.append(f"  <- L2: {c.l2_bytes.evidence}")
     lines.append(f"  <- L2 sharing: {c.l2_sharing.evidence}")
     lines.append(f"  <- L3: {c.l3_bytes.evidence}")
+    if c.lscpu_l1d_bytes:
+        lines.append(
+            f"  <- lscpu L1d aggregate: {c.lscpu_l1d_bytes.evidence} "
+            f"(instances={_fmt_val(c.lscpu_l1d_instances) if c.lscpu_l1d_instances else '?'})"
+        )
+    if c.lscpu_l1i_bytes:
+        lines.append(
+            f"  <- lscpu L1i aggregate: {c.lscpu_l1i_bytes.evidence} "
+            f"(instances={_fmt_val(c.lscpu_l1i_instances) if c.lscpu_l1i_instances else '?'})"
+        )
+    if c.lscpu_l2_bytes:
+        lines.append(
+            f"  <- lscpu L2 aggregate: {c.lscpu_l2_bytes.evidence} "
+            f"(instances={_fmt_val(c.lscpu_l2_instances) if c.lscpu_l2_instances else '?'})"
+        )
+    if c.lscpu_l3_bytes:
+        lines.append(
+            f"  <- lscpu L3 aggregate: {c.lscpu_l3_bytes.evidence} "
+            f"(instances={_fmt_val(c.lscpu_l3_instances) if c.lscpu_l3_instances else '?'})"
+        )
+    lines.append("")
+
+    # SECTION 2b
+    lines.append("=== SECTION 2b: EXECUTION ENVIRONMENT ===")
+    ee = p.exec_env
+    if ee is None:
+        lines.append("UNDETECTED (reason: exec_env not populated)")
+    else:
+        lines.append(
+            f"virtualization hypervisor vendor (lscpu): "
+            f"{_fmt_val(ee.hypervisor_vendor_lscpu)}"
+        )
+        lines.append(_evid(ee.hypervisor_vendor_lscpu))
+        lines.append(
+            f"virtualization (lscpu Virtualization / type): "
+            f"{_fmt_val(ee.virtualization_lscpu)}"
+        )
+        lines.append(_evid(ee.virtualization_lscpu))
+        lines.append(f"/sys/hypervisor: {_fmt_val(ee.hypervisor_sysfs)}")
+        lines.append(_evid(ee.hypervisor_sysfs))
+        lines.append(
+            f"systemd-detect-virt: {_fmt_val(ee.systemd_detect_virt)}"
+        )
+        lines.append(_evid(ee.systemd_detect_virt))
+        lines.append(f"/.dockerenv: {_fmt_val(ee.dockerenv)}")
+        lines.append(_evid(ee.dockerenv))
+        lines.append(f"/run/.containerenv: {_fmt_val(ee.containerenv)}")
+        lines.append(_evid(ee.containerenv))
+        lines.append(f"/proc/1/cgroup (verbatim): {_fmt_val(ee.proc1_cgroup)}")
+        lines.append(_evid(ee.proc1_cgroup))
+        lines.append(f"cgroup version: {_fmt_val(ee.cgroup_version)}")
+        lines.append(_evid(ee.cgroup_version))
+        lines.append(f"cgroup memory.max: {_fmt_val(ee.memory_max)}")
+        lines.append(_evid(ee.memory_max))
+        lines.append(f"cgroup memory.high: {_fmt_val(ee.memory_high)}")
+        lines.append(_evid(ee.memory_high))
+        lines.append(f"cgroup memory.current: {_fmt_val(ee.memory_current)}")
+        lines.append(_evid(ee.memory_current))
+        lines.append(f"cgroup cpu.max: {_fmt_val(ee.cpu_max)}")
+        lines.append(_evid(ee.cpu_max))
+        lines.append(
+            f"cgroup cpu.max quota/period: {_fmt_val(ee.cpu_max_quota_period)}"
+        )
+        lines.append(_evid(ee.cpu_max_quota_period))
+        lines.append(
+            f"cpuset.cpus.effective: {_fmt_val(ee.cpuset_cpus_effective)} "
+            f"(size={_fmt_val(ee.cpuset_size)})"
+        )
+        lines.append(_evid(ee.cpuset_cpus_effective))
+        lines.append(_evid(ee.cpuset_size))
+        lines.append(
+            f"os.cpu_count(): {_fmt_val(ee.os_cpu_count)}  |  "
+            f"len(os.sched_getaffinity(0)): {_fmt_val(ee.sched_affinity_len)}  |  "
+            f"affinity set: {_fmt_val(ee.sched_affinity_set)}"
+        )
+        lines.append(_evid(ee.os_cpu_count))
+        lines.append(_evid(ee.sched_affinity_len))
+        lines.append(_evid(ee.sched_affinity_set))
+        lines.append(f"steal sample t0: {_fmt_val(ee.steal_sample_t0)}")
+        lines.append(_evid(ee.steal_sample_t0))
+        lines.append(f"steal sample t1 (+5s): {_fmt_val(ee.steal_sample_t1)}")
+        lines.append(_evid(ee.steal_sample_t1))
+        lines.append(
+            f"steal time delta % of elapsed jiffies: {_fmt_val(ee.steal_percent)}"
+        )
+        lines.append(_evid(ee.steal_percent))
+        lines.append(
+            f"effective_memory_limit: {_fmt_val(ee.effective_memory_limit)} "
+            f"(winner: {ee.effective_memory_winner})"
+        )
+        lines.append(_evid(ee.effective_memory_limit))
+        lines.append(
+            f"  raw MemTotal for comparison: {_fmt_val(p.mem_total_bytes)}"
+        )
+        lines.append(
+            f"effective_cpu_count: {_fmt_val(ee.effective_cpu_count)} "
+            f"(winner: {ee.effective_cpu_winner})"
+        )
+        lines.append(_evid(ee.effective_cpu_count))
+        lines.append(
+            "  note: every downstream thread/RAM default uses effective_* "
+            "not raw /proc or lscpu alone."
+        )
     lines.append("")
 
     lines.append("=== SECTION 3: ISA FLAGS ===")
+    lines.append(f"flag_match_mode: {p.isa.flag_match_mode}")
     for flag, ef in p.isa.flags.items():
         lines.append(f"{flag}: {ef.value}  <- {ef.evidence}")
-    lines.append(f"quant_kernel_tier: {_fmt_val(p.isa.quant_kernel_tier)}")
+    lines.append(f"cpuid_tier: {_fmt_val(p.isa.cpuid_tier)}")
+    lines.append(_evid(p.isa.cpuid_tier))
+    lines.append(f"usable_tier: {_fmt_val(p.isa.usable_tier)}")
+    lines.append(_evid(p.isa.usable_tier))
     lines.append(f"  reasoning: {p.isa.quant_kernel_reasoning}")
+    lines.append("")
+
+    # SECTION 3b
+    lines.append("=== SECTION 3b: PARSER NEGATIVE CONTROL ===")
+    pnc = p.parser_negative_control
+    if pnc is None:
+        lines.append("UNDETECTED (reason: negative control not run)")
+    else:
+        lines.append(f"match_mode: {pnc.match_mode}")
+        for probe in pnc.probes:
+            lines.append(
+                f"{probe['flag']}: {probe['result']}  <- {probe['evidence']}  "
+                f"[{probe['status']}; expected {probe['expectation']}]"
+            )
+        lines.append(f"overall: {pnc.overall}")
+        if pnc.overall == "FAIL":
+            lines.append(
+                "PARSER BROKEN: a negative-control probe returned PRESENT."
+            )
+    lines.append("")
+
+    # SECTION 3c
+    lines.append("=== SECTION 3c: RUNTIME CAPABILITY PROBE (AMX) ===")
+    amx = p.amx_runtime_probe
+    if amx is None:
+        lines.append("UNDETECTED (reason: AMX probe not run)")
+    else:
+        lines.append(f"prctl(ARCH_REQ_XCOMP_PERM, XTILEDATA=18) rc: {_fmt_val(amx.prctl_rc)}")
+        lines.append(_evid(amx.prctl_rc))
+        lines.append(f"prctl errno: {_fmt_val(amx.prctl_errno)}")
+        lines.append(_evid(amx.prctl_errno))
+        lines.append(f"ARCH_GET_XCOMP_SUPP: {_fmt_val(amx.xcomp_supp)}")
+        lines.append(_evid(amx.xcomp_supp))
+        lines.append(f"ARCH_GET_XCOMP_PERM: {_fmt_val(amx.xcomp_perm)}")
+        lines.append(_evid(amx.xcomp_perm))
+        lines.append(f"/proc/self/status XCOMP: {_fmt_val(amx.status_xcomp)}")
+        lines.append(_evid(amx.status_xcomp))
+        lines.append(f"note: {amx.note}")
+        lines.append(
+            f"quant_kernel_tier split → cpuid_tier={_fmt_val(p.isa.cpuid_tier)} "
+            f"/ usable_tier={_fmt_val(p.isa.usable_tier)}"
+        )
     lines.append("")
 
     lines.append("=== SECTION 4: MEMORY ===")
@@ -123,6 +278,13 @@ def format_report(profile: DeviceProfile) -> str:
     lines.append(f"  <- MemAvailable: {p.mem_available_bytes.evidence}")
     lines.append(f"  <- MemFree: {p.mem_free_bytes.evidence}")
     lines.append(f"  <- note: {p.mem_available_source_note}")
+    if p.exec_env:
+        lines.append(
+            f"effective_memory_limit (USED DOWNSTREAM): "
+            f"{_fmt_val(p.exec_env.effective_memory_limit)} "
+            f"(winner: {p.exec_env.effective_memory_winner})"
+        )
+        lines.append(_evid(p.exec_env.effective_memory_limit))
     lines.append(
         f"swap_total / swap_used / swappiness: "
         f"{_fmt_val(p.swap_total_bytes)} / {_fmt_val(p.swap_used_bytes)} / "
@@ -171,12 +333,25 @@ def format_report(profile: DeviceProfile) -> str:
     lines.append(f"  formula: {p.suggested_thread_formula}")
     lines.append(
         "  note: provisional; to be REPLACED by the measured saturation point "
-        "in Phase 2"
+        "in Phase 2; uses effective_cpu_count"
     )
+    lines.append(f"headroom_factor_applied: {p.headroom_factor}")
     lines.append(
-        f"usable_ram_for_model_bytes: {_fmt_val(p.usable_ram_for_model_bytes)}"
+        f"usable_ram_for_model_bytes (from effective_memory_limit): "
+        f"{_fmt_val(p.usable_ram_for_model_bytes)}"
     )
     lines.append(f"  formula: {p.usable_ram_formula}")
+    lines.append(
+        f"usable_ram_from_raw_MemAvailable (NOT USED DOWNSTREAM): "
+        f"{_fmt_val(p.usable_ram_from_memavailable_bytes)}"
+    )
+    lines.append(_evid(p.usable_ram_from_memavailable_bytes))
+    if p.usable_ram_warning:
+        lines.append(f"  {p.usable_ram_warning}")
+    lines.append(
+        "  policy: headroom 0.70 (not 0.85) — leaves ~30% for OS, runtime, "
+        "activations, and fragmentation; additional -5% when SwapTotal==0."
+    )
     lines.append("")
 
     lines.append("=== SECTION 7: SELF-CRITIQUE ===")
@@ -190,6 +365,10 @@ def format_report(profile: DeviceProfile) -> str:
     lines.append(json.dumps(p.to_json_dict(), indent=2, default=str))
     lines.append("")
 
+    lines.append("=== SECTION 9: TARGET RELIABILITY STATEMENT ===")
+    lines.append(p.target_reliability_statement or "UNDETECTED")
+    lines.append("")
+
     lines.append("=== META: COMMANDS & VERSIONS ===")
     lines.append(f"Python: {sys.version}")
     lines.append(f"platform.python_version(): {platform.python_version()}")
@@ -199,9 +378,14 @@ def format_report(profile: DeviceProfile) -> str:
         lines.append(f"  - {lib}")
     lines.append(
         "Why no third-party lib: raw /proc, sysfs, and lscpu were available; "
-        "stdlib subprocess/os suffice and keep evidence verbatim."
+        "stdlib subprocess/os/hashlib/ctypes suffice and keep evidence verbatim. "
+        "ctypes used only for prctl AMX XCOMP probe (no raw file equivalent)."
     )
-    lines.append("Commands shelled out to (in order, including re-reads):")
+    lines.append(
+        "Capture-once: each command/file below was executed/read exactly once; "
+        "sha256 of the stored blob is shown."
+    )
+    lines.append("Commands / reads (in order):")
     for cmd in p.commands_run:
         lines.append(f"  $ {cmd}")
 

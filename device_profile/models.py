@@ -1,4 +1,4 @@
-"""DeviceProfile data model for Phase 1 CPU/memory detection."""
+"""DeviceProfile data model for Phase 1 / 1.5 CPU/memory detection."""
 
 from __future__ import annotations
 
@@ -41,12 +41,32 @@ def undetected(reason: str) -> EvidenceField:
 
 
 @dataclass
+class CaptureBlob:
+    """One raw source captured exactly once."""
+
+    key: str
+    command: str
+    content: str
+    sha256: str
+    skipped_reason: Optional[str] = None
+
+
+@dataclass
 class CacheInfo:
-    l1d_bytes: EvidenceField
+    l1d_bytes: EvidenceField  # per-core/instance from sysfs when available
     l1i_bytes: EvidenceField
     l2_bytes: EvidenceField
-    l2_sharing: EvidenceField  # "per-core" | "shared" | UNDETECTED
+    l2_sharing: EvidenceField
     l3_bytes: EvidenceField
+    # Aggregates from lscpu (for cross-check)
+    lscpu_l1d_bytes: Optional[EvidenceField] = None
+    lscpu_l1i_bytes: Optional[EvidenceField] = None
+    lscpu_l2_bytes: Optional[EvidenceField] = None
+    lscpu_l3_bytes: Optional[EvidenceField] = None
+    lscpu_l1d_instances: Optional[EvidenceField] = None
+    lscpu_l1i_instances: Optional[EvidenceField] = None
+    lscpu_l2_instances: Optional[EvidenceField] = None
+    lscpu_l3_instances: Optional[EvidenceField] = None
 
 
 @dataclass
@@ -60,14 +80,20 @@ class HybridInfo:
 
 @dataclass
 class IsaFlags:
-    """Platform-specific ISA presence map: flag -> (PRESENT|ABSENT, evidence)."""
-
     arch_family: str  # "x86" | "arm" | "other"
     flags: dict[str, EvidenceField] = field(default_factory=dict)
-    quant_kernel_tier: EvidenceField = field(
+    flag_match_mode: str = "whitespace-tokenized"
+    cpuid_tier: EvidenceField = field(
+        default_factory=lambda: undetected("tier not computed")
+    )
+    usable_tier: EvidenceField = field(
         default_factory=lambda: undetected("tier not computed")
     )
     quant_kernel_reasoning: str = ""
+    # Back-compat alias used in older report bits
+    quant_kernel_tier: EvidenceField = field(
+        default_factory=lambda: undetected("tier not computed")
+    )
 
 
 @dataclass
@@ -79,6 +105,52 @@ class CrossCheck:
 
 
 @dataclass
+class ParserNegativeControl:
+    match_mode: str
+    probes: list[dict[str, str]] = field(default_factory=list)
+    overall: str = "PASS"
+
+
+@dataclass
+class AmxRuntimeProbe:
+    prctl_rc: EvidenceField
+    prctl_errno: EvidenceField
+    xcomp_supp: EvidenceField
+    xcomp_perm: EvidenceField
+    status_xcomp: EvidenceField
+    note: str = ""
+
+
+@dataclass
+class ExecutionEnvironment:
+    hypervisor_vendor_lscpu: EvidenceField
+    virtualization_lscpu: EvidenceField
+    hypervisor_sysfs: EvidenceField
+    systemd_detect_virt: EvidenceField
+    dockerenv: EvidenceField
+    containerenv: EvidenceField
+    proc1_cgroup: EvidenceField
+    cgroup_version: EvidenceField
+    memory_max: EvidenceField
+    memory_high: EvidenceField
+    memory_current: EvidenceField
+    cpu_max: EvidenceField
+    cpu_max_quota_period: EvidenceField
+    cpuset_cpus_effective: EvidenceField
+    cpuset_size: EvidenceField
+    os_cpu_count: EvidenceField
+    sched_affinity_len: EvidenceField
+    sched_affinity_set: EvidenceField
+    steal_sample_t0: EvidenceField
+    steal_sample_t1: EvidenceField
+    steal_percent: EvidenceField
+    effective_memory_limit: EvidenceField
+    effective_memory_winner: str
+    effective_cpu_count: EvidenceField
+    effective_cpu_winner: str
+
+
+@dataclass
 class DeviceProfile:
     # Meta
     platform: str
@@ -86,66 +158,120 @@ class DeviceProfile:
     detection_libraries: list[str]
     commands_run: list[str]
     raw_source_dump: str
+    captures: list[CaptureBlob] = field(default_factory=list)
+    is_development_proxy: bool = False
+    proxy_banner: str = ""
+    target_reliability_statement: str = ""
 
     # Identity
-    model_name: EvidenceField
-    vendor: EvidenceField
-    cpu_family: EvidenceField
-    model: EvidenceField
-    stepping: EvidenceField
-    arch: EvidenceField
-    base_mhz: EvidenceField
-    max_mhz: EvidenceField
+    model_name: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    vendor: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    cpu_family: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    model: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    stepping: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    arch: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    base_mhz: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    max_mhz: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    uarch_host_level: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
 
     # Topology
-    logical_cores: EvidenceField
-    physical_cores: EvidenceField
-    threads_per_core: EvidenceField
-    sockets: EvidenceField
-    smt_enabled: EvidenceField
-    hybrid: HybridInfo
-    numa_nodes: EvidenceField
-    cpu_to_node_map: EvidenceField
-    cache: CacheInfo
+    logical_cores: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    physical_cores: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    threads_per_core: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    sockets: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    smt_enabled: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    hybrid: HybridInfo = field(
+        default_factory=lambda: HybridInfo(is_hybrid=undetected("unset"))
+    )
+    numa_nodes: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    cpu_to_node_map: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    cache: CacheInfo = field(
+        default_factory=lambda: CacheInfo(
+            l1d_bytes=undetected("unset"),
+            l1i_bytes=undetected("unset"),
+            l2_bytes=undetected("unset"),
+            l2_sharing=undetected("unset"),
+            l3_bytes=undetected("unset"),
+        )
+    )
+
+    # Execution environment (Phase 1.5)
+    exec_env: Optional[ExecutionEnvironment] = None
 
     # ISA
-    isa: IsaFlags
+    isa: IsaFlags = field(default_factory=lambda: IsaFlags(arch_family="other"))
+    parser_negative_control: Optional[ParserNegativeControl] = None
+    amx_runtime_probe: Optional[AmxRuntimeProbe] = None
 
     # Memory
-    mem_total_bytes: EvidenceField
-    mem_available_bytes: EvidenceField
-    mem_free_bytes: EvidenceField
-    mem_available_source_note: str
-    swap_total_bytes: EvidenceField
-    swap_used_bytes: EvidenceField
-    swappiness: EvidenceField
-    page_size_bytes: EvidenceField
-    hugepages_count: EvidenceField
-    hugepages_size_bytes: EvidenceField
-    memory_channels: EvidenceField
-    dimm_count: EvidenceField
-    dimm_speed_mts: EvidenceField
-    theoretical_peak_bandwidth_GBps: EvidenceField
-    bandwidth_formula: str
-    bandwidth_confidence: str
+    mem_total_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    mem_available_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    mem_free_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    mem_available_source_note: str = ""
+    swap_total_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    swap_used_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    swappiness: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    page_size_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    hugepages_count: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    hugepages_size_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    memory_channels: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    dimm_count: EvidenceField = field(default_factory=lambda: undetected("unset"))
+    dimm_speed_mts: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    theoretical_peak_bandwidth_GBps: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    bandwidth_formula: str = ""
+    bandwidth_confidence: str = ""
 
-    # Derived (provisional)
-    suggested_thread_count: EvidenceField
-    suggested_thread_formula: str
-    usable_ram_for_model_bytes: EvidenceField
-    usable_ram_formula: str
+    # Derived (provisional) — MUST use effective_* limits
+    suggested_thread_count: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    suggested_thread_formula: str = ""
+    usable_ram_for_model_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    usable_ram_formula: str = ""
+    usable_ram_from_memavailable_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    usable_ram_warning: str = ""
+    headroom_factor: float = 0.70
 
     # Cross-checks & critique
     cross_checks: list[CrossCheck] = field(default_factory=list)
     core_count_sources: dict[str, Any] = field(default_factory=dict)
     self_critique: dict[str, list[str]] = field(default_factory=dict)
-
-    # Independent core-type counts for hybrid cross-check
     per_core_type_counts: dict[str, int] = field(default_factory=dict)
+    lscpu_unique_cores: Optional[int] = None
 
     def to_json_dict(self) -> dict[str, Any]:
-        """Serialize for SECTION 8; EvidenceField becomes {value, evidence}."""
-
         def convert(obj: Any) -> Any:
             if isinstance(obj, EvidenceField):
                 return {"value": obj.value, "evidence": obj.evidence}
