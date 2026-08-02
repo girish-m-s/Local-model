@@ -15,9 +15,14 @@ python3 -m device_profile
 python3 -m device_profile.phase2
 ```
 
+<<<<<<< HEAD
 Phase 1 report opens with `HOST CLASS: bare-metal|VM|container`.
 Phase 2 measures STREAM bandwidth, compute thread knee, 180s sustained
 thermal, and mmap fault cost; total runtime budget 10 minutes.
+=======
+Report opens with `HOST CLASS: bare-metal|VM|container` and evidence.
+If not bare-metal, a non-representative banner is printed.
+>>>>>>> origin/main
 
 ## Design rules
 
