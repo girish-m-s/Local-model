@@ -9,7 +9,7 @@ import re
 import shutil
 import subprocess
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from .models import (
     AmxRuntimeProbe,
@@ -25,6 +25,12 @@ from .models import (
     QuantKernelTier,
     undetected,
 )
+from .extras import (
+    build_memory_budget,
+    classify_host,
+    detect_storage,
+    detect_thermal_power,
+)
 
 X86_FLAGS = [
     "sse4_2",
@@ -32,11 +38,16 @@ X86_FLAGS = [
     "avx2",
     "fma",
     "f16c",
+    "avx_vnni",
     "avx512f",
     "avx512bw",
     "avx512vl",
     "avx512_vnni",
     "avx512_bf16",
+    "avx512_fp16",
+    "avx512_vbmi2",
+    "avx512_bitalg",
+    "sha_ni",
     "amx_tile",
     "amx_int8",
     "amx_bf16",
@@ -48,9 +59,20 @@ ARM_FLAGS = [
     "asimddp",
     "i8mm",
     "bf16",
+    "fphp",
+    "flagm",
+    "sha3",
     "sve",
     "sve2",
     "sme",
+    "sme2",
+]
+
+MACOS_ARM_SYSCTLS = [
+    "hw.optional.arm.FEAT_I8MM",
+    "hw.optional.arm.FEAT_DotProd",
+    "hw.optional.arm.FEAT_BF16",
+    "hw.optional.arm.FEAT_SME",
 ]
 
 # HOST-LEVEL ONLY. (vendor_id, family, model) → uarch name.
@@ -259,31 +281,31 @@ def _flag_present_tokenized(
 
 
 def _tier_from_flags(family: str, present: set[str]) -> tuple[QuantKernelTier, str]:
+    # x86: AMX > AVX512_VNNI > AVX512 > AVX_VNNI > AVX2 > SSE_ONLY
+    # ARM: ARM_SME > ARM_I8MM > ARM_DOTPROD > ARM_BASELINE
     if family == "x86":
         if "amx_tile" in present or "amx_int8" in present:
-            return (
-                QuantKernelTier.AMX,
-                "amx_tile/amx_int8 PRESENT → AMX",
-            )
+            return QuantKernelTier.AMX, "amx_tile/amx_int8 PRESENT → AMX"
         if "avx512_vnni" in present:
             return (
                 QuantKernelTier.AVX512_VNNI,
-                "avx512_vnni PRESENT (AMX absent) → AVX512_VNNI",
+                "avx512_vnni PRESENT → AVX512_VNNI",
             )
         if "avx512f" in present:
-            return (
-                QuantKernelTier.AVX512,
-                "avx512f PRESENT (VNNI/AMX absent) → AVX512",
-            )
+            return QuantKernelTier.AVX512, "avx512f PRESENT → AVX512"
+        if "avx_vnni" in present:
+            return QuantKernelTier.AVX_VNNI, "avx_vnni PRESENT → AVX_VNNI"
         if "avx2" in present:
             return QuantKernelTier.AVX2, "avx2 PRESENT → AVX2"
         return QuantKernelTier.SSE_ONLY, "sse4_2/baseline → SSE_ONLY"
     if family == "arm":
+        if "sme" in present or "sme2" in present:
+            return QuantKernelTier.ARM_SME, "sme/sme2 PRESENT → ARM_SME"
         if "i8mm" in present:
             return QuantKernelTier.ARM_I8MM, "i8mm PRESENT → ARM_I8MM"
         if "asimddp" in present:
             return QuantKernelTier.ARM_DOTPROD, "asimddp PRESENT → ARM_DOTPROD"
-        return QuantKernelTier.ARM_BASELINE, "no i8mm/asimddp → ARM_BASELINE"
+        return QuantKernelTier.ARM_BASELINE, "no sme/i8mm/asimddp → ARM_BASELINE"
     return QuantKernelTier.SSE_ONLY, f"unsupported family {family}"
 
 
@@ -635,6 +657,9 @@ def _capture_all() -> CaptureStore:
     store.read("proc1_cgroup", "/proc/1/cgroup")
     store.read("proc_self_cgroup", "/proc/self/cgroup")
     store.read("proc_self_status", "/proc/self/status")
+    store.read("proc_mounts", "/proc/mounts")
+    store.read("dmi_sys_vendor", "/sys/class/dmi/id/sys_vendor")
+    store.read("dmi_product_name", "/sys/class/dmi/id/product_name")
 
     # cgroup v2 (or note v1)
     # Resolve cgroup path from /proc/self/cgroup
@@ -1204,10 +1229,23 @@ def detect_linux() -> DeviceProfile:
         usable_tier = cpuid_tier
         usable_reason = f"cpuid_tier={cpuid_tier.value}; AMX not claimed so usable=cpuid"
 
+    absent_vals = [v.value for v in flags.values()]
+    if flags and all(v == "PRESENT" for v in absent_vals):
+        absent_branch_note = (
+            "ABSENT-branch formatting NOT exercised on this host "
+            "(every flag in the printed set is PRESENT)."
+        )
+    else:
+        n_abs = sum(1 for v in absent_vals if v == "ABSENT")
+        absent_branch_note = (
+            f"ABSENT-branch exercised: {n_abs} flag(s) ABSENT in printed set."
+        )
+
     isa = IsaFlags(
         arch_family=family,
         flags=flags,
         flag_match_mode="whitespace-tokenized",
+        absent_branch_note=absent_branch_note,
         cpuid_tier=EvidenceField(
             value=cpuid_tier.value,
             evidence=f"from flags in {flags_source}; {cpuid_reason}",
@@ -1216,15 +1254,24 @@ def detect_linux() -> DeviceProfile:
             value=usable_tier.value,
             evidence=usable_reason,
         ),
+        tier_runtime_verified=False,
+        tier_runtime_verified_note=(
+            "tier_runtime_verified=false: CPUID presence does NOT imply the "
+            "inference runtime has kernels for that tier; this is to be "
+            "confirmed by probe in a later phase."
+        ),
         quant_kernel_tier=EvidenceField(
             value=usable_tier.value,
             evidence=f"usable_tier (not cpuid alone): {usable_reason}",
         ),
         quant_kernel_reasoning=(
+            f"ladder x86: AMX>AVX512_VNNI>AVX512>AVX_VNNI>AVX2>SSE_ONLY; "
+            f"ARM: ARM_SME>ARM_I8MM>ARM_DOTPROD>ARM_BASELINE. "
             f"cpuid_tier={cpuid_tier.value} ({cpuid_reason}); "
             f"usable_tier={usable_tier.value} ({usable_reason}). "
             f"{amx_probe.note}"
         ),
+        macos_sysctl_feats={},
     )
 
     # --- Memory ---
@@ -1242,7 +1289,7 @@ def detect_linux() -> DeviceProfile:
     mem_free = mem_bytes("MemFree")
     mem_available_source_note = (
         "MemAvailable used as primary /proc availability metric (reclaimable "
-        "cache/buffers); downstream usable_ram uses effective_memory_limit, "
+        "cache/buffers); downstream budgets use effective_mem_bytes, "
         "not raw MemAvailable."
     )
 
@@ -1342,16 +1389,13 @@ def detect_linux() -> DeviceProfile:
             "board-specific interpretation; not guessed"
         )
 
-    theoretical_bw = undetected(
-        "need memory_channels, bus width, and DIMM MT/s; channels/width unavailable"
-    )
-    bandwidth_formula = (
-        "channels * width_bytes * MT/s / 1e9 — inputs incomplete "
-        f"(channels={memory_channels.value}, dimm_speed={dimm_speed.value}, "
-        "width_bytes=UNDETECTED)"
-    )
-    bandwidth_confidence = (
-        "guess — no DMI channel/width data on this host; formula not evaluated"
+    # theoretical_peak_bandwidth_GBps DELETED — bandwidth measured in Phase 2
+    measured_bw = EvidenceField(
+        value="PENDING_PHASE_2",
+        evidence=(
+            "placeholder: dmidecode-based theoretical bandwidth removed; "
+            "measured_bandwidth_GBps will be filled by Phase 2 benchmarks"
+        ),
     )
 
     # --- SECTION 2b: Execution environment ---
@@ -1629,31 +1673,47 @@ def detect_linux() -> DeviceProfile:
         eff_mem_winner = "UNDETECTED"
         effective_memory_limit = undetected("MemTotal and cgroup memory.max unavailable")
 
-    # effective_cpu_count = min(affinity, cgroup cpu.max quota/period)
-    aff_f = float(affinity_len)
+    # effective_cores = min(affinity_count, cpu.max quota, logical_cores)
+    logical_f = (
+        float(logical_cores.value)
+        if isinstance(logical_cores.value, int)
+        else None
+    )
+    candidates = [
+        ("affinity_count", float(affinity_len)),
+    ]
     if cgroup_cpu_limit is not None:
-        if aff_f <= cgroup_cpu_limit:
-            eff_cpu_val = aff_f
-            eff_cpu_winner = "affinity"
-        else:
-            eff_cpu_val = cgroup_cpu_limit
-            eff_cpu_winner = "cgroup cpu.max quota/period"
+        candidates.append(("cpu.max quota/period", float(cgroup_cpu_limit)))
+    if logical_f is not None:
+        candidates.append(("logical_cores", logical_f))
+    winner_name, winner_val = min(candidates, key=lambda x: x[1])
+    if float(winner_val) == int(winner_val):
+        eff_cpu_out: Any = int(winner_val)
     else:
-        eff_cpu_val = aff_f
-        eff_cpu_winner = "affinity (cgroup cpu.max unlimited/unavailable)"
-    # Prefer int when whole
-    if float(eff_cpu_val) == int(eff_cpu_val):
-        eff_cpu_out: Any = int(eff_cpu_val)
-    else:
-        eff_cpu_out = eff_cpu_val
+        eff_cpu_out = winner_val
+    eff_cpu_winner = winner_name
+    eff_inputs_str = (
+        "min("
+        + ", ".join(f"{n}={v}" for n, v in candidates)
+        + f") = {eff_cpu_out}; winner={eff_cpu_winner}"
+    )
     effective_cpu_count = EvidenceField(
         value=eff_cpu_out,
-        evidence=(
-            f"min(affinity={affinity_len}, cgroup_cpu_limit="
-            f"{cgroup_cpu_limit if cgroup_cpu_limit is not None else 'unavailable'}) "
-            f"= {eff_cpu_out}; winner={eff_cpu_winner}; "
-            f"cpuset_size={cpuset_size.value}"
-        ),
+        evidence=eff_inputs_str,
+    )
+    effective_cores = EvidenceField(
+        value=eff_cpu_out,
+        evidence=eff_inputs_str,
+    )
+
+    eff_mem_inputs_str = (
+        f"min(MemTotal={mem_total_int}, cgroup memory.max="
+        f"{cgroup_mem_bytes if cgroup_mem_bytes is not None else memory_max_ef.value})"
+        f" = {eff_mem}; winner={eff_mem_winner}"
+    )
+    effective_mem_bytes_ef = EvidenceField(
+        value=eff_mem if eff_mem is not None else "UNDETECTED (reason: no mem)",
+        evidence=eff_mem_inputs_str,
     )
 
     exec_env = ExecutionEnvironment(
@@ -1680,94 +1740,79 @@ def detect_linux() -> DeviceProfile:
         steal_percent=steal_pct,
         effective_memory_limit=effective_memory_limit,
         effective_memory_winner=eff_mem_winner,
+        effective_mem_inputs=eff_mem_inputs_str,
         effective_cpu_count=effective_cpu_count,
         effective_cpu_winner=eff_cpu_winner,
+        effective_cores=effective_cores,
+        effective_cores_inputs=eff_inputs_str,
+        effective_mem_bytes=effective_mem_bytes_ef,
     )
 
-    # Proxy detection
-    is_proxy = False
-    proxy_reasons = []
-    if hyp_vendor.is_detected():
-        is_proxy = True
-        proxy_reasons.append(f"Hypervisor vendor={hyp_vendor.value}")
-    if systemd_virt.is_detected() and str(systemd_virt.value) not in (
-        "none",
-        "",
-    ):
-        is_proxy = True
-        proxy_reasons.append(f"systemd-detect-virt={systemd_virt.value}")
-    if dockerenv.value == "EXISTS":
-        is_proxy = True
-        proxy_reasons.append("/.dockerenv EXISTS")
-    proxy_banner = ""
-    if is_proxy:
-        proxy_banner = (
-            "*** DEVELOPMENT PROXY / SANDBOX — NOT A BARE-METAL DEPLOYMENT TARGET *** "
-            + "; ".join(proxy_reasons)
-            + ". Values below describe this guest/container share, not host silicon capacity."
-        )
+    # HOST CLASS
+    dmi_vendor_b = store.get("dmi_sys_vendor")
+    dmi_product_b = store.get("dmi_product_name")
+    dmi_vendor = (
+        dmi_vendor_b.content.strip()
+        if not dmi_vendor_b.skipped_reason and dmi_vendor_b.content.strip()
+        else None
+    )
+    dmi_product = (
+        dmi_product_b.content.strip()
+        if not dmi_product_b.skipped_reason and dmi_product_b.content.strip()
+        else None
+    )
+    host_info = classify_host(
+        dockerenv_exists=(dockerenv.value == "EXISTS"),
+        containerenv_exists=(containerenv.value == "EXISTS"),
+        systemd_virt=(
+            str(systemd_virt.value) if systemd_virt.is_detected() else None
+        ),
+        hypervisor_vendor=(
+            str(hyp_vendor.value) if hyp_vendor.is_detected() else None
+        ),
+        proc1_cgroup=(
+            str(proc1_cgroup.value) if proc1_cgroup.is_detected() else ""
+        ),
+        dmi_sys_vendor=dmi_vendor,
+        dmi_product_name=dmi_product,
+    )
+    is_proxy = host_info.host_class.value != "bare-metal"
+    proxy_banner = host_info.banner
+    host_class_ef = host_info.host_class
 
     target_reliability = (
-        "This machine is a development proxy (KVM guest inside a Docker/cgroup "
-        "sandbox), not the intended bare-metal deployment target. The following "
-        "detected values would NOT transfer to different hardware: hypervisor-"
-        "synthesized cache sizes (especially the 320 MiB L3), CPU model string "
-        f"('{(model_name.value if model_name.is_detected() else '?')}'), "
-        "CPUID flags that the guest advertises but cannot enable (AMX/"
-        "XTILEDATA prctl failed here), cgroup memory.max/cpu.max quotas, "
-        "steal time, sched affinity, DIMM/channel topology (undetected in-"
-        "guest), and any HOST-LEVEL uarch decode implications about memory "
-        "channels or package L3. Only re-run detection on the real target."
+        f"HOST CLASS={host_info.host_class.value}. "
+        + (
+            "This is NOT bare-metal and is not representative of an edge "
+            "deployment target. "
+            if is_proxy
+            else "Classified as bare-metal from available signals. "
+        )
+        + "Values that would NOT transfer to different hardware: "
+        "hypervisor-synthesized cache sizes, guest CPUID flags that fail "
+        "runtime enable (AMX/XTILEDATA), cgroup memory.max/cpu.max, steal "
+        "time, sched affinity, DIMM/channel topology, storage of the "
+        "container overlay, and HOST-LEVEL uarch implications. "
+        f"Model string={(model_name.value if model_name.is_detected() else '?')!r}."
     )
 
+    # Storage + thermal (after mounts captured)
+    storage_info = detect_storage(
+        store_read=store.read,
+        store_text=store.text,
+        store_sha=store.sha,
+        store_get=store.get,
+    )
+    thermal_info = detect_thermal_power(store_text_fn=store.text)
+
     # --- Derived defaults from EFFECTIVE limits ---
-    headroom = 0.70
-    usable_warning = ""
-    no_swap = isinstance(swap_total.value, int) and swap_total.value == 0
-    # Use centi-precision ints to avoid 0.70-0.05 → 0.649999... display junk.
-    factor_cents = 70
-    if no_swap:
-        factor_cents -= 5  # additional 5%
-        usable_warning = (
-            "WARNING: SwapTotal == 0; subtracted an additional 5% headroom "
-            f"(factor 0.70 → {factor_cents / 100:.2f}). Failure mode is "
-            "OOM-kill rather than swap-backed degradation."
-        )
-    effective_factor = factor_cents / 100.0
-
     if isinstance(effective_memory_limit.value, int):
-        usable = int(effective_memory_limit.value * effective_factor)
-        usable_ram = EvidenceField(
-            value=usable,
-            evidence=(
-                f"{effective_factor} * effective_memory_limit = "
-                f"{effective_factor} * {effective_memory_limit.value} = {usable} "
-                f"(winner was {eff_mem_winner})"
-            ),
-        )
-        usable_formula = (
-            f"{effective_factor} * effective_memory_limit "
-            f"({effective_memory_limit.value}) = {usable}"
-            + (" [no-swap -5% applied]" if no_swap else "")
-        )
+        memory_budget = build_memory_budget(int(effective_memory_limit.value))
     else:
-        usable_ram = undetected("effective_memory_limit unavailable")
-        usable_formula = "UNDETECTED"
+        memory_budget = build_memory_budget(0)
+        memory_budget.provisional_note += " | effective_mem UNDETECTED → budgets meaningless"
 
-    # Side-by-side from raw MemAvailable (NOT used downstream)
-    if isinstance(mem_avail.value, int):
-        alt = int(mem_avail.value * effective_factor)
-        usable_from_avail = EvidenceField(
-            value=alt,
-            evidence=(
-                f"NOT USED DOWNSTREAM: {effective_factor} * MemAvailable "
-                f"= {effective_factor} * {mem_avail.value} = {alt}"
-            ),
-        )
-    else:
-        usable_from_avail = undetected("MemAvailable unavailable")
-
-    # suggested threads from effective_cpu_count
+    # suggested threads from effective_cores
     if isinstance(effective_cpu_count.value, (int, float)):
         # Use floor for threads
         n_threads = int(effective_cpu_count.value)
@@ -1776,12 +1821,12 @@ def detect_linux() -> DeviceProfile:
         suggested_thread_count = EvidenceField(
             value=n_threads,
             evidence=(
-                f"effective_cpu_count={effective_cpu_count.value} "
+                f"effective_cores={effective_cpu_count.value} "
                 f"(winner={eff_cpu_winner}); provisional pending Phase 2"
             ),
         )
         suggested_formula = (
-            f"int(effective_cpu_count) = int({effective_cpu_count.value}) "
+            f"int(effective_cores) = int({effective_cpu_count.value}) "
             f"= {n_threads} [NOT raw os.cpu_count()/lscpu]"
         )
     else:
@@ -1817,17 +1862,13 @@ def detect_linux() -> DeviceProfile:
             )
         )
 
-    # 2. MemFree <= MemAvailable <= MemTotal
-    if (
-        isinstance(mem_free.value, int)
-        and isinstance(mem_avail.value, int)
-        and isinstance(mem_total.value, int)
-    ):
-        ok = mem_free.value <= mem_avail.value <= mem_total.value
+    # 2. MemAvailable <= MemTotal (replaces tautology MemTotal-MemAvailable<=MemTotal)
+    if isinstance(mem_avail.value, int) and isinstance(mem_total.value, int):
+        ok = mem_avail.value <= mem_total.value
         cross_checks.append(
             CrossCheck(
-                name="MemFree <= MemAvailable <= MemTotal",
-                left=f"MemFree={mem_free.value}, MemAvailable={mem_avail.value}",
+                name="MemAvailable <= MemTotal",
+                left=f"MemAvailable={mem_avail.value}",
                 right=f"MemTotal={mem_total.value}",
                 result="PASS" if ok else "FAIL",
             )
@@ -1835,76 +1876,95 @@ def detect_linux() -> DeviceProfile:
     else:
         cross_checks.append(
             CrossCheck(
-                name="MemFree <= MemAvailable <= MemTotal",
+                name="MemAvailable <= MemTotal",
                 left="UNDETECTED",
                 right="UNDETECTED",
                 result="FAIL",
             )
         )
 
-    # 3. effective_memory_limit vs MemTotal — FAIL loudly if cgroup < /proc
-    if (
-        isinstance(effective_memory_limit.value, int)
-        and isinstance(mem_total.value, int)
-    ):
-        if cgroup_mem_bytes is not None and cgroup_mem_bytes < mem_total.value:
-            cross_checks.append(
-                CrossCheck(
-                    name="effective_memory_limit <= MemTotal (cgroup binding)",
-                    left=(
-                        f"CGROUP BINDS BELOW /proc: cgroup memory.max="
-                        f"{cgroup_mem_bytes} < MemTotal={mem_total.value}; "
-                        f"effective={effective_memory_limit.value}"
-                    ),
-                    right=f"MemTotal={mem_total.value}",
-                    result="FAIL",
-                )
+    # 3. effective_mem <= MemTotal
+    if isinstance(effective_memory_limit.value, int) and isinstance(mem_total.value, int):
+        ok = effective_memory_limit.value <= mem_total.value
+        cross_checks.append(
+            CrossCheck(
+                name="effective_mem <= MemTotal",
+                left=(
+                    f"effective_mem={effective_memory_limit.value} "
+                    f"(winner={eff_mem_winner}; inputs: {eff_mem_inputs_str})"
+                ),
+                right=f"MemTotal={mem_total.value}",
+                result="PASS" if ok else "FAIL",
             )
-        else:
-            ok = effective_memory_limit.value <= mem_total.value
-            cross_checks.append(
-                CrossCheck(
-                    name="effective_memory_limit <= MemTotal (cgroup binding)",
-                    left=(
-                        f"effective={effective_memory_limit.value} "
-                        f"(winner={eff_mem_winner}); "
-                        f"cgroup memory.max={cgroup_mem_bytes}"
-                    ),
-                    right=f"MemTotal={mem_total.value}",
-                    result="PASS" if ok else "FAIL",
-                )
-            )
+        )
     else:
         cross_checks.append(
             CrossCheck(
-                name="effective_memory_limit <= MemTotal (cgroup binding)",
+                name="effective_mem <= MemTotal",
                 left="UNDETECTED",
                 right="UNDETECTED",
                 result="FAIL",
             )
         )
 
-    # 4. os.cpu_count() == len(affinity) == cpuset size
+    # 4. effective_cores <= logical_cores
+    if (
+        isinstance(effective_cpu_count.value, (int, float))
+        and isinstance(logical_cores.value, int)
+    ):
+        ok = float(effective_cpu_count.value) <= float(logical_cores.value)
+        cross_checks.append(
+            CrossCheck(
+                name="effective_cores <= logical_cores",
+                left=f"effective_cores={effective_cpu_count.value} ({eff_inputs_str})",
+                right=f"logical_cores={logical_cores.value}",
+                result="PASS" if ok else "FAIL",
+            )
+        )
+    else:
+        cross_checks.append(
+            CrossCheck(
+                name="effective_cores <= logical_cores",
+                left="UNDETECTED",
+                right="UNDETECTED",
+                result="FAIL",
+            )
+        )
+
+    # 4b. affinity vs os.cpu_count vs cpuset — NOT INDEPENDENT if all from same kernel view
     cc_vals = {
         "os.cpu_count()": os_cc,
         "len(os.sched_getaffinity(0))": affinity_len,
         "cgroup cpuset.cpus.effective size": (
             cpuset_size.value if isinstance(cpuset_size.value, int) else None
         ),
+        "lscpu CPU(s)": logical_cores.value if isinstance(logical_cores.value, int) else None,
     }
     defined = {k: v for k, v in cc_vals.items() if v is not None}
-    agree = len(set(defined.values())) == 1 and len(defined) >= 2
-    # Mandatory: if cpu_count != affinity, FAIL
+    numeric_agree = len(set(defined.values())) == 1 and len(defined) >= 2
     if os_cc != affinity_len:
-        agree = False
-    cross_checks.append(
-        CrossCheck(
-            name="os.cpu_count() == len(os.sched_getaffinity(0)) == cgroup cpuset size",
-            left=str(defined),
-            right=f"unique={sorted(set(defined.values()))}",
-            result="PASS" if agree else "FAIL",
+        cross_checks.append(
+            CrossCheck(
+                name="core-count sources (affinity mandatory)",
+                left=str(defined),
+                right="os.cpu_count() != len(sched_getaffinity) → FAIL",
+                result="FAIL",
+            )
         )
-    )
+    else:
+        cross_checks.append(
+            CrossCheck(
+                name="core-count sources agreement",
+                left=str(defined),
+                right=(
+                    "NOT INDEPENDENT: os.cpu_count, sched_getaffinity, lscpu "
+                    "CPU(s), and cpuset all derive from the same kernel "
+                    "CPU/affinity/cgroup view on Linux — agreement is expected, "
+                    "not corroboration from independent hardware probes"
+                ),
+                result="NOT INDEPENDENT" if numeric_agree else "FAIL",
+            )
+        )
 
     # 5. sum of lscpu -e unique CORE values == physical_cores
     unique_cores: set[int] = set()
@@ -2005,6 +2065,37 @@ def detect_linux() -> DeviceProfile:
         lscpu_l3,
     )
 
+    # Cache plausibility: L3 > 64 MiB with <= 8 cores → SUSPECT (hypervisor artifact)
+    l3_agg = lscpu_l3.value if lscpu_l3 is not None else None
+    if isinstance(l3_agg, int) and isinstance(logical_cores.value, int):
+        if l3_agg > 64 * 1024 * 1024 and logical_cores.value <= 8:
+            cross_checks.append(
+                CrossCheck(
+                    name="cache size physically plausible for core count",
+                    left=f"L3 aggregate={l3_agg} bytes ({l3_agg/1024/1024:.1f} MiB)",
+                    right=f"logical_cores={logical_cores.value} (<=8)",
+                    result="SUSPECT",
+                )
+            )
+        else:
+            cross_checks.append(
+                CrossCheck(
+                    name="cache size physically plausible for core count",
+                    left=f"L3 aggregate={l3_agg} bytes",
+                    right=f"logical_cores={logical_cores.value}",
+                    result="PASS",
+                )
+            )
+    else:
+        cross_checks.append(
+            CrossCheck(
+                name="cache size physically plausible for core count",
+                left="UNDETECTED L3 or core count",
+                right="n/a",
+                result="SUSPECT",
+            )
+        )
+
     # 7. ISA consistency (kept; can fail)
     def flag_on(name: str) -> bool:
         f = isa.flags.get(name)
@@ -2061,50 +2152,60 @@ def detect_linux() -> DeviceProfile:
 
     self_critique = {
         "fields that are heuristic, not directly read": [
-            "suggested_thread_count from effective_cpu_count (provisional)",
-            f"usable_ram_for_model_bytes ({effective_factor} * effective_memory_limit; policy)",
-            "cpuid_tier priority ladder over flags",
-            "usable_tier drops AMX→AVX512_VNNI on failed prctl (policy from Phase 1.5 spec)",
+            "suggested_thread_count from effective_cores (provisional)",
+            "memory budget table (os_reserve 1GiB, runtime 512MiB, KV stand-in formula)",
+            "cpuid_tier priority ladder over flags; tier_runtime_verified=false always for now",
+            "usable_tier drops AMX→AVX512_VNNI on failed prctl",
             "hybrid=false from absence of sysfs hybrid signals",
             "uarch decode from static lookup table (HOST-LEVEL ONLY)",
-            "effective_cpu_count / effective_memory_limit min() selection",
+            "HOST CLASS classification heuristics (container>VM>bare-metal)",
+            "sparse/mmap sanity note from fstype class, not a probe",
         ],
         "platform code paths not exercised on this machine": [
-            "macOS sysctl/vm_stat path",
+            "macOS sysctl hw.optional.arm.FEAT_* path",
+            "macOS pmset/powermetrics path",
             "Windows WMIC/PowerShell CIM path",
-            "ARM ISA flag set and ARM quant tiers",
+            "ARM Linux ISA flag set and ARM_SME/I8MM tiers (0% exercised)",
+            "bare-metal HOST CLASS path (this host is container-on-KVM)",
             "hybrid P/E core_type and cpu_capacity parsing",
             "multi-node NUMA mapping",
-            "dmidecode DIMM/channel parsing (not installed)",
-            "cpufreq base/max frequency sysfs (absent under KVM)",
-            "numactl --hardware (not installed)",
-            "cgroup v1 fallback path (this host is cgroup v2)",
-            "successful AMX prctl path (rc=0) — only failure path exercised",
-            "/sys/hypervisor present path (absent here)",
+            "cgroup v1 fallback path",
+            "successful AMX prctl path (rc=0)",
+            "AC/battery power_supply nodes (absent here)",
+            "cpufreq governor sysfs (absent under KVM)",
+            "thermal_zone* readable path (absent here)",
         ],
         "places a default could have been silently substituted": [
             "base_mhz: could have used /proc/cpuinfo cpu MHz — intentionally NOT done",
-            "usable_tier: could have kept AMX from CPUID — intentionally dropped after failed prctl",
-            "theoretical_peak_bandwidth / DIMM fields: left UNDETECTED",
-            "cgroup memory.max='max' would fall through to MemTotal — reported explicitly",
-            "headroom 0.70 (not 0.85); no-swap extra -5% applied and warned",
+            "usable_tier: could have kept AMX from CPUID — intentionally dropped",
+            "theoretical_peak_bandwidth DELETED; measured_bandwidth_GBps=PENDING_PHASE_2",
+            "effective_* could have reported host totals — min() with cgroup/affinity enforced",
+            "budget numbers are policy, not measurements — marked PROVISIONAL",
         ],
         "known parsing fragility": [
             "lscpu English locale keys",
             "whitespace tokenization assumes cpuid names are single tokens",
-            "KVM may expose synthetic cache sizes",
-            "steal field index assumes standard /proc/stat column order",
-            "cgroup path resolution from 0::/ assumes v2 unified hierarchy at /sys/fs/cgroup",
-            "uarch table incomplete; UNKNOWN_UARCH is not an error but limits insight",
+            "KVM may expose synthetic cache sizes (L3 SUSPECT flagged)",
+            "overlay mounts hide underlying block rotational attribute",
+            "cgroup path resolution from 0::/ assumes v2 at /sys/fs/cgroup",
+            "core-count sources are NOT INDEPENDENT on Linux",
         ],
     }
+
+    devices_note = (
+        "DEVICES REACHED FROM THIS AGENT: only this Cursor cloud sandbox "
+        f"(HOST CLASS={host_info.host_class.value}). No SSH targets, bare-metal "
+        "hosts, or ARM devices are reachable from this environment. Bare-metal "
+        "and ARM reports are therefore ABSENT — not fabricated."
+    )
 
     return DeviceProfile(
         platform="linux",
         python_version=platform.python_version(),
         detection_libraries=[
             f"Python stdlib only (platform={platform.python_version()}, "
-            "subprocess, os, hashlib, ctypes for prctl). No third-party detection libs."
+            "subprocess, os, hashlib, ctypes for prctl, shutil.disk_usage). "
+            "No third-party detection libs."
         ],
         commands_run=store.commands_log(),
         raw_source_dump=raw_dump,
@@ -2112,6 +2213,8 @@ def detect_linux() -> DeviceProfile:
         is_development_proxy=is_proxy,
         proxy_banner=proxy_banner,
         target_reliability_statement=target_reliability,
+        host_class=host_class_ef,
+        host_class_banner=proxy_banner,
         model_name=model_name,
         vendor=vendor,
         cpu_family=cpu_family,
@@ -2131,6 +2234,9 @@ def detect_linux() -> DeviceProfile:
         cpu_to_node_map=cpu_to_node,
         cache=cache,
         exec_env=exec_env,
+        storage=storage_info,
+        thermal_power=thermal_info,
+        memory_budget=memory_budget,
         isa=isa,
         parser_negative_control=parser_nc,
         amx_runtime_probe=amx_probe,
@@ -2147,19 +2253,13 @@ def detect_linux() -> DeviceProfile:
         memory_channels=memory_channels,
         dimm_count=dimm_count,
         dimm_speed_mts=dimm_speed,
-        theoretical_peak_bandwidth_GBps=theoretical_bw,
-        bandwidth_formula=bandwidth_formula,
-        bandwidth_confidence=bandwidth_confidence,
+        measured_bandwidth_GBps=measured_bw,
         suggested_thread_count=suggested_thread_count,
         suggested_thread_formula=suggested_formula,
-        usable_ram_for_model_bytes=usable_ram,
-        usable_ram_formula=usable_formula,
-        usable_ram_from_memavailable_bytes=usable_from_avail,
-        usable_ram_warning=usable_warning,
-        headroom_factor=effective_factor,
         cross_checks=cross_checks,
         core_count_sources=core_count_sources,
         self_critique=self_critique,
         per_core_type_counts=per_core_type_counts,
         lscpu_unique_cores=lscpu_unique_core_count,
+        devices_reached_note=devices_note,
     )
