@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "local-model-device-profile"
+version = "0.1.0"
+description = "Phase 1 DeviceProfile CPU/memory detector (detection only)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+device-profile = "device_profile.detect:main"
+
+[tool.setuptools.packages.find]
+include = ["device_profile*"]
