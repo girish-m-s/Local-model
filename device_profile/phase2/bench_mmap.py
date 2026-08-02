@@ -79,7 +79,9 @@ def run_bench4(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
 
     stride = 4096
     pages = (need + stride - 1) // stride
-    estimated_read = pages  # one byte touched per page
+    # One load per page; OS still brings in whole pages → cold-read GB/s
+    # is file_bytes / time (not the 1-byte-touched numerator).
+    bytes_touched = pages
 
     maj0, maj0_ev = read_majflt()
     cold_t0 = now()
@@ -100,9 +102,14 @@ def run_bench4(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
             "cold_seconds": cold_dt,
             "warm_seconds": warm_dt,
             "stride": stride,
-            "estimated_bytes_touched_per_pass": estimated_read,
-            "cold_gbs": (estimated_read / cold_dt / 1e9) if cold_dt else None,
-            "warm_gbs": (estimated_read / warm_dt / 1e9) if warm_dt else None,
+            "pages_touched_per_pass": pages,
+            "estimated_bytes_touched_per_pass": bytes_touched,
+            # Spec: cold-read GB/s = effective page-fault throughput for the
+            # 2x-RAM mapping (whole pages brought in), not 1-byte/page loads.
+            "cold_gbs": (need / cold_dt / 1e9) if cold_dt else None,
+            "warm_gbs": (need / warm_dt / 1e9) if warm_dt else None,
+            "cold_touch_gbs": (bytes_touched / cold_dt / 1e9) if cold_dt else None,
+            "warm_touch_gbs": (bytes_touched / warm_dt / 1e9) if warm_dt else None,
             "cold_checksum": cold_acc,
             "warm_checksum": warm_acc,
             "majflt_before_cold": maj0,
@@ -113,9 +120,11 @@ def run_bench4(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
             "majflt_evidence": [maj0_ev, maj1_ev, maj2_ev],
             "fadvise_evidence": fadvise_ev,
             "note": (
-                "GB/s uses one byte touched per 4KiB page via C stride_touch; "
-                "compares cold (faulting) vs warm pass. File size = 2x effective_mem. "
-                "posix_fadvise(DONTNEED) used before cold pass (not a silent shrink)."
+                "cold/warm GB/s = file_bytes/time (whole pages faulted via "
+                "4KiB-stride touch). touch_gbs = 1-byte-per-page / time. "
+                "File size = 2x effective_mem. posix_fadvise(DONTNEED) before "
+                "cold pass (not a silent shrink); majflt may under-count if "
+                "pages remain cached."
             ),
         }
     )

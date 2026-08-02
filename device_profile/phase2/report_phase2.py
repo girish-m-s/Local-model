@@ -173,9 +173,15 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
             f"write: {b4['write_seconds']:.3f}s ({b4['write_gbs']:.4f} GB/s)"
         )
         lines.append(
-            f"cold: {b4['cold_seconds']:.3f}s ({b4['cold_gbs']:.6f} GB/s touched); "
-            f"warm: {b4['warm_seconds']:.3f}s ({b4['warm_gbs']:.6f} GB/s touched)"
+            f"cold-read: {b4['cold_seconds']:.3f}s ({b4['cold_gbs']:.4f} GB/s); "
+            f"warm: {b4['warm_seconds']:.3f}s ({b4['warm_gbs']:.4f} GB/s)"
         )
+        if b4.get("cold_touch_gbs") is not None:
+            lines.append(
+                f"  <- touch_gbs (1B/page): cold={b4['cold_touch_gbs']:.6f} "
+                f"warm={b4['warm_touch_gbs']:.6f}; "
+                f"pages={b4.get('pages_touched_per_pass')}"
+            )
         lines.append(
             f"majflt cold_delta={b4['majflt_cold_delta']} "
             f"warm_delta={b4['majflt_warm_delta']}"
