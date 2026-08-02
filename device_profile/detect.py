@@ -77,6 +77,9 @@ def _unsupported_stub(platform_name: str, reason: str) -> DeviceProfile:
         suggested_thread_formula="UNDETECTED",
         usable_ram_for_model_bytes=u,
         usable_ram_formula="UNDETECTED",
+        is_development_proxy=True,
+        proxy_banner=f"*** PLATFORM STUB: {reason} ***",
+        target_reliability_statement=reason,
         cross_checks=[],
         self_critique={
             "fields that are heuristic, not directly read": [],
