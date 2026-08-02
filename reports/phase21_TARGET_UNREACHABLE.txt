@@ -1,0 +1,43 @@
+=== PHASE 2.1 TARGET DEVICE STATUS ===
+generated_by: cursor cloud agent (bc-019fc342-825e-7eab-bcd3-89b205bdbc56)
+host_this_agent_runs_on: Ubuntu 24.04 container on KVM (/.dockerenv EXISTS; systemd-detect-virt=docker; lscpu Hypervisor vendor=KVM)
+date: 2026-08-02
+
+MANDATORY TARGET SET (Phase 2.1):
+  1. One bare-metal x86 machine (laptop), on AC and on battery.
+  2. One ARM device (Android/Termux or Apple Silicon Mac).
+
+RESULT: BOTH TARGETS UNREACHABLE FROM THIS AGENT.
+
+Evidence of reachability attempts:
+  - This VM is itself HOST CLASS=container (not bare-metal).
+  - host.docker.internal (172.17.0.1) responds to ICMP but TCP/22 Connection refused.
+  - No SSH keys / known_hosts for a user laptop in ~/.ssh.
+  - No Termux / adb / Apple Silicon host advertised in environment or MCP.
+  - cursor-cloud environment-info: environment=null (no linked multi-host fleet).
+  - No second agent / private worker with bare-metal or ARM access listed.
+
+Therefore:
+  - ARM path remains 0% validated going into Phase 3.
+  - Bare-metal x86 (AC + battery) remains 0% validated going into Phase 3.
+  - A container re-run is NOT claimed as the Phase 2.1 calibration deliverable.
+
+WHAT WAS DELIVERED INSTEAD:
+  - Harness bug fixes for BUG 1–6 + SECTION D extensions (KV / MoE / prefill / GiB).
+  - Harness smoke verification on this container ONLY to prove the math gates
+    (constant reps, reconstruction assert, SUPERLINEAR gate, loadavg BLOCKED,
+     STREAM thermals, dual-file mmap io accounting). That smoke output is
+     NOT a Phase 2.1 device report.
+
+HOW TO PRODUCE THE REAL DELIVERABLE (on each target device):
+  git clone <repo> && git checkout cursor/phase21-fix-rerun-bc56
+  python3 -m device_profile.phase2 > reports/phase21_<host>_<ac|battery>.txt
+
+  Required filenames (suggested):
+    reports/phase21_baremetal_x86_ac.txt
+    reports/phase21_baremetal_x86_battery.txt
+    reports/phase21_arm_<device>.txt
+
+Do not set PHASE2_LOAD_THRESHOLD / PHASE2_QUIET_* / PHASE2_BENCH3_DURATION_S
+overrides for deliverable runs; those exist only for harness debugging and
+are printed as OVERRIDE in the quiet_gate evidence when used.

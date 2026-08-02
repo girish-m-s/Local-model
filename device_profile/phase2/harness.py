@@ -1,7 +1,8 @@
-"""Phase 2 orchestrator — synthetic microbenchmarks only."""
+"""Phase 2.1 orchestrator — synthetic microbenchmarks only (bugfix)."""
 
 from __future__ import annotations
 
+import os
 import sys
 import time
 from typing import Any
@@ -14,13 +15,28 @@ from .bench_stream import run_bench1
 from .bench_sustained import run_bench3
 from .native import build_kernels
 from .report_phase2 import format_phase2_report
-from .util import effective_cores, effective_mem
+from .util import GIB, effective_cores, effective_mem
+
+
+# Representative dense 7B-class decoder config (Llama-2-7B-like).
+# Stated explicitly — not detected from a model file.
+REP_7B = {
+    "name": "representative_dense_7B_llama2_like",
+    "n_layers": 32,
+    "n_kv_heads": 32,
+    "head_dim": 128,
+    "bytes_per_element": 2,  # fp16 KV
+    "model_weight_GiB": 7.0,
+    "note": (
+        "Assumed dense Transformer decode: every weight read every token + "
+        "full KV cache up to n_ctx. NOT a real GGUF measurement."
+    ),
+}
 
 
 def run_phase2() -> dict[str, Any]:
     t_wall0 = time.time()
     profile = detect_device_profile()
-    # steal sampling in detect is 5s — already spent
 
     kernels = build_kernels()
     cores = effective_cores(profile)
@@ -29,68 +45,89 @@ def run_phase2() -> dict[str, Any]:
     b1 = run_bench1(profile, kernels)
     b2 = run_bench2(profile, kernels)
 
-    sat_threads = b2["knee"]["all_cores"]["fp32_knee_threads"]
-    # Prefer compute knee; also record bandwidth sat
-    bw_sat = b1["saturation"]["saturation_thread_count"]
+    bw_sat = b1.get("saturation", {}).get("saturation_thread_count")
+    knee = None
+    if b2.get("knee", {}).get("all_cores") and not b2["knee"]["all_cores"].get("invalid"):
+        knee = b2["knee"]["all_cores"].get("fp32_knee_threads")
 
-    # Time budget: keep BENCH3 at 180s; if remaining wall would exceed 10 min
-    # after estimated BENCH4, still run 180s as required by spec.
-    elapsed = time.time() - t_wall0
-    remaining = 600.0 - elapsed
     duration = 180.0
-    if remaining < 200:
-        # Still run required 180s; may slightly exceed 10 min — note it.
-        duration = 180.0
+    if "PHASE2_BENCH3_DURATION_S" in os.environ:
+        duration = float(os.environ["PHASE2_BENCH3_DURATION_S"])
 
     b3 = run_bench3(
         profile,
         kernels,
-        sat_threads=sat_threads,
-        n_fp32=b2["n_fp32"],
-        reps_fp32=b2["reps_fp32"],
+        sat_threads=bw_sat,
+        n_elements=int(b1.get("n_elements_per_array") or 0),
+        reps=int(b1.get("reps") or 0),
+        bytes_moved_per_iter=int(b1.get("bytes_moved_per_iter") or 0),
         duration_s=duration,
         bucket_s=10.0,
     )
 
     b4 = run_bench4(profile, kernels)
 
-    measured_bw = b1["saturation"]["bandwidth_saturated_median_gbs"]
+    measured_bw = b1.get("saturation", {}).get("bandwidth_saturated_median_gbs")
     predictions = []
-    for gb in (0.5, 1, 2, 4, 8, 16):
-        model_bytes = int(gb * 1e9)  # decimal GB as labeled
-        upper = measured_bw * 1e9 / model_bytes
-        predictions.append(
-            {
-                "model_gb": gb,
-                "model_bytes": model_bytes,
-                "upper_tok_s": upper,
-                "realistic_0_55x_tok_s": upper * 0.55,
-            }
-        )
+    if measured_bw is not None:
+        for gib in (0.5, 1, 2, 4, 8, 16):
+            model_bytes = int(gib * GIB)
+            # BW is decimal GB/s (1e9); convert to bytes/s then / model_bytes
+            upper = measured_bw * 1e9 / model_bytes
+            predictions.append(
+                {
+                    "model_GiB": gib,
+                    "model_bytes": model_bytes,
+                    "model_bytes_basis": "GiB = 2^30",
+                    "upper_tok_s": upper,
+                    "realistic_0_55x_tok_s": upper * 0.55,
+                    "decimal_GB_alias": gib,  # same numeric label, different byte count
+                    "decimal_GB_bytes_1e9": int(gib * 1e9),
+                    "upper_tok_s_if_decimal_GB": measured_bw * 1e9 / (gib * 1e9),
+                }
+            )
 
-    # Sustained thread recommendation: if throttled, try max(1, knee-1)
-    throttle_t = b3["summary"]["time_to_throttle_s"]
-    sust_ratio = b3["summary"]["sustained_over_peak"]
-    if sust_ratio is not None and sust_ratio < 0.90:
-        rec_sust = max(1, sat_threads - 1)
+    kv_preds = _kv_cache_predictions(measured_bw)
+
+    # Sustained recommendation
+    rec_threads = knee
+    rec_sust = None
+    sust_ev = "UNAVAILABLE"
+    if b3.get("thermal_blind") or b3.get("status") == "THERMAL_BLIND":
         sust_ev = (
-            f"sustained/peak={sust_ratio:.3f} < 0.90 "
-            f"(time_to_throttle_s={throttle_t}); "
-            f"recommend knee-1 = {rec_sust}"
+            "THERMAL BLIND — RESULT NOT MEANINGFUL; "
+            "recommended_thread_count_sustained NOT concluded from BENCH 3"
         )
-    else:
-        rec_sust = sat_threads
-        sust_ev = (
-            f"sustained/peak={sust_ratio}; no >10% drop observed → "
-            f"same as compute knee ({sat_threads})"
-        )
+        rec_sust = None
+    elif b3.get("status") == "BLOCKED":
+        sust_ev = "BENCH 3 BLOCKED by loadavg gate"
+    elif b3.get("status") == "SKIPPED":
+        sust_ev = f"BENCH 3 SKIPPED: {b3.get('skip_reason')}"
+    elif b3.get("summary") and not b3["summary"].get("conclusion_skipped"):
+        sust_ratio = b3["summary"].get("sustained_over_peak")
+        throttle_t = b3["summary"].get("time_to_throttle_s")
+        if knee is None:
+            sust_ev = "compute knee unavailable; cannot derive sustained recommendation"
+        elif sust_ratio is not None and sust_ratio < 0.90:
+            rec_sust = max(1, knee - 1)
+            sust_ev = (
+                f"sustained/peak={sust_ratio:.3f} < 0.90 "
+                f"(time_to_throttle_s={throttle_t}); recommend knee-1 = {rec_sust}"
+            )
+        else:
+            rec_sust = knee
+            sust_ev = (
+                f"sustained/peak={sust_ratio}; no >10% drop observed → "
+                f"same as compute knee ({knee})"
+            )
 
     total_runtime = time.time() - t_wall0
-    contaminated_flags = []
+    blocked = []
     for name, b in (("bench1", b1), ("bench2", b2), ("bench3", b3), ("bench4", b4)):
-        pre = b.get("pre")
-        if pre is not None and getattr(pre, "contaminated", False):
-            contaminated_flags.append(f"{name} start CONTAMINATED (loadavg>0.5)")
+        if b.get("status") == "BLOCKED":
+            blocked.append(
+                f"{name} BLOCKED by loadavg gate; readings={b.get('quiet_gate', {}).get('readings')}"
+            )
 
     host_class = (
         profile.host_class.value
@@ -99,6 +136,7 @@ def run_phase2() -> dict[str, Any]:
     )
 
     bundle: dict[str, Any] = {
+        "phase": "2.1",
         "host_class": host_class,
         "host_class_evidence": profile.host_class.evidence,
         "effective_cores": cores,
@@ -121,36 +159,55 @@ def run_phase2() -> dict[str, Any]:
             "measured_bandwidth_GBps": measured_bw,
             "bandwidth_saturation_threads": bw_sat,
             "predictions": predictions,
-            "recommended_thread_count": sat_threads,
+            "prediction_units_note": (
+                "model_GiB uses 2^30 bytes (GGUF convention). "
+                "measured_bandwidth_GBps uses decimal 1e9 bytes/s (STREAM convention). "
+                "upper_tok_s = BW_bytes_per_s / model_bytes."
+            ),
+            "kv_cache_predictions": kv_preds,
+            "moe_note": (
+                "WRONG FOR MoE: this model assumes every weight is read every token. "
+                "Mixture-of-Experts models only activate a subset of experts per token, "
+                "so weight bytes/token are much smaller and MoE will be systematically "
+                "UNDERRATED (predicted tok/s too low) by BW/model_bytes. "
+                "FLAG FOR PHASE 3 selection policy."
+            ),
+            "prefill_note": (
+                "OPEN GAP: prefill / time-to-first-token is compute-bound "
+                "(or mixed), not bandwidth-bound. Nothing in this harness predicts TTFT."
+            ),
+            "recommended_thread_count": rec_threads,
             "recommended_thread_count_evidence": (
-                f"BENCH 2 fp32 knee on all_cores curve = {sat_threads} "
-                f"(not raw core count {cores}); bw_sat_threads={bw_sat}"
+                f"BENCH 2 fp32 knee on all_cores = {knee} "
+                f"(not raw core count {cores}); bw_sat_threads={bw_sat}; "
+                f"bench2_status={b2.get('status')}"
             ),
             "recommended_thread_count_sustained": rec_sust,
             "recommended_thread_count_sustained_evidence": sust_ev,
         },
         "self_critique": {
-            "measurements likely contaminated by other processes": contaminated_flags
+            "measurements blocked or contaminated": blocked
             or [
-                "loadavg threshold 0.5 is strict on multi-tenant cloud; "
-                "check CONTAMINATED tags above"
+                "no bench BLOCKED by loadavg>0.3 after retries "
+                "(or gate not exercised)"
             ],
             "likely wrong under virtualization": [
                 "BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers",
-                "BENCH 3 thermal/cpufreq sysfs often absent under KVM — throttle detection blind",
+                "BENCH 3 thermal/cpufreq often absent under KVM — THERMAL BLIND path",
                 "BENCH 4 overlay FS + virtio block ≠ bare-metal NVMe latency",
-                "steal time / noisy neighbors can inflate CV (see NOISY tags)",
+                "steal time / noisy neighbors can still inflate CV (see NOISY tags)",
             ],
             "where a benchmark may have been served from cache rather than RAM": [
-                f"BENCH 1 working_set={b1['working_set_bytes']} vs L3="
-                f"{b1['cache_proof']['l3_bytes']} "
-                f"(suspect_fallback={b1['l3_suspect_fallback']})",
-                "BENCH 2 intentionally L2-resident — compute-bound by design, not DRAM",
-                "BENCH 4 uses posix_fadvise(DONTNEED) before cold pass; without root "
-                "drop_caches, eviction is best-effort and majflt may under-count",
+                f"BENCH 1 working_set={b1.get('working_set_bytes')} vs L3="
+                f"{(b1.get('cache_proof') or {}).get('l3_bytes')} "
+                f"(suspect_fallback={b1.get('l3_suspect_fallback')}); "
+                f"prefault_s={(b1.get('prefault') or {}).get('wall_time_s')}",
+                "BENCH 2 per-thread 0.5*L2 — compute-bound by design, not DRAM",
+                "BENCH 4 uses posix_fadvise(DONTNEED); without root drop_caches, "
+                "cold pass may still hit page cache — trust io read_bytes delta",
             ],
             "ISA tier verification": [
-                b2["isa_verification"],
+                b2.get("isa_verification"),
                 f"Phase 1.5 usable_tier={profile.isa.usable_tier.value} was NOT "
                 "exercised by these scalar C/+OpenMP kernels",
             ],
@@ -158,11 +215,57 @@ def run_phase2() -> dict[str, Any]:
                 f"total_runtime_s={total_runtime:.1f} budget=600 "
                 f"over={total_runtime > 600}",
                 "0.55x decode band is an unvalidated assumption pending Phase 4",
-                "BENCH 4 file size uses decimal 2*effective_mem; disk check is hard fail/SKIP",
+                "Phase 2.1: constant reps + reconstruction assert; SUPERLINEAR gate; "
+                "CONTAMINATED aborts; STREAM thermals; GiB prediction table",
             ],
         },
     }
     return bundle
+
+
+def _kv_cache_predictions(measured_bw: float | None) -> dict[str, Any]:
+    cfg = dict(REP_7B)
+    n_layers = cfg["n_layers"]
+    n_kv_heads = cfg["n_kv_heads"]
+    head_dim = cfg["head_dim"]
+    bpe = cfg["bytes_per_element"]
+    model_bytes = int(cfg["model_weight_GiB"] * GIB)
+
+    rows = []
+    for n_ctx in (512, 4096, 32768):
+        kv_bytes = 2 * n_layers * n_kv_heads * head_dim * n_ctx * bpe
+        total = model_bytes + kv_bytes
+        kv_share = kv_bytes / total if total else None
+        if measured_bw is None:
+            upper = None
+            upper_weights_only = None
+        else:
+            bps = measured_bw * 1e9
+            upper = bps / total
+            upper_weights_only = bps / model_bytes
+        rows.append(
+            {
+                "n_ctx": n_ctx,
+                "kv_bytes": kv_bytes,
+                "model_weight_bytes": model_bytes,
+                "bytes_per_token_total": total,
+                "kv_share_of_total": kv_share,
+                "upper_tok_s_weights_plus_kv": upper,
+                "upper_tok_s_weights_only": upper_weights_only,
+                "formula": (
+                    "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; "
+                    "tok_s = BW / (model_bytes + kv_bytes)"
+                ),
+            }
+        )
+    return {
+        "config": cfg,
+        "rows": rows,
+        "note": (
+            "UPPER BOUND with perfect bandwidth utilization. "
+            "KV term grows with n_ctx and can dominate at long context."
+        ),
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
