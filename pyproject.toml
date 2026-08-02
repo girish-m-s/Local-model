@@ -12,6 +12,7 @@ dependencies = []
 
 [project.scripts]
 device-profile = "device_profile.detect:main"
+device-profile-phase2 = "device_profile.phase2.harness:main"
 
 [tool.setuptools.packages.find]
 include = ["device_profile*"]
