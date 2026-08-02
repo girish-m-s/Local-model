@@ -8,11 +8,16 @@ No benchmarks, model selection, download, or optimization code.
 ## Run
 
 ```bash
+# Phase 1 / 1.5 — detection
 python3 -m device_profile
+
+# Phase 2 — synthetic measurement harness (no model downloads)
+python3 -m device_profile.phase2
 ```
 
-Report opens with `HOST CLASS: bare-metal|VM|container` and evidence.
-If not bare-metal, a non-representative banner is printed.
+Phase 1 report opens with `HOST CLASS: bare-metal|VM|container`.
+Phase 2 measures STREAM bandwidth, compute thread knee, 180s sustained
+thermal, and mmap fault cost; total runtime budget 10 minutes.
 
 ## Design rules
 
