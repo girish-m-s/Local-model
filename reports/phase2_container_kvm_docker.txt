@@ -1,0 +1,951 @@
+=== PHASE 2 MEASUREMENT HARNESS REPORT ===
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+*** NON-BARE-METAL HOST — bandwidth/thermal numbers may be unrepresentative of an edge target ***
+profile_effective_cores: 4
+profile_effective_mem_bytes: 16792014848
+usable_tier (from Phase 1.5): AVX512_VNNI
+total_runtime_s: 258.34
+kernel_compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_3dwhkoq6/kernels.so
+  <- log: '(empty)'
+
+=== BENCH 1 — ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c) ===
+pre: loadavg=(0.15, 0.04, 0.01) MemAvailable=15818137600 MemFree=8048054272 OK
+  <- /proc/loadavg: 0.15 0.04 0.01 4/228 5464
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7859428 kB
+  <- MemAvailable:   15447400 kB
+backend: numpy numpy 2.4.4 allocation + OpenMP-C stream_triad
+  <- numpy_available=True (numpy 2.4.4); compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_3dwhkoq6/kernels.so; omp=True; lib=/tmp/phase2_kernels_3dwhkoq6/kernels.so
+working_set_bytes: 536870904
+  <- policy: L3 SUSPECT or undetected (l3=335544320, logical_cores=4); using 512 MiB working set as required by Phase 2 spec
+l3_suspect_fallback: True
+cache_proof: ws=536870904 L3=335544320 ratio=1.599999976158142
+  <- working_set=536870904 vs L3=335544320; ratio=1.600x; L3 SUSPECT → forced 512 MiB policy; triad always writes `a`, so results cannot be pure register/L1 reuse
+threads=1: median=18.1130 min=16.8179 max=18.3720 mean=17.9322 CV%=3.57 GB/s
+  raw_gbs: [16.817930185233493, 18.017393936029137, 18.11296299870114, 18.34086176436013, 18.372006375312594]
+  raw_times_s: [0.25538025099967854, 0.23837893800009624, 0.23712118399998872, 0.2341747780001242, 0.23377779999964332]
+  <- OMP_NUM_THREADS=1; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=2: median=71.3389 min=70.3692 max=72.1906 mean=71.3827 CV%=1.06 GB/s
+  raw_gbs: [72.19064172796575, 72.05043414541935, 70.96418969727388, 71.338855575914, 70.36919882415634]
+  raw_times_s: [0.23797916900002747, 0.23844226799974422, 0.24209208899992518, 0.24082064100002754, 0.2441390440003488]
+  <- OMP_NUM_THREADS=2; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=3: median=70.9858 min=66.4043 max=72.2321 mean=70.3639 CV%=3.23 GB/s
+  raw_gbs: [72.23210931961405, 66.40433376996668, 70.9061185879424, 71.29098281071192, 70.98578491793204]
+  raw_times_s: [0.23784254800011695, 0.2587160800003403, 0.24229035900043527, 0.24098235500014198, 0.24201843999981065]
+  <- OMP_NUM_THREADS=3; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=4: median=71.2213 min=70.7327 max=71.4688 mean=71.1597 CV%=0.45 GB/s
+  raw_gbs: [71.4361508084332, 71.2213273899828, 70.93945999700286, 71.46884917840254, 70.73270883230086]
+  raw_times_s: [0.24049264600034803, 0.24121803900015948, 0.24217648300009387, 0.24038261599980615, 0.24288436300003013]
+  <- OMP_NUM_THREADS=4; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+saturation_thread_count: 2 (rule: saturation = lowest thread count whose median >= 95% of peak median)
+bandwidth_saturated / bandwidth_1thread: 71.3389 / 18.1130 = 3.9385524930973266
+post: loadavg=(0.68, 0.16, 0.05) MemAvailable=15256924160 MemFree=7486787584 CONTAMINATED
+  <- /proc/loadavg: 0.68 0.16 0.05 4/232 5468
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7311316 kB
+  <- MemAvailable:   14899340 kB
+
+=== BENCH 2 — THREAD SATURATION FOR COMPUTE ===
+pre: loadavg=(0.68, 0.16, 0.05) MemAvailable=15798419456 MemFree=8028282880 CONTAMINATED
+  <- /proc/loadavg: 0.68 0.16 0.05 1/232 5468
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7840120 kB
+  <- MemAvailable:   15428144 kB
+L2/fit: fp32 vectors: 2*209715*4=1677720 bytes (target ≤ 0.8*L2=1677721.6); int8 vectors: 2*838860*1=1677720 bytes
+isa_verification: NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.
+host is non-hybrid; P-only/E-only pinned curves NOT run (no core_type/cpu_capacity signals)
+-- curve: all_cores --
+  <- affinity: os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+  fp32 threads=1: median=3.9855 min=3.9815 max=3.9909 CV%=0.10 GFLOPS
+    raw_gflops: [3.984804440964251, 3.9909206991510704, 3.98548331887465, 3.990261952053972, 3.981504312716217]
+    raw_times_s: [0.12504574500007948, 0.12485410699991917, 0.12502444500023557, 0.12487471900021774, 0.12514939099992262]
+  fp32 threads=2: median=15.0907 min=13.9894 max=15.1125 CV%=3.26 GFLOPS
+    raw_gflops: [15.11245243746841, 15.090704526564716, 13.98939834911921, 15.10818918429257, 14.90310138142757]
+    raw_times_s: [0.03297167300024739, 0.0330191900002319, 0.035618604000319465, 0.03298097700007929, 0.03343484200013336]
+  fp32 threads=3: median=15.1223 min=15.0891 max=15.1487 CV%=0.17 GFLOPS
+    raw_gflops: [15.148660355312826, 15.089088190842372, 15.13623536613513, 15.12233397098957, 15.094575177803687]
+    raw_times_s: [0.032892865000121674, 0.033022726999661245, 0.03291986600015662, 0.03295012799981123, 0.03301072300018859]
+  fp32 threads=4: median=15.0107 min=14.1563 max=15.1269 CV%=2.75 GFLOPS
+    raw_gflops: [14.993431008193477, 15.118154585972917, 15.010733812562822, 14.156324731291301, 15.126853186708235]
+    raw_times_s: [0.033233409999866126, 0.03295923699988634, 0.033195101999808685, 0.03519860200003677, 0.03294028400023308]
+  int8 threads=1: median=19.2013 min=18.9965 max=19.3533 CV%=0.67 GOPS
+    raw_gops: [19.353314809815192, 18.996529222981806, 19.187903643816032, 19.241109226030723, 19.201260716222436]
+    raw_times_s: [0.13627514800009521, 0.1388346159997127, 0.13744992100009767, 0.1370698440000524, 0.1373543059999065]
+  int8 threads=2: median=74.1617 min=70.0003 max=74.9135 CV%=2.96 GOPS
+    raw_gops: [74.57167097658672, 71.5085112690491, 74.91350427554741, 74.16167742456635, 70.00027629868556]
+    raw_times_s: [0.03536699400001453, 0.036881985000036366, 0.035205613000016456, 0.035562516000027244, 0.037676648999877216]
+  int8 threads=3: median=74.7298 min=64.7199 max=74.7388 CV%=6.12 GOPS
+    raw_gops: [74.73883646804228, 74.46697040303711, 64.71990275487519, 74.73205109565666, 74.72978534248217]
+    raw_times_s: [0.0352878899998359, 0.03541671999983009, 0.04075061499997901, 0.03529109399960362, 0.03529216400011137]
+  int8 threads=4: median=74.6662 min=69.2251 max=74.8589 CV%=3.27 GOPS
+    raw_gops: [73.45372327078532, 69.22512843162738, 74.85885751750148, 74.66624147630219, 74.75889906646744]
+    raw_times_s: [0.03590527100004692, 0.03809853300026589, 0.03523131299971283, 0.03532219899989286, 0.035278419999940525]
+  knee(fp32): 2  <- last thread count with >=10% gain vs previous median
+post: loadavg=(1.03, 0.24, 0.08) MemAvailable=15798542336 MemFree=8028397568 CONTAMINATED
+  <- /proc/loadavg: 1.03 0.24 0.08 4/232 5468
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7840232 kB
+  <- MemAvailable:   15428264 kB
+
+=== BENCH 3 — SUSTAINED VS BURST (thermal) ===
+pre: loadavg=(1.03, 0.24, 0.08) MemAvailable=15798542336 MemFree=8028397568 CONTAMINATED
+  <- /proc/loadavg: 1.03 0.24 0.08 1/232 5468
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7840232 kB
+  <- MemAvailable:   15428264 kB
+sat_threads: 2
+duration_s: 180.0; bucket_s: 10.0
+battery_dual_run: NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only
+bucket[0]: gflops=14.8006 calls=298 elapsed_s=10.033 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[1]: gflops=14.3922 calls=289 elapsed_s=10.006 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[2]: gflops=14.8049 calls=298 elapsed_s=10.030 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[3]: gflops=14.9612 calls=301 elapsed_s=10.025 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[4]: gflops=14.9020 calls=300 elapsed_s=10.031 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[5]: gflops=14.9439 calls=300 elapsed_s=10.003 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[6]: gflops=14.7309 calls=296 elapsed_s=10.012 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[7]: gflops=14.8864 calls=299 elapsed_s=10.008 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[8]: gflops=15.0174 calls=302 elapsed_s=10.020 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[9]: gflops=14.9281 calls=300 elapsed_s=10.014 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[10]: gflops=14.9986 calls=302 elapsed_s=10.033 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[11]: gflops=15.0052 calls=302 elapsed_s=10.029 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[12]: gflops=15.0030 calls=302 elapsed_s=10.030 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[13]: gflops=14.9988 calls=302 elapsed_s=10.033 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[14]: gflops=14.9980 calls=301 elapsed_s=10.000 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[15]: gflops=14.4416 calls=290 elapsed_s=10.006 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[16]: gflops=13.3366 calls=268 elapsed_s=10.013 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+bucket[17]: gflops=13.5525 calls=264 elapsed_s=9.706 temps={} freqs_kHz={}
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+peak_bucket_gflops: 15.0174; sustained_last3_median: 13.5525; sustained/peak: 0.9024563246801666
+time_to_throttle_s: None  <- first bucket with gflops < 90% of first bucket
+post: loadavg=(3.86, 1.95, 0.78) MemAvailable=15798591488 MemFree=8028397568 CONTAMINATED
+  <- /proc/loadavg: 3.86 1.95 0.78 4/237 5475
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7840232 kB
+  <- MemAvailable:   15428312 kB
+
+=== BENCH 4 — mmap / PAGE-FAULT COST ===
+pre: loadavg=(3.86, 1.95, 0.78) MemAvailable=15798591488 MemFree=8028397568 CONTAMINATED
+  <- /proc/loadavg: 3.86 1.95 0.78 4/237 5475
+  <- MemTotal:       16398452 kB
+  <- MemFree:         7840232 kB
+  <- MemAvailable:   15428312 kB
+required_bytes: 33584029696 (2x effective_mem=16792014848)
+disk free/total on /home/ubuntu/.cache/localmodel: 248112201728 / 270436077568
+status: OK
+write: 24.183s (1.3888 GB/s)
+cold: 18.105s (0.000453 GB/s touched); warm: 16.387s (0.000500 GB/s touched)
+majflt cold_delta=232 warm_delta=1
+  <- /proc/self/stat majflt field (rest[9])=0; raw_tail=['15888', '5933', '0', '0']
+  <- /proc/self/stat majflt field (rest[9])=232; raw_tail=['784618', '5933', '232', '0']
+  <- /proc/self/stat majflt field (rest[9])=233; raw_tail=['1553296', '5933', '233', '0']
+  <- os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase2_mmap_probe.bin', POSIX_FADV_DONTNEED) OK
+note: GB/s uses one byte touched per 4KiB page via C stride_touch; compares cold (faulting) vs warm pass. File size = 2x effective_mem. posix_fadvise(DONTNEED) used before cold pass (not a silent shrink).
+post: loadavg=(2.29, 1.84, 0.82) MemAvailable=15858167808 MemFree=15312465920 CONTAMINATED
+  <- /proc/loadavg: 2.29 1.84 0.82 1/238 5475
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14953580 kB
+  <- MemAvailable:   15486492 kB
+
+=== SECTION D — DERIVED OUTPUT ===
+measured_bandwidth_GBps (BENCH1 saturated median): 71.338855575914
+predicted_decode_tok_s(model_bytes) = measured_bandwidth_GBps * 1e9 / model_bytes
+UPPER BOUND assuming perfect bandwidth utilization. Real engines typically hit 40-70% of it.
+  model_GB     upper_tok_s   realistic_0.55x_tok_s
+       0.5          142.68                   78.47
+       1.0           71.34                   39.24
+       2.0           35.67                   19.62
+       4.0           17.83                    9.81
+       8.0            8.92                    4.90
+      16.0            4.46                    2.45
+0.55x realistic band: UNVALIDATED ASSUMPTION — to be checked in Phase 4 against a real engine.
+recommended_thread_count: 2  <- BENCH 2 fp32 knee on all_cores curve = 2 (not raw core count 4); bw_sat_threads=2
+recommended_thread_count_sustained: 2  <- sustained/peak=0.9024563246801666; no >10% drop observed → same as compute knee (2)
+
+=== SELF-CRITIQUE ===
+- measurements likely contaminated by other processes:
+  - bench2 start CONTAMINATED (loadavg>0.5)
+  - bench3 start CONTAMINATED (loadavg>0.5)
+  - bench4 start CONTAMINATED (loadavg>0.5)
+- likely wrong under virtualization:
+  - BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers
+  - BENCH 3 thermal/cpufreq sysfs often absent under KVM — throttle detection blind
+  - BENCH 4 overlay FS + virtio block ≠ bare-metal NVMe latency
+  - steal time / noisy neighbors can inflate CV (see NOISY tags)
+- where a benchmark may have been served from cache rather than RAM:
+  - BENCH 1 working_set=536870904 vs L3=335544320 (suspect_fallback=True)
+  - BENCH 2 intentionally L2-resident — compute-bound by design, not DRAM
+  - BENCH 4 uses posix_fadvise(DONTNEED) before cold pass; without root drop_caches, eviction is best-effort and majflt may under-count
+- ISA tier verification:
+  - NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.
+  - Phase 1.5 usable_tier=AVX512_VNNI was NOT exercised by these scalar C/+OpenMP kernels
+- other:
+  - total_runtime_s=258.3 budget=600 over=False
+  - 0.55x decode band is an unvalidated assumption pending Phase 4
+  - BENCH 4 file size uses decimal 2*effective_mem; disk check is hard fail/SKIP
+
+=== PHASE 2 JSON ===
+{
+  "host_class": "container",
+  "host_class_evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED",
+  "effective_cores": 4,
+  "effective_mem_bytes": 16792014848,
+  "usable_tier": "AVX512_VNNI",
+  "kernel_compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_3dwhkoq6/kernels.so",
+  "kernel_compile_log": "(empty)",
+  "total_runtime_s": 258.33811616897583,
+  "runtime_budget_s": 600,
+  "runtime_over_budget": false,
+  "bench1": {
+    "name": "BENCH 1 \u2014 ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c)",
+    "backend": "numpy numpy 2.4.4 allocation + OpenMP-C stream_triad",
+    "backend_evidence": "numpy_available=True (numpy 2.4.4); compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_3dwhkoq6/kernels.so; omp=True; lib=/tmp/phase2_kernels_3dwhkoq6/kernels.so",
+    "working_set_bytes": 536870904,
+    "working_set_policy": "L3 SUSPECT or undetected (l3=335544320, logical_cores=4); using 512 MiB working set as required by Phase 2 spec",
+    "l3_suspect_fallback": true,
+    "n_elements_per_array": 22369621,
+    "bytes_moved_per_iter": 536870904,
+    "pre": "SystemSnapshot(when='bench1_pre', loadavg_1_5_15=(0.15, 0.04, 0.01), mem_available_bytes=15818137600, mem_free_bytes=8048054272, mem_total_bytes=16792014848, contaminated=False, evidence=['/proc/loadavg: 0.15 0.04 0.01 4/228 5464', 'MemTotal:       16398452 kB', 'MemFree:         7859428 kB', 'MemAvailable:   15447400 kB'])",
+    "thread_sweeps": [
+      {
+        "threads": 1,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "1",
+        "raw_times_s": [
+          0.25538025099967854,
+          0.23837893800009624,
+          0.23712118399998872,
+          0.2341747780001242,
+          0.23377779999964332
+        ],
+        "raw_gbs": [
+          16.817930185233493,
+          18.017393936029137,
+          18.11296299870114,
+          18.34086176436013,
+          18.372006375312594
+        ],
+        "median_gbs": 18.11296299870114,
+        "min_gbs": 16.817930185233493,
+        "max_gbs": 18.372006375312594,
+        "mean_gbs": 17.9322310519273,
+        "cv_pct": 3.572872916880011,
+        "noisy": false
+      },
+      {
+        "threads": 2,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "2",
+        "raw_times_s": [
+          0.23797916900002747,
+          0.23844226799974422,
+          0.24209208899992518,
+          0.24082064100002754,
+          0.2441390440003488
+        ],
+        "raw_gbs": [
+          72.19064172796575,
+          72.05043414541935,
+          70.96418969727388,
+          71.338855575914,
+          70.36919882415634
+        ],
+        "median_gbs": 71.338855575914,
+        "min_gbs": 70.36919882415634,
+        "max_gbs": 72.19064172796575,
+        "mean_gbs": 71.38266399414587,
+        "cv_pct": 1.0629539936941603,
+        "noisy": false
+      },
+      {
+        "threads": 3,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "3",
+        "raw_times_s": [
+          0.23784254800011695,
+          0.2587160800003403,
+          0.24229035900043527,
+          0.24098235500014198,
+          0.24201843999981065
+        ],
+        "raw_gbs": [
+          72.23210931961405,
+          66.40433376996668,
+          70.9061185879424,
+          71.29098281071192,
+          70.98578491793204
+        ],
+        "median_gbs": 70.98578491793204,
+        "min_gbs": 66.40433376996668,
+        "max_gbs": 72.23210931961405,
+        "mean_gbs": 70.36386588123341,
+        "cv_pct": 3.2336695069731767,
+        "noisy": false
+      },
+      {
+        "threads": 4,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "4",
+        "raw_times_s": [
+          0.24049264600034803,
+          0.24121803900015948,
+          0.24217648300009387,
+          0.24038261599980615,
+          0.24288436300003013
+        ],
+        "raw_gbs": [
+          71.4361508084332,
+          71.2213273899828,
+          70.93945999700286,
+          71.46884917840254,
+          70.73270883230086
+        ],
+        "median_gbs": 71.2213273899828,
+        "min_gbs": 70.73270883230086,
+        "max_gbs": 71.46884917840254,
+        "mean_gbs": 71.15969924122444,
+        "cv_pct": 0.44805573340170474,
+        "noisy": false
+      }
+    ],
+    "cache_proof": {
+      "working_set_bytes": 536870904,
+      "l3_bytes": 335544320,
+      "ratio_ws_over_l3": 1.599999976158142,
+      "evidence": "working_set=536870904 vs L3=335544320; ratio=1.600x; L3 SUSPECT \u2192 forced 512 MiB policy; triad always writes `a`, so results cannot be pure register/L1 reuse"
+    },
+    "saturation": {
+      "saturation_thread_count": 2,
+      "bandwidth_saturated_median_gbs": 71.338855575914,
+      "bandwidth_1thread_median_gbs": 18.11296299870114,
+      "ratio_sat_over_1": 3.9385524930973266,
+      "peak_median_gbs": 71.338855575914,
+      "rule": "saturation = lowest thread count whose median >= 95% of peak median"
+    },
+    "post": "SystemSnapshot(when='bench1_post', loadavg_1_5_15=(0.68, 0.16, 0.05), mem_available_bytes=15256924160, mem_free_bytes=7486787584, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 0.68 0.16 0.05 4/232 5468', 'MemTotal:       16398452 kB', 'MemFree:         7311316 kB', 'MemAvailable:   14899340 kB'])",
+    "notes": [
+      "page-commit touch sentinel=0.9658355086298988"
+    ]
+  },
+  "bench2": {
+    "name": "BENCH 2 \u2014 THREAD SATURATION FOR COMPUTE",
+    "l2_bytes_per_core": 2097152,
+    "n_fp32": 209715,
+    "n_i8": 838860,
+    "fit_evidence": "fp32 vectors: 2*209715*4=1677720 bytes (target \u2264 0.8*L2=1677721.6); int8 vectors: 2*838860*1=1677720 bytes",
+    "isa_verification": "NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.",
+    "pre": "SystemSnapshot(when='bench2_pre', loadavg_1_5_15=(0.68, 0.16, 0.05), mem_available_bytes=15798419456, mem_free_bytes=8028282880, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 0.68 0.16 0.05 1/232 5468', 'MemTotal:       16398452 kB', 'MemFree:         7840120 kB', 'MemAvailable:   15428144 kB'])",
+    "curves": {
+      "all_cores": {
+        "affinity": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "cpus": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fp32": [
+          {
+            "threads": 1,
+            "raw_times_s": [
+              0.12504574500007948,
+              0.12485410699991917,
+              0.12502444500023557,
+              0.12487471900021774,
+              0.12514939099992262
+            ],
+            "raw_gflops": [
+              3.984804440964251,
+              3.9909206991510704,
+              3.98548331887465,
+              3.990261952053972,
+              3.981504312716217
+            ],
+            "median_gflops": 3.98548331887465,
+            "min_gflops": 3.981504312716217,
+            "max_gflops": 3.9909206991510704,
+            "cv_pct": 0.09916555761144245,
+            "noisy": false
+          },
+          {
+            "threads": 2,
+            "raw_times_s": [
+              0.03297167300024739,
+              0.0330191900002319,
+              0.035618604000319465,
+              0.03298097700007929,
+              0.03343484200013336
+            ],
+            "raw_gflops": [
+              15.11245243746841,
+              15.090704526564716,
+              13.98939834911921,
+              15.10818918429257,
+              14.90310138142757
+            ],
+            "median_gflops": 15.090704526564716,
+            "min_gflops": 13.98939834911921,
+            "max_gflops": 15.11245243746841,
+            "cv_pct": 3.260392796213643,
+            "noisy": false
+          },
+          {
+            "threads": 3,
+            "raw_times_s": [
+              0.032892865000121674,
+              0.033022726999661245,
+              0.03291986600015662,
+              0.03295012799981123,
+              0.03301072300018859
+            ],
+            "raw_gflops": [
+              15.148660355312826,
+              15.089088190842372,
+              15.13623536613513,
+              15.12233397098957,
+              15.094575177803687
+            ],
+            "median_gflops": 15.12233397098957,
+            "min_gflops": 15.089088190842372,
+            "max_gflops": 15.148660355312826,
+            "cv_pct": 0.17108004924848597,
+            "noisy": false
+          },
+          {
+            "threads": 4,
+            "raw_times_s": [
+              0.033233409999866126,
+              0.03295923699988634,
+              0.033195101999808685,
+              0.03519860200003677,
+              0.03294028400023308
+            ],
+            "raw_gflops": [
+              14.993431008193477,
+              15.118154585972917,
+              15.010733812562822,
+              14.156324731291301,
+              15.126853186708235
+            ],
+            "median_gflops": 15.010733812562822,
+            "min_gflops": 14.156324731291301,
+            "max_gflops": 15.126853186708235,
+            "cv_pct": 2.7529425607504763,
+            "noisy": false
+          }
+        ],
+        "int8": [
+          {
+            "threads": 1,
+            "raw_times_s": [
+              0.13627514800009521,
+              0.1388346159997127,
+              0.13744992100009767,
+              0.1370698440000524,
+              0.1373543059999065
+            ],
+            "raw_gops": [
+              19.353314809815192,
+              18.996529222981806,
+              19.187903643816032,
+              19.241109226030723,
+              19.201260716222436
+            ],
+            "median_gops": 19.201260716222436,
+            "min_gops": 18.996529222981806,
+            "max_gops": 19.353314809815192,
+            "cv_pct": 0.6725218343578625,
+            "noisy": false
+          },
+          {
+            "threads": 2,
+            "raw_times_s": [
+              0.03536699400001453,
+              0.036881985000036366,
+              0.035205613000016456,
+              0.035562516000027244,
+              0.037676648999877216
+            ],
+            "raw_gops": [
+              74.57167097658672,
+              71.5085112690491,
+              74.91350427554741,
+              74.16167742456635,
+              70.00027629868556
+            ],
+            "median_gops": 74.16167742456635,
+            "min_gops": 70.00027629868556,
+            "max_gops": 74.91350427554741,
+            "cv_pct": 2.960555883390236,
+            "noisy": false
+          },
+          {
+            "threads": 3,
+            "raw_times_s": [
+              0.0352878899998359,
+              0.03541671999983009,
+              0.04075061499997901,
+              0.03529109399960362,
+              0.03529216400011137
+            ],
+            "raw_gops": [
+              74.73883646804228,
+              74.46697040303711,
+              64.71990275487519,
+              74.73205109565666,
+              74.72978534248217
+            ],
+            "median_gops": 74.72978534248217,
+            "min_gops": 64.71990275487519,
+            "max_gops": 74.73883646804228,
+            "cv_pct": 6.1228515504567715,
+            "noisy": false
+          },
+          {
+            "threads": 4,
+            "raw_times_s": [
+              0.03590527100004692,
+              0.03809853300026589,
+              0.03523131299971283,
+              0.03532219899989286,
+              0.035278419999940525
+            ],
+            "raw_gops": [
+              73.45372327078532,
+              69.22512843162738,
+              74.85885751750148,
+              74.66624147630219,
+              74.75889906646744
+            ],
+            "median_gops": 74.66624147630219,
+            "min_gops": 69.22512843162738,
+            "max_gops": 74.85885751750148,
+            "cv_pct": 3.2679846924739615,
+            "noisy": false
+          }
+        ]
+      }
+    },
+    "knee": {
+      "all_cores": {
+        "fp32_knee_threads": 2,
+        "rule": "last thread count with >=10% gain vs previous median",
+        "fp32_medians": [
+          3.98548331887465,
+          15.090704526564716,
+          15.12233397098957,
+          15.010733812562822
+        ],
+        "int8_medians": [
+          19.201260716222436,
+          74.16167742456635,
+          74.72978534248217,
+          74.66624147630219
+        ]
+      }
+    },
+    "post": "SystemSnapshot(when='bench2_post', loadavg_1_5_15=(1.03, 0.24, 0.08), mem_available_bytes=15798542336, mem_free_bytes=8028397568, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.03 0.24 0.08 4/232 5468', 'MemTotal:       16398452 kB', 'MemFree:         7840232 kB', 'MemAvailable:   15428264 kB'])",
+    "hybrid": false,
+    "reps_fp32": 1188,
+    "reps_i8": 1572,
+    "hybrid_note": "host is non-hybrid; P-only/E-only pinned curves NOT run (no core_type/cpu_capacity signals)"
+  },
+  "bench3": {
+    "name": "BENCH 3 \u2014 SUSTAINED VS BURST (thermal)",
+    "sat_threads": 2,
+    "duration_s": 180.0,
+    "bucket_s": 10.0,
+    "n_fp32": 209715,
+    "reps_per_call": 1188,
+    "on_ac_power_at_profile": "UNDETECTED (reason: /sys/class/power_supply absent or empty)",
+    "battery_dual_run": "NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only",
+    "pre": "SystemSnapshot(when='bench3_pre', loadavg_1_5_15=(1.03, 0.24, 0.08), mem_available_bytes=15798542336, mem_free_bytes=8028397568, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.03 0.24 0.08 1/232 5468', 'MemTotal:       16398452 kB', 'MemFree:         7840232 kB', 'MemAvailable:   15428264 kB'])",
+    "buckets": [
+      {
+        "bucket": 0,
+        "elapsed_s": 10.032553166999605,
+        "calls": 298,
+        "gflops": 14.800647835929464,
+        "raw_last_call_s": 0.03477555100016616,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 1,
+        "elapsed_s": 10.005665519000104,
+        "calls": 289,
+        "gflops": 14.392220136336391,
+        "raw_last_call_s": 0.03312802400023429,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 2,
+        "elapsed_s": 10.029661651999959,
+        "calls": 298,
+        "gflops": 14.804914808904922,
+        "raw_last_call_s": 0.032933295000020735,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 3,
+        "elapsed_s": 10.02481029899991,
+        "calls": 301,
+        "gflops": 14.961194313568463,
+        "raw_last_call_s": 0.033352507000017795,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 4,
+        "elapsed_s": 10.031211370000165,
+        "calls": 300,
+        "gflops": 14.901974097271719,
+        "raw_last_call_s": 0.032924805999755336,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 5,
+        "elapsed_s": 10.0030537130001,
+        "calls": 300,
+        "gflops": 14.943921755186373,
+        "raw_last_call_s": 0.032932926999819756,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 6,
+        "elapsed_s": 10.012435577999895,
+        "calls": 296,
+        "gflops": 14.730853396358455,
+        "raw_last_call_s": 0.032873960999950214,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 7,
+        "elapsed_s": 10.008235641000283,
+        "calls": 299,
+        "gflops": 14.886397013840632,
+        "raw_last_call_s": 0.03289438499996322,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 8,
+        "elapsed_s": 10.020474815000398,
+        "calls": 302,
+        "gflops": 15.017393931745941,
+        "raw_last_call_s": 0.03525203799972587,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 9,
+        "elapsed_s": 10.013640042999668,
+        "calls": 300,
+        "gflops": 14.928123175797777,
+        "raw_last_call_s": 0.03550574900009451,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 10,
+        "elapsed_s": 10.03300144700006,
+        "calls": 302,
+        "gflops": 14.998644072257662,
+        "raw_last_call_s": 0.03318520799984981,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 11,
+        "elapsed_s": 10.028592741000011,
+        "calls": 302,
+        "gflops": 15.005237680535682,
+        "raw_last_call_s": 0.03279529899964473,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 12,
+        "elapsed_s": 10.03008853700021,
+        "calls": 302,
+        "gflops": 15.002999936130756,
+        "raw_last_call_s": 0.035470695000185515,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 13,
+        "elapsed_s": 10.032887334000407,
+        "calls": 302,
+        "gflops": 14.998814665249375,
+        "raw_last_call_s": 0.03297297700009949,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 14,
+        "elapsed_s": 10.000179189999926,
+        "calls": 301,
+        "gflops": 14.998044734036522,
+        "raw_last_call_s": 0.033028850000391685,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 15,
+        "elapsed_s": 10.005977452000025,
+        "calls": 290,
+        "gflops": 14.44156998086344,
+        "raw_last_call_s": 0.03583867899988036,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 16,
+        "elapsed_s": 10.013028172000304,
+        "calls": 268,
+        "gflops": 13.336604953676341,
+        "raw_last_call_s": 0.04464258799998788,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      },
+      {
+        "bucket": 17,
+        "elapsed_s": 9.70642027599979,
+        "calls": 264,
+        "gflops": 13.552542133917678,
+        "partial": true,
+        "temps_C": {},
+        "freqs_kHz": {},
+        "thermal_evidence": [
+          "no thermal_zone* readable",
+          "no scaling_cur_freq readable"
+        ]
+      }
+    ],
+    "post": "SystemSnapshot(when='bench3_post', loadavg_1_5_15=(3.86, 1.95, 0.78), mem_available_bytes=15798591488, mem_free_bytes=8028397568, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 3.86 1.95 0.78 4/237 5475', 'MemTotal:       16398452 kB', 'MemFree:         7840232 kB', 'MemAvailable:   15428312 kB'])",
+    "summary": {
+      "peak_bucket_gflops": 15.017393931745941,
+      "sustained_last3_median_gflops": 13.552542133917678,
+      "sustained_over_peak": 0.9024563246801666,
+      "time_to_throttle_s": null,
+      "throttle_rule": "first bucket with gflops < 90% of first bucket",
+      "first_bucket_gflops": 14.800647835929464
+    }
+  },
+  "bench4": {
+    "name": "BENCH 4 \u2014 mmap / PAGE-FAULT COST",
+    "cache_dir": "/home/ubuntu/.cache/localmodel",
+    "file_path": "/home/ubuntu/.cache/localmodel/phase2_mmap_probe.bin",
+    "required_bytes": 33584029696,
+    "effective_mem_bytes": 16792014848,
+    "disk_total": 270436077568,
+    "disk_free": 248112201728,
+    "pre": "SystemSnapshot(when='bench4_pre', loadavg_1_5_15=(3.86, 1.95, 0.78), mem_available_bytes=15798591488, mem_free_bytes=8028397568, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 3.86 1.95 0.78 4/237 5475', 'MemTotal:       16398452 kB', 'MemFree:         7840232 kB', 'MemAvailable:   15428312 kB'])",
+    "status": "OK",
+    "post": "SystemSnapshot(when='bench4_post', loadavg_1_5_15=(2.29, 1.84, 0.82), mem_available_bytes=15858167808, mem_free_bytes=15312465920, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 2.29 1.84 0.82 1/238 5475', 'MemTotal:       16398452 kB', 'MemFree:        14953580 kB', 'MemAvailable:   15486492 kB'])",
+    "write_seconds": 24.182564724999793,
+    "write_gbs": 1.3887703838659027,
+    "cold_seconds": 18.104770821999864,
+    "warm_seconds": 16.387044722000155,
+    "stride": 4096,
+    "estimated_bytes_touched_per_pass": 8199226,
+    "cold_gbs": 0.0004528765418028257,
+    "warm_gbs": 0.0005003480578162007,
+    "cold_checksum": 254176006,
+    "warm_checksum": 254176006,
+    "majflt_before_cold": 0,
+    "majflt_after_cold": 232,
+    "majflt_after_warm": 233,
+    "majflt_cold_delta": 232,
+    "majflt_warm_delta": 1,
+    "majflt_evidence": [
+      "/proc/self/stat majflt field (rest[9])=0; raw_tail=['15888', '5933', '0', '0']",
+      "/proc/self/stat majflt field (rest[9])=232; raw_tail=['784618', '5933', '232', '0']",
+      "/proc/self/stat majflt field (rest[9])=233; raw_tail=['1553296', '5933', '233', '0']"
+    ],
+    "fadvise_evidence": "os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase2_mmap_probe.bin', POSIX_FADV_DONTNEED) OK",
+    "note": "GB/s uses one byte touched per 4KiB page via C stride_touch; compares cold (faulting) vs warm pass. File size = 2x effective_mem. posix_fadvise(DONTNEED) used before cold pass (not a silent shrink)."
+  },
+  "derived": {
+    "measured_bandwidth_GBps": 71.338855575914,
+    "bandwidth_saturation_threads": 2,
+    "predictions": [
+      {
+        "model_gb": 0.5,
+        "model_bytes": 500000000,
+        "upper_tok_s": 142.677711151828,
+        "realistic_0_55x_tok_s": 78.47274113350541
+      },
+      {
+        "model_gb": 1,
+        "model_bytes": 1000000000,
+        "upper_tok_s": 71.338855575914,
+        "realistic_0_55x_tok_s": 39.236370566752704
+      },
+      {
+        "model_gb": 2,
+        "model_bytes": 2000000000,
+        "upper_tok_s": 35.669427787957,
+        "realistic_0_55x_tok_s": 19.618185283376352
+      },
+      {
+        "model_gb": 4,
+        "model_bytes": 4000000000,
+        "upper_tok_s": 17.8347138939785,
+        "realistic_0_55x_tok_s": 9.809092641688176
+      },
+      {
+        "model_gb": 8,
+        "model_bytes": 8000000000,
+        "upper_tok_s": 8.91735694698925,
+        "realistic_0_55x_tok_s": 4.904546320844088
+      },
+      {
+        "model_gb": 16,
+        "model_bytes": 16000000000,
+        "upper_tok_s": 4.458678473494625,
+        "realistic_0_55x_tok_s": 2.452273160422044
+      }
+    ],
+    "recommended_thread_count": 2,
+    "recommended_thread_count_evidence": "BENCH 2 fp32 knee on all_cores curve = 2 (not raw core count 4); bw_sat_threads=2",
+    "recommended_thread_count_sustained": 2,
+    "recommended_thread_count_sustained_evidence": "sustained/peak=0.9024563246801666; no >10% drop observed \u2192 same as compute knee (2)"
+  },
+  "self_critique": {
+    "measurements likely contaminated by other processes": [
+      "bench2 start CONTAMINATED (loadavg>0.5)",
+      "bench3 start CONTAMINATED (loadavg>0.5)",
+      "bench4 start CONTAMINATED (loadavg>0.5)"
+    ],
+    "likely wrong under virtualization": [
+      "BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers",
+      "BENCH 3 thermal/cpufreq sysfs often absent under KVM \u2014 throttle detection blind",
+      "BENCH 4 overlay FS + virtio block \u2260 bare-metal NVMe latency",
+      "steal time / noisy neighbors can inflate CV (see NOISY tags)"
+    ],
+    "where a benchmark may have been served from cache rather than RAM": [
+      "BENCH 1 working_set=536870904 vs L3=335544320 (suspect_fallback=True)",
+      "BENCH 2 intentionally L2-resident \u2014 compute-bound by design, not DRAM",
+      "BENCH 4 uses posix_fadvise(DONTNEED) before cold pass; without root drop_caches, eviction is best-effort and majflt may under-count"
+    ],
+    "ISA tier verification": [
+      "NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.",
+      "Phase 1.5 usable_tier=AVX512_VNNI was NOT exercised by these scalar C/+OpenMP kernels"
+    ],
+    "other": [
+      "total_runtime_s=258.3 budget=600 over=False",
+      "0.55x decode band is an unvalidated assumption pending Phase 4",
+      "BENCH 4 file size uses decimal 2*effective_mem; disk check is hard fail/SKIP"
+    ]
+  }
+}
