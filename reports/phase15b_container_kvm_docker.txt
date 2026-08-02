@@ -1,0 +1,1795 @@
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+========================================================================
+*** HOST CLASS = CONTAINER — PROFILE NOT REPRESENTATIVE OF AN EDGE TARGET *** (container (on VM/hypervisor=KVM)). Do not use host totals as effective capacity; cgroup/affinity limits apply.
+========================================================================
+DEVICES REACHED FROM THIS AGENT: only this Cursor cloud sandbox (HOST CLASS=container). No SSH targets, bare-metal hosts, or ARM devices are reachable from this environment. Bare-metal and ARM reports are therefore ABSENT — not fabricated.
+
+=== SECTION 0: RAW SOURCE DUMP ===
+CAPTURE-ONCE DISCIPLINE: each source below was read exactly once; all '<-' evidence lines parse the same stored blob (sha256 shown).
+
+$ lscpu
+sha256: a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 57 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  4
+On-line CPU(s) list:                     0-3
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Processor
+CPU family:                              6
+Model:                                   207
+Thread(s) per core:                      1
+Core(s) per socket:                      4
+Socket(s):                               1
+Stepping:                                2
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Virtualization:                          VT-x
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               192 KiB (4 instances)
+L1i cache:                               128 KiB (4 instances)
+L2 cache:                                8 MiB (4 instances)
+L3 cache:                                320 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-3
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Mitigation; TSX disabled
+Vulnerability Vmscape:                   Not affected
+$ head -30 /proc/cpuinfo  # derived from single capture: read /proc/cpuinfo
+sha256: d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 207
+model name	: Intel(R) Xeon(R) Processor
+stepping	: 2
+microcode	: 0x1
+cpu MHz		: 2400.000
+cache size	: 327680 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 32
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+vmx flags	: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling
+bugs		: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret
+bogomips	: 4800.00
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 46 bits physical, 57 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+
+[TRUNCATED: showing first 30 of 112 lines of /proc/cpuinfo; full blob sha256=d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88]
+$ cat /proc/meminfo | head -8  # derived from single capture: read /proc/meminfo
+sha256: be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85
+MemTotal:       16398452 kB
+MemFree:         7868172 kB
+MemAvailable:   15454540 kB
+Buffers:          189172 kB
+Cached:          7126800 kB
+SwapCached:            0 kB
+Active:           348976 kB
+Inactive:        7408308 kB
+
+[TRUNCATED: showing first 8 of 53 lines of /proc/meminfo; full blob sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]
+
+$ lscpu -e
+sha256: 33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a
+CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE
+  0    0      0    0 0:0:0:0          yes
+  1    0      0    1 1:1:1:0          yes
+  2    0      0    2 2:2:2:0          yes
+  3    0      0    3 3:3:3:0          yes
+
+$ numactl --hardware
+sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+[numactl not in PATH]
+
+--- additional captures for SECTION 2b (same store) ---
+
+$ systemd-detect-virt
+sha256: 00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd
+docker
+
+$ read /sys/hypervisor/type
+sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+[/sys/hypervisor absent]
+
+$ test -e /.dockerenv
+sha256: b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c
+EXISTS
+
+$ test -e /run/.containerenv
+sha256: 08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56
+ABSENT
+
+$ read /proc/1/cgroup
+sha256: e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107
+0::/
+
+$ read /proc/self/cgroup
+sha256: e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107
+0::/
+
+$ read /sys/fs/cgroup/memory.max
+sha256: c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b
+17179869184
+
+$ read /sys/fs/cgroup/memory.high
+sha256: dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e
+max
+
+$ read /sys/fs/cgroup/memory.current
+sha256: b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288
+677376000
+
+$ read /sys/fs/cgroup/cpu.max
+sha256: bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f
+400000 100000
+
+$ read /sys/fs/cgroup/cpuset.cpus.effective
+sha256: b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc
+0-3
+
+$ read /proc/stat
+sha256: d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d
+cpu  5977 0 4347 736147 692 0 440 33 0 0
+cpu0 1449 0 1134 184053 76 0 157 1 0 0
+cpu1 1373 0 1111 183909 348 0 133 2 0 0
+cpu2 1592 0 1086 183954 195 0 55 26 0 0
+cpu3 1561 0 1014 184230 71 0 94 2 0 0
+intr 4178935 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19189 23152 32864 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 8344292
+btime 1785687542
+processes 6571
+procs_running 1
+procs_blocked 0
+softirq 285951 0 34420 17 28317 42333 0 226 125648 0 54990
+
+$ read /proc/stat
+sha256: bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079
+cpu  5977 0 4347 738146 692 0 440 33 0 0
+cpu0 1449 0 1134 184553 76 0 157 1 0 0
+cpu1 1373 0 1111 184409 349 0 133 2 0 0
+cpu2 1592 0 1086 184453 195 0 55 26 0 0
+cpu3 1561 0 1014 184729 71 0 94 2 0 0
+intr 4179414 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19198 23152 32866 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ctxt 8344747
+btime 1785687542
+processes 6571
+procs_running 1
+procs_blocked 0
+softirq 286307 0 34500 17 28319 42342 0 226 125858 0 55045
+
+$ read /proc/self/status
+sha256: 13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8
+Name:	python3
+Umask:	0022
+State:	R (running)
+Tgid:	4749
+Ngid:	0
+Pid:	4749
+PPid:	4737
+TracerPid:	0
+Uid:	1000	1000	1000	1000
+Gid:	1000	1000	1000	1000
+FDSize:	64
+Groups:	4 20 24 25 27 29 30 44 46 1000 
+NStgid:	4749
+NSpid:	4749
+NSpgid:	4737
+NSsid:	4737
+Kthread:	0
+VmPeak:	   32292 kB
+VmSize:	   32256 kB
+VmLck:	       0 kB
+VmPin:	       0 kB
+VmHWM:	   23856 kB
+VmRSS:	   23856 kB
+RssAnon:	   13116 kB
+RssFile:	   10740 kB
+RssShmem:	       0 kB
+VmData:	   13652 kB
+VmStk:	     132 kB
+VmExe:	    2956 kB
+VmLib:	    6000 kB
+VmPTE:	     100 kB
+VmSwap:	       0 kB
+HugetlbPages:	       0 kB
+CoreDumping:	0
+THP_enabled:	1
+untag_mask:	0xffffffffffffffff
+Threads:	1
+SigQ:	0/64043
+SigPnd:	0000000000000000
+ShdPnd:	0000000000000000
+SigBlk:	0000000000000000
+SigIgn:	0000000001001000
+SigCgt:	0000000000000002
+CapInh:	0000000000000000
+CapPrm:	0000000000000000
+CapEff:	0000000000000000
+CapBnd:	000001ffffffffff
+CapAmb:	0000000000000000
+NoNewPrivs:	0
+Seccomp:	0
+Seccomp_filters:	0
+Speculation_Store_Bypass:	thread vulnerable
+SpeculationIndirectBranch:	conditional enabled
+Cpus_allowed:	f
+Cpus_allowed_list:	0-3
+Mems_allowed:	00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001
+Mems_allowed_list:	0
+voluntary_ctxt_switches:	15
+nonvoluntary_ctxt_switches:	3
+
+$ uname -m
+sha256: aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62
+x86_64
+
+=== SECTION 1: IDENTITY ===
+model_name: Intel(R) Xeon(R) Processor
+  <- Model name:                              Intel(R) Xeon(R) Processor  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+vendor / family / model / stepping: GenuineIntel / 6 / 207 / 2
+  <- vendor: Vendor ID:                               GenuineIntel  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- family: CPU family:                              6  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- model: Model:                                   207  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- stepping: Stepping:                                2  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+arch (uname -m): x86_64
+  <- uname -m → x86_64 [sha256=aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62]
+base_mhz / max_mhz: UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base) / UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')
+  <- base_mhz: UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)
+  <- max_mhz: UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')
+uarch (HOST-LEVEL INFORMATION ONLY): Emerald Rapids (Intel Xeon; CPUID model 0xCF)
+  <- HOST-LEVEL INFORMATION ONLY: lookup('GenuineIntel', family=6, model=207/0xCF, stepping=2) → Emerald Rapids (Intel Xeon; CPUID model 0xCF). Any host memory-channel or L3 figure this uarch implies does NOT describe this guest's available share.
+
+=== SECTION 2: TOPOLOGY ===
+logical_cores / physical_cores / threads_per_core / sockets: 4 / 4 / 1 / 1
+  <- logical_cores: CPU(s):                                  4  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- physical_cores: Core(s) per socket * Socket(s) = 4 * 1 = 4; from [Core(s) per socket:                      4  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]] [Socket(s):                               1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]]
+  <- threads_per_core: Thread(s) per core:                      1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- sockets: Socket(s):                               1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+smt_enabled: False
+  <- /sys/devices/system/cpu/smt/active: 0 [sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa]; control: notsupported [sha256=f53cfd31e68d9fc43f08c8b6f8d97e4bc4d592da020860713b416ea60a6c0f24]
+hybrid: False
+  <- no sysfs topology/core_type or varying cpu_capacity; lscpu -e has no core-type column → treated as non-hybrid (absence of hybrid signals) [lscpu -e sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a]
+numa_nodes + cpu-to-node map: single node
+  <- NUMA node(s):                            1; NUMA node0 CPU(s):                       0-3  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+  <- cpu-to-node map: NUMA node0 CPU(s):                       0-3  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+cache L1d / L1i / L2 / L3 (bytes, sysfs per-instance): 49152 / 32768 / 2097152 / 335544320; L2 sharing: per-core
+  <- L1d: read /sys/devices/system/cpu/cpu0/cache/index0/size: 48K [sha256=a8a65783418b0f3e1a40010bde03c4713b57420000a6fe3116fb3b2d266c024a]
+  <- L1i: read /sys/devices/system/cpu/cpu0/cache/index1/size: 32K [sha256=1451566a7ba657a9c136b6408f17b8aa6c516681e01fd703df5d666d9af1b1d0]
+  <- L2: read /sys/devices/system/cpu/cpu0/cache/index2/size: 2048K [sha256=d080d15ede009d61eec7a2156dbeb8637a21d5d56a18a00fcd73b902a42703e8]
+  <- L2 sharing: read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list: 0 → per-core [sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa]
+  <- L3: read /sys/devices/system/cpu/cpu0/cache/index3/size: 327680K [sha256=c758ee6788d94b982a243292c6f9507ea778ae5c18086fa143d1a22c164bd146]
+
+=== SECTION 2b: EXECUTION ENVIRONMENT / CONTAINMENT ===
+virtualization hypervisor vendor (lscpu): KVM
+  <- Hypervisor vendor:                       KVM  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]
+/sys/hypervisor: UNDETECTED (reason: /sys/hypervisor absent)
+  <- UNDETECTED (reason: /sys/hypervisor absent)
+systemd-detect-virt: docker
+  <- systemd-detect-virt → docker [sha256=00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd]
+/.dockerenv: EXISTS
+  <- test -e /.dockerenv → EXISTS [sha256=b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c]
+/run/.containerenv: ABSENT
+  <- test -e /run/.containerenv → ABSENT [sha256=08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56]
+/proc/1/cgroup: 0::/
+
+  <- /proc/1/cgroup verbatim (5 bytes) [sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107]: '0::/\n'
+cgroup version: v2
+  <- test cgroup v2 memory.max → v2 [sha256=fb04dcb6970e4c3d1873de51fd5a50d7bb46b3383113602665c350ec40b5f990]
+cgroup memory.max: 17179869184
+  <- read /sys/fs/cgroup/memory.max: 17179869184 [sha256=c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b]
+cgroup memory.high: max
+  <- read /sys/fs/cgroup/memory.high: max [sha256=dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e]
+cgroup memory.current: 677376000
+  <- read /sys/fs/cgroup/memory.current: 677376000 [sha256=b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288]
+cgroup cpu.max: 400000 100000
+  <- read /sys/fs/cgroup/cpu.max: 400000 100000 [sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f]
+cgroup cpu.max → effective CPU quota (cores): 4.0
+  <- cpu.max quota/period = 400000/100000 = 4.0 [from read /sys/fs/cgroup/cpu.max: 400000 100000 [sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f]]
+cpuset.cpus.effective: 0-3 (size=4)
+  <- read /sys/fs/cgroup/cpuset.cpus.effective: 0-3 [sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc]
+len(os.sched_getaffinity(0)): 4  |  os.cpu_count(): 4  |  set=[0, 1, 2, 3]
+  <- python len(os.sched_getaffinity(0)) (Python 3.12.3) → 4
+  <- python os.cpu_count() (Python 3.12.3) → 4
+effective_cores = min(affinity, cpu.max quota, logical_cores): 4
+  inputs/winner: min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count
+  <- min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count
+effective_mem_bytes = min(MemTotal, cgroup memory.max): 16792014848
+  inputs/winner: min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)
+  <- min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)
+  note: a container/VM MUST NOT treat host totals as effective; downstream defaults use effective_* only.
+steal time delta % of elapsed jiffies: 0.0
+  <- delta_steal=0, delta_jiffies=1999, steal%=0.000000 (sampled 5s apart)
+
+=== SECTION 3: ISA FLAGS ===
+flag_match_mode: whitespace-tokenized
+sse4_2: PRESENT  <- sse4_2
+avx: PRESENT  <- avx
+avx2: PRESENT  <- avx2
+fma: PRESENT  <- fma
+f16c: PRESENT  <- f16c
+avx_vnni: PRESENT  <- avx_vnni
+avx512f: PRESENT  <- avx512f
+avx512bw: PRESENT  <- avx512bw
+avx512vl: PRESENT  <- avx512vl
+avx512_vnni: PRESENT  <- avx512_vnni
+avx512_bf16: PRESENT  <- avx512_bf16
+avx512_fp16: PRESENT  <- avx512_fp16
+avx512_vbmi2: PRESENT  <- avx512_vbmi2
+avx512_bitalg: PRESENT  <- avx512_bitalg
+sha_ni: PRESENT  <- sha_ni
+amx_tile: PRESENT  <- amx_tile
+amx_int8: PRESENT  <- amx_int8
+amx_bf16: PRESENT  <- amx_bf16
+ABSENT-branch formatting NOT exercised on this host (every flag in the printed set is PRESENT).
+cpuid_tier: AMX
+  <- from flags in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]; amx_tile/amx_int8 PRESENT → AMX
+usable_tier: AVX512_VNNI
+  <- CPUID claims AMX but prctl ARCH_REQ_XCOMP_PERM rc=-1 errno=22; usable_tier drops to AVX512_VNNI (do not claim AMX on CPUID alone)
+tier_runtime_verified: False
+  note: tier_runtime_verified=false: CPUID presence does NOT imply the inference runtime has kernels for that tier; this is to be confirmed by probe in a later phase.
+  reasoning: ladder x86: AMX>AVX512_VNNI>AVX512>AVX_VNNI>AVX2>SSE_ONLY; ARM: ARM_SME>ARM_I8MM>ARM_DOTPROD>ARM_BASELINE. cpuid_tier=AMX (amx_tile/amx_int8 PRESENT → AMX); usable_tier=AVX512_VNNI (CPUID claims AMX but prctl ARCH_REQ_XCOMP_PERM rc=-1 errno=22; usable_tier drops to AVX512_VNNI (do not claim AMX on CPUID alone)). llama.cpp AMX support is build-flag gated and covers a limited quant set; usable_tier will be re-confirmed against the actual binary in Phase 5.
+
+=== SECTION 3b: PARSER NEGATIVE CONTROL ===
+match_mode: whitespace-tokenized (explicit split on whitespace; NOT substring / NOT regex-prefix). Previous Phase 1 used word-boundary regex which is equivalent for these tokens; Phase 1.5 states and uses tokenized matching.
+i8mm: ABSENT  <- not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)  [PASS; expected ABSENT (ARM flag; must be ABSENT on x86)]
+asimddp: ABSENT  <- not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)  [PASS; expected ABSENT (ARM flag; must be ABSENT on x86)]
+sve: ABSENT  <- not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)  [PASS; expected ABSENT (ARM flag; must be ABSENT on x86)]
+zzz_nonexistent_flag: ABSENT  <- not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)  [PASS; expected ABSENT (synthetic; exists nowhere)]
+avx512: ABSENT  <- not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)  [PASS; expected ABSENT (strict PREFIX of avx512f — NOT a real flag; must be ABSENT)]
+overall: PASS
+
+=== SECTION 3c: RUNTIME CAPABILITY PROBE (AMX) ===
+prctl(ARCH_REQ_XCOMP_PERM, XTILEDATA=18) rc: -1
+  <- ctypes.CDLL('libc.so.6') / libc.prctl; Python 3.12.3: prctl(ARCH_REQ_XCOMP_PERM=0x1023, XFEATURE_XTILEDATA=18) → return code -1
+prctl errno: 22
+  <- ctypes.get_errno() after ARCH_REQ_XCOMP_PERM → 22
+note: llama.cpp AMX support is build-flag gated and covers a limited quant set; usable_tier will be re-confirmed against the actual binary in Phase 5.
+
+=== SECTION 4: MEMORY ===
+mem_total_bytes / mem_available_bytes / mem_free_bytes: 16792014848 / 15825448960 / 8057008128
+  <- MemTotal: MemTotal:       16398452 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]
+  <- MemAvailable: MemAvailable:   15454540 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]
+  <- MemFree: MemFree:         7868172 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]
+effective_mem_bytes (USED DOWNSTREAM): 16792014848 (winner: MemTotal (/proc))
+  inputs: min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)
+swap_total / swap_used / swappiness: 0 / 0 / 60
+  <- swap_total: SwapTotal:             0 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]
+  <- swappiness: /proc/sys/vm/swappiness: 60 [sha256=95cf32708a31caa478a0e9141103ac567d85e5186e697e7e0c81f75589999e31]
+page_size; hugepages (count, size): 4096; count=0, size_bytes=2097152
+  <- page_size: getconf PAGE_SIZE → 4096 [sha256=25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91]
+memory channels / DIMM count / DIMM speed: UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.) / UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped) / UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)
+  <- channels: UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)
+measured_bandwidth_GBps: PENDING_PHASE_2
+  <- placeholder: dmidecode-based theoretical bandwidth removed; measured_bandwidth_GBps will be filled by Phase 2 benchmarks
+
+=== SECTION 4b: STORAGE ===
+model cache dir: /home/ubuntu/.cache/localmodel
+  <- intended model cache dir default ~/.cache/localmodel → /home/ubuntu/.cache/localmodel; disk_usage probed via /home/ubuntu/.cache
+total_bytes / free_bytes: 270436077568 / 248112996352
+  <- shutil.disk_usage('/home/ubuntu/.cache').total (Python 3.12.3) → 270436077568
+  <- shutil.disk_usage('/home/ubuntu/.cache').free (Python 3.12.3) → 248112996352
+filesystem type: overlay
+  <- /proc/mounts match mountpoint=/: overlay / overlay rw,relatime,lowerdir=/var/lib/docker/overlay2/l/GQIYIES5NNCYJEJ7XNHCUILIFW:/var/lib/docker/overlay2/l/UBK2MSYVRO6OWZE5UD6ZOGWJYR:/var/lib/docker/overlay2/l/H4FZHGEFEAIT6SI3H7QMU7LXTJ:/var/lib/docker/overlay2/l/QRQUYSGXFJDPITCL4Q7LM3R37V:/var/lib/docker/overlay2/l/WQHY675VYZEM2NRTKUBBRRQEO7:/var/lib/docker/overlay2/l/WC6TLBRLOK36KERMT3PYZDEL7X:/var/lib/docker/overlay2/l/MU4QKMRLKQGT3C6O5SUR2YTXWI:/var/lib/docker/overlay2/l/ORNIRLW5TSFCDQXZUHQ27PLKIT:/var/lib/docker/overlay2/l/QI7SJEI2D2TI5LSDAO6OX6FT6X:/var/lib/docker/overlay2/l/EWWFVNMVINMIMF5QBBAKUPPMD6:/var/lib/docker/overlay2/l/RUZCLCJ3EUTXEUPRC2YWM5BRRB:/var/lib/docker/overlay2/l/Z4MKAAK66QRK37EIMRKN33JVQ2:/var/lib/docker/overlay2/l/MACCLMITUZFFS5ELCYAVO7RMUU:/var/lib/docker/overlay2/l/TAFWTTKZDH2VGWW2OQ7RDB4HEW:/var/lib/docker/overlay2/l/FGFACSKGRZXBRRUQMTAQHUWPMR:/var/lib/docker/overlay2/l/CZXDCBDWSG2SZQQDWQWESCRKS6:/var/lib/docker/overlay2/l/OEA6C5HQMCLM76CGVQVDUU53HK:/var/lib/docker/overlay2/l/SECLDPE5HYCIRKDVYA3BF3GGGL:/var/lib/docker/overlay2/l/OY5RBRKXATEVDV5GH7QZWP4NU3:/var/lib/docker/overlay2/l/5NTOB5K27ONOFTT4PJELBCGZYW:/var/lib/docker/overlay2/l/7LQSASPPWYHXD6YJIOLTX2IGMR:/var/lib/docker/overlay2/l/BOHSBJKTGK63NWCVXQKWSEML2O:/var/lib/docker/overlay2/l/ECOMKT5EDXIXR2W45BSGP5UMBB:/var/lib/docker/overlay2/l/W7AAZBJQH4ADIUE3575HJXV554:/var/lib/docker/overlay2/l/4MSZTPKLTZVH7EKF2IDBKAJFKH:/var/lib/docker/overlay2/l/KZEUMOUBBDUNF43DMO7NEDYWA2,upperdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/diff,workdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/work 0 0 [sha256=3f210e757512fd38c4d3222cc70864012ca61569c8c12a024375003ca8c8b788]
+rotational: UNDETECTED (reason: overlay mount; no single block device)
+  <- mount source=overlay fstype=overlay — rotational attribute not attributable to one device
+sparse/mmap note: OVERLAY — sparse usually OK via upperdir; mmap OK; not a network FS
+  <- fstype=overlay from /proc/mounts
+
+=== SECTION 4c: THERMAL & POWER ===
+on_ac_power: UNDETECTED (reason: /sys/class/power_supply absent or empty)
+  <- UNDETECTED (reason: /sys/class/power_supply absent or empty)
+battery_present: False
+  <- no BAT* under /sys/class/power_supply
+battery_capacity: UNDETECTED (reason: no BAT* capacity)
+  <- UNDETECTED (reason: no BAT* capacity)
+thermal_zones: UNDETECTED (reason: no readable thermal_zone*)
+  <- /sys/class/thermal empty/absent
+cpufreq governors: UNDETECTED (reason: no cpufreq policy*/scaling_governor)
+  <- /sys/devices/system/cpu/cpufreq absent (common under KVM/container)
+thermal throttling indicators: UNDETECTED (reason: no thermal_throttle sysfs nodes)
+  <- /sys/devices/system/cpu/cpu*/thermal_throttle/core_throttle_count absent
+platform notes: Linux sysfs path exercised. macOS: pmset -g batt; powermetrics (often sudo). Android/Termux: power_supply + thermal_zone often readable unprivileged; cpufreq governors frequently blocked.
+
+=== SECTION 5: CROSS-CHECKS ===
+physical_cores * threads_per_core == logical_cores: PASS
+  left:  4 * 1 = 4
+  right: logical_cores = 4
+MemAvailable <= MemTotal: PASS
+  left:  MemAvailable=15825448960
+  right: MemTotal=16792014848
+effective_mem <= MemTotal: PASS
+  left:  effective_mem=16792014848 (winner=MemTotal (/proc); inputs: min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc))
+  right: MemTotal=16792014848
+effective_cores <= logical_cores: PASS
+  left:  effective_cores=4 (min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count)
+  right: logical_cores=4
+core-count sources agreement: NOT INDEPENDENT
+  left:  {'os.cpu_count()': 4, 'len(os.sched_getaffinity(0))': 4, 'cgroup cpuset.cpus.effective size': 4, 'lscpu CPU(s)': 4}
+  right: NOT INDEPENDENT: os.cpu_count, sched_getaffinity, lscpu CPU(s), and cpuset all derive from the same kernel CPU/affinity/cgroup view on Linux — agreement is expected, not corroboration from independent hardware probes
+sum of lscpu -e unique CORE values == physical_cores: PASS
+  left:  unique CORE ids=[0, 1, 2, 3] count=4 [sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a]
+  right: physical_cores=4
+L1d: sysfs_per_core * lscpu_instances == lscpu_aggregate: PASS
+  left:  per_instance(49152) * instances(4) = 196608
+  right: lscpu aggregate = 196608
+L1i: sysfs_per_core * lscpu_instances == lscpu_aggregate: PASS
+  left:  per_instance(32768) * instances(4) = 131072
+  right: lscpu aggregate = 131072
+L2: sysfs_per_core * lscpu_instances == lscpu_aggregate: PASS
+  left:  per_instance(2097152) * instances(4) = 8388608
+  right: lscpu aggregate = 8388608
+L3: sysfs_per_core * lscpu_instances == lscpu_aggregate: PASS
+  left:  per_instance(335544320) * instances(1) = 335544320
+  right: lscpu aggregate = 335544320
+cache size physically plausible for core count: SUSPECT
+  left:  L3 aggregate=335544320 bytes (320.0 MiB)
+  right: logical_cores=4 (<=8)
+ISA flags internally consistent: PASS
+  left:  avx512_vnni=True → avx512f=True; amx_any=True → avx512f=True
+  right: avx512_vnni⇒avx512f; amx⇒avx512f; i8mm⇒asimd
+SECTION 3b parser negative control: PASS
+  left:  [('i8mm', 'ABSENT'), ('asimddp', 'ABSENT'), ('sve', 'ABSENT'), ('zzz_nonexistent_flag', 'ABSENT'), ('avx512', 'ABSENT')]
+  right: all probes ABSENT
+core_count_sources (all):
+  lscpu CPU(s): 4
+  os.cpu_count(): 4
+  len(os.sched_getaffinity(0)): 4
+  /proc/cpuinfo processor entry count: 4
+  cgroup cpuset.cpus.effective size: 4
+  cgroup cpu.max quota/period: 4.0
+  effective_cpu_count: 4
+  lscpu -e unique CORE count: 4
+  lscpu Core(s) per socket * Socket(s): 4
+
+=== SECTION 6: DERIVED DEFAULTS (PROVISIONAL BUDGET) ===
+suggested_thread_count: 4
+  formula: int(effective_cores) = int(4) = 4 [NOT raw os.cpu_count()/lscpu]
+  note: provisional; uses effective_cores; to be REPLACED by measured saturation in Phase 2
+PROVISIONAL memory budget (effective_mem=16792014848)
+os_reserve_bytes: 1073741824
+  <- PROVISIONAL policy: 1 GiB absolute OS reserve — justified as headroom for kernel/page-cache/agent so model load does not sit at cgroup OOM edge. NOT measured.
+runtime_overhead_bytes: 536870912
+  <- PROVISIONAL policy: 512 MiB runtime overhead — loader, tokenizer, native allocator arenas, scratch. NOT measured.
+kv_formula: kv_budget(n_ctx) = 2 * n_layers * n_kv_heads * head_dim * elem_bytes * n_ctx = 2*32*8*128*2 * n_ctx = 131072 * n_ctx  (PROVISIONAL stand-in for a 7B-class GQA model; not measured)
+weight_budget_bytes = effective_mem - os_reserve - runtime_overhead - kv_budget(n_ctx)
+   n_ctx    os_reserve       runtime     kv_budget   weight_budget
+    2048    1073741824     536870912     268435456     14912966656
+    4096    1073741824     536870912     536870912     14644531200
+    8192    1073741824     536870912    1073741824     14107660288
+   32768    1073741824     536870912    4294967296     10886434816
+note: PROVISIONAL — entire budget table will be REPLACED by measured values in a later phase. CPUID/topology do not validate these numbers.
+  assumptions n_ctx=2048: effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=268435456 via 131072*n_ctx
+  assumptions n_ctx=4096: effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=536870912 via 131072*n_ctx
+  assumptions n_ctx=8192: effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=1073741824 via 131072*n_ctx
+  assumptions n_ctx=32768: effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=4294967296 via 131072*n_ctx
+
+=== SECTION 7: SELF-CRITIQUE ===
+- fields that are heuristic, not directly read:
+  - suggested_thread_count from effective_cores (provisional)
+  - memory budget table (os_reserve 1GiB, runtime 512MiB, KV stand-in formula)
+  - cpuid_tier priority ladder over flags; tier_runtime_verified=false always for now
+  - usable_tier drops AMX→AVX512_VNNI on failed prctl
+  - hybrid=false from absence of sysfs hybrid signals
+  - uarch decode from static lookup table (HOST-LEVEL ONLY)
+  - HOST CLASS classification heuristics (container>VM>bare-metal)
+  - sparse/mmap sanity note from fstype class, not a probe
+- platform code paths not exercised on this machine:
+  - macOS sysctl hw.optional.arm.FEAT_* path
+  - macOS pmset/powermetrics path
+  - Windows WMIC/PowerShell CIM path
+  - ARM Linux ISA flag set and ARM_SME/I8MM tiers (0% exercised)
+  - bare-metal HOST CLASS path (this host is container-on-KVM)
+  - hybrid P/E core_type and cpu_capacity parsing
+  - multi-node NUMA mapping
+  - cgroup v1 fallback path
+  - successful AMX prctl path (rc=0)
+  - AC/battery power_supply nodes (absent here)
+  - cpufreq governor sysfs (absent under KVM)
+  - thermal_zone* readable path (absent here)
+- places a default could have been silently substituted:
+  - base_mhz: could have used /proc/cpuinfo cpu MHz — intentionally NOT done
+  - usable_tier: could have kept AMX from CPUID — intentionally dropped
+  - theoretical_peak_bandwidth DELETED; measured_bandwidth_GBps=PENDING_PHASE_2
+  - effective_* could have reported host totals — min() with cgroup/affinity enforced
+  - budget numbers are policy, not measurements — marked PROVISIONAL
+- known parsing fragility:
+  - lscpu English locale keys
+  - whitespace tokenization assumes cpuid names are single tokens
+  - KVM may expose synthetic cache sizes (L3 SUSPECT flagged)
+  - overlay mounts hide underlying block rotational attribute
+  - cgroup path resolution from 0::/ assumes v2 at /sys/fs/cgroup
+  - core-count sources are NOT INDEPENDENT on Linux
+
+=== SECTION 8: PROFILE JSON ===
+{
+  "platform": "linux",
+  "python_version": "3.12.3",
+  "detection_libraries": [
+    "Python stdlib only (platform=3.12.3, subprocess, os, hashlib, ctypes for prctl, shutil.disk_usage). No third-party detection libs."
+  ],
+  "commands_run": [
+    "lscpu  # sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144",
+    "read /proc/cpuinfo  # sha256=d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88",
+    "read /proc/meminfo  # sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85",
+    "lscpu -e  # sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a",
+    "numactl --hardware  # SKIPPED: numactl not in PATH sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uname -m  # sha256=aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62",
+    "read /sys/devices/system/cpu/cpu0/cpufreq/base_frequency  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/base_frequency' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/smt/active  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "read /sys/devices/system/cpu/smt/control  # sha256=f53cfd31e68d9fc43f08c8b6f8d97e4bc4d592da020860713b416ea60a6c0f24",
+    "list /sys/devices/system/cpu/cpuN  # sha256=90c70e152cf6aa008af0e9cbddd45343e6ba5e06226166da62307bb9d3596cc0",
+    "read /sys/devices/system/cpu/cpu0/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu0/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu1/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu1/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu2/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu2/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu3/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu3/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/level  # sha256=4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/type  # sha256=dc4dad0cef184fb5f194c67a101f83acad5e1c1bc80b03217b03152d2478aaaa",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/size  # sha256=a8a65783418b0f3e1a40010bde03c4713b57420000a6fe3116fb3b2d266c024a",
+    "read /sys/devices/system/cpu/cpu0/cache/index0/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/level  # sha256=4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/type  # sha256=d25bf25583662ba3bb850925a74a7123053b5d6e5592e6e1c2a9d56653792e44",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/size  # sha256=1451566a7ba657a9c136b6408f17b8aa6c516681e01fd703df5d666d9af1b1d0",
+    "read /sys/devices/system/cpu/cpu0/cache/index1/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/level  # sha256=53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/type  # sha256=df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/size  # sha256=d080d15ede009d61eec7a2156dbeb8637a21d5d56a18a00fcd73b902a42703e8",
+    "read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/level  # sha256=1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/type  # sha256=df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/size  # sha256=c758ee6788d94b982a243292c6f9507ea778ae5c18086fa143d1a22c164bd146",
+    "read /sys/devices/system/cpu/cpu0/cache/index3/shared_cpu_list  # sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc",
+    "read /proc/sys/vm/swappiness  # sha256=95cf32708a31caa478a0e9141103ac567d85e5186e697e7e0c81f75589999e31",
+    "getconf PAGE_SIZE  # sha256=25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+    "dmidecode -t memory  # SKIPPED: dmidecode not in PATH sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/hypervisor/type  # SKIPPED: /sys/hypervisor absent sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "systemd-detect-virt  # sha256=00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd",
+    "test -e /.dockerenv  # sha256=b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c",
+    "test -e /run/.containerenv  # sha256=08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56",
+    "read /proc/1/cgroup  # sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107",
+    "read /proc/self/cgroup  # sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107",
+    "read /proc/self/status  # sha256=13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8",
+    "read /proc/mounts  # sha256=3f210e757512fd38c4d3222cc70864012ca61569c8c12a024375003ca8c8b788",
+    "read /sys/class/dmi/id/sys_vendor  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/sys_vendor' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "read /sys/class/dmi/id/product_name  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/product_name' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resolve cgroup base  # sha256=85bae2ead9d613eb16150e89460f06daea72d31beaa1c37c68457a29a0fdba68",
+    "test cgroup v2 memory.max  # sha256=fb04dcb6970e4c3d1873de51fd5a50d7bb46b3383113602665c350ec40b5f990",
+    "read /sys/fs/cgroup/memory.max  # sha256=c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b",
+    "read /sys/fs/cgroup/memory.high  # sha256=dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e",
+    "read /sys/fs/cgroup/memory.current  # sha256=b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288",
+    "read /sys/fs/cgroup/cpu.max  # sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f",
+    "read /sys/fs/cgroup/cpuset.cpus.effective  # sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc",
+    "read /proc/stat  # sha256=d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d",
+    "read /proc/stat  # sha256=bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079"
+  ],
+  "raw_source_dump": "CAPTURE-ONCE DISCIPLINE: each source below was read exactly once; all '<-' evidence lines parse the same stored blob (sha256 shown).\n\n$ lscpu\nsha256: a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144\nArchitecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Processor\nCPU family:                              6\nModel:                                   207\nThread(s) per core:                      1\nCore(s) per socket:                      4\nSocket(s):                               1\nStepping:                                2\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nVirtualization:                          VT-x\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               192 KiB (4 instances)\nL1i cache:                               128 KiB (4 instances)\nL2 cache:                                8 MiB (4 instances)\nL3 cache:                                320 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Mitigation; TSX disabled\nVulnerability Vmscape:                   Not affected\n$ head -30 /proc/cpuinfo  # derived from single capture: read /proc/cpuinfo\nsha256: d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88\nprocessor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\n\n[TRUNCATED: showing first 30 of 112 lines of /proc/cpuinfo; full blob sha256=d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88]\n$ cat /proc/meminfo | head -8  # derived from single capture: read /proc/meminfo\nsha256: be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85\nMemTotal:       16398452 kB\nMemFree:         7868172 kB\nMemAvailable:   15454540 kB\nBuffers:          189172 kB\nCached:          7126800 kB\nSwapCached:            0 kB\nActive:           348976 kB\nInactive:        7408308 kB\n\n[TRUNCATED: showing first 8 of 53 lines of /proc/meminfo; full blob sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]\n\n$ lscpu -e\nsha256: 33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a\nCPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE\n  0    0      0    0 0:0:0:0          yes\n  1    0      0    1 1:1:1:0          yes\n  2    0      0    2 2:2:2:0          yes\n  3    0      0    3 3:3:3:0          yes\n\n$ numactl --hardware\nsha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n[numactl not in PATH]\n\n--- additional captures for SECTION 2b (same store) ---\n\n$ systemd-detect-virt\nsha256: 00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd\ndocker\n\n$ read /sys/hypervisor/type\nsha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n[/sys/hypervisor absent]\n\n$ test -e /.dockerenv\nsha256: b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c\nEXISTS\n\n$ test -e /run/.containerenv\nsha256: 08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56\nABSENT\n\n$ read /proc/1/cgroup\nsha256: e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107\n0::/\n\n$ read /proc/self/cgroup\nsha256: e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107\n0::/\n\n$ read /sys/fs/cgroup/memory.max\nsha256: c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b\n17179869184\n\n$ read /sys/fs/cgroup/memory.high\nsha256: dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e\nmax\n\n$ read /sys/fs/cgroup/memory.current\nsha256: b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288\n677376000\n\n$ read /sys/fs/cgroup/cpu.max\nsha256: bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f\n400000 100000\n\n$ read /sys/fs/cgroup/cpuset.cpus.effective\nsha256: b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc\n0-3\n\n$ read /proc/stat\nsha256: d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d\ncpu  5977 0 4347 736147 692 0 440 33 0 0\ncpu0 1449 0 1134 184053 76 0 157 1 0 0\ncpu1 1373 0 1111 183909 348 0 133 2 0 0\ncpu2 1592 0 1086 183954 195 0 55 26 0 0\ncpu3 1561 0 1014 184230 71 0 94 2 0 0\nintr 4178935 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19189 23152 32864 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nctxt 8344292\nbtime 1785687542\nprocesses 6571\nprocs_running 1\nprocs_blocked 0\nsoftirq 285951 0 34420 17 28317 42333 0 226 125648 0 54990\n\n$ read /proc/stat\nsha256: bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079\ncpu  5977 0 4347 738146 692 0 440 33 0 0\ncpu0 1449 0 1134 184553 76 0 157 1 0 0\ncpu1 1373 0 1111 184409 349 0 133 2 0 0\ncpu2 1592 0 1086 184453 195 0 55 26 0 0\ncpu3 1561 0 1014 184729 71 0 94 2 0 0\nintr 4179414 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19198 23152 32866 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nctxt 8344747\nbtime 1785687542\nprocesses 6571\nprocs_running 1\nprocs_blocked 0\nsoftirq 286307 0 34500 17 28319 42342 0 226 125858 0 55045\n\n$ read /proc/self/status\nsha256: 13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8\nName:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t4749\nNgid:\t0\nPid:\t4749\nPPid:\t4737\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 20 24 25 27 29 30 44 46 1000 \nNStgid:\t4749\nNSpid:\t4749\nNSpgid:\t4737\nNSsid:\t4737\nKthread:\t0\nVmPeak:\t   32292 kB\nVmSize:\t   32256 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   23856 kB\nVmRSS:\t   23856 kB\nRssAnon:\t   13116 kB\nRssFile:\t   10740 kB\nRssShmem:\t       0 kB\nVmData:\t   13652 kB\nVmStk:\t     132 kB\nVmExe:\t    2956 kB\nVmLib:\t    6000 kB\nVmPTE:\t     100 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/64043\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t15\nnonvoluntary_ctxt_switches:\t3\n\n$ uname -m\nsha256: aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62\nx86_64",
+  "captures": [
+    {
+      "key": "lscpu",
+      "command": "lscpu",
+      "content": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  4\nOn-line CPU(s) list:                     0-3\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Processor\nCPU family:                              6\nModel:                                   207\nThread(s) per core:                      1\nCore(s) per socket:                      4\nSocket(s):                               1\nStepping:                                2\nBogoMIPS:                                4800.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nVirtualization:                          VT-x\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               192 KiB (4 instances)\nL1i cache:                               128 KiB (4 instances)\nL2 cache:                                8 MiB (4 instances)\nL3 cache:                                320 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-3\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Mitigation; TSX disabled\nVulnerability Vmscape:                   Not affected\n",
+      "sha256": "a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_cpuinfo",
+      "command": "read /proc/cpuinfo",
+      "content": "processor\t: 0\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 0\ncpu cores\t: 4\napicid\t\t: 0\ninitial apicid\t: 0\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\nprocessor\t: 1\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 1\ncpu cores\t: 4\napicid\t\t: 1\ninitial apicid\t: 1\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\nprocessor\t: 2\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 2\ncpu cores\t: 4\napicid\t\t: 2\ninitial apicid\t: 2\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\nprocessor\t: 3\nvendor_id\t: GenuineIntel\ncpu family\t: 6\nmodel\t\t: 207\nmodel name\t: Intel(R) Xeon(R) Processor\nstepping\t: 2\nmicrocode\t: 0x1\ncpu MHz\t\t: 2400.000\ncache size\t: 327680 KB\nphysical id\t: 0\nsiblings\t: 4\ncore id\t\t: 3\ncpu cores\t: 4\napicid\t\t: 3\ninitial apicid\t: 3\nfpu\t\t: yes\nfpu_exception\t: yes\ncpuid level\t: 32\nwp\t\t: yes\nflags\t\t: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities\nvmx flags\t: vnmi preemption_timer posted_intr invvpid ept_x_only ept_ad ept_1gb ept_5level flexpriority apicv tsc_offset vtpr mtf vapic ept vpid unrestricted_guest vapic_reg vid shadow_vmcs pml tsc_scaling\nbugs\t\t: spectre_v1 spectre_v2 spec_store_bypass swapgs taa eibrs_pbrsb bhi ibpb_no_ret\nbogomips\t: 4800.00\nclflush size\t: 64\ncache_alignment\t: 64\naddress sizes\t: 46 bits physical, 57 bits virtual\npower management:\n\n",
+      "sha256": "d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_meminfo",
+      "command": "read /proc/meminfo",
+      "content": "MemTotal:       16398452 kB\nMemFree:         7868172 kB\nMemAvailable:   15454540 kB\nBuffers:          189172 kB\nCached:          7126800 kB\nSwapCached:            0 kB\nActive:           348976 kB\nInactive:        7408308 kB\nActive(anon):        300 kB\nInactive(anon):   459432 kB\nActive(file):     348676 kB\nInactive(file):  6948876 kB\nUnevictable:          16 kB\nMlocked:              16 kB\nSwapTotal:             0 kB\nSwapFree:              0 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:               608 kB\nWriteback:             0 kB\nAnonPages:        441328 kB\nMapped:           338684 kB\nShmem:             18448 kB\nKReclaimable:     626748 kB\nSlab:             710848 kB\nSReclaimable:     626748 kB\nSUnreclaim:        84100 kB\nKernelStack:        3768 kB\nPageTables:         8296 kB\nSecPageTables:         0 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:     8199224 kB\nCommitted_AS:    1741512 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:        5344 kB\nVmallocChunk:          0 kB\nPercpu:             1248 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:         0 kB\nFilePmdMapped:         0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:       49152 kB\nDirectMap2M:     4145152 kB\nDirectMap1G:    14680064 kB\n",
+      "sha256": "be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85",
+      "skipped_reason": null
+    },
+    {
+      "key": "lscpu_e",
+      "command": "lscpu -e",
+      "content": "CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE\n  0    0      0    0 0:0:0:0          yes\n  1    0      0    1 1:1:1:0          yes\n  2    0      0    2 2:2:2:0          yes\n  3    0      0    3 3:3:3:0          yes\n",
+      "sha256": "33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a",
+      "skipped_reason": null
+    },
+    {
+      "key": "numactl",
+      "command": "numactl --hardware",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "numactl not in PATH"
+    },
+    {
+      "key": "uname_m",
+      "command": "uname -m",
+      "content": "x86_64\n",
+      "sha256": "aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62",
+      "skipped_reason": null
+    },
+    {
+      "key": "cpufreq_base",
+      "command": "read /sys/devices/system/cpu/cpu0/cpufreq/base_frequency",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/base_frequency'"
+    },
+    {
+      "key": "cpufreq_max",
+      "command": "read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq'"
+    },
+    {
+      "key": "smt_active",
+      "command": "read /sys/devices/system/cpu/smt/active",
+      "content": "0\n",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "skipped_reason": null
+    },
+    {
+      "key": "smt_control",
+      "command": "read /sys/devices/system/cpu/smt/control",
+      "content": "notsupported\n",
+      "sha256": "f53cfd31e68d9fc43f08c8b6f8d97e4bc4d592da020860713b416ea60a6c0f24",
+      "skipped_reason": null
+    },
+    {
+      "key": "cpu_dirs_list",
+      "command": "list /sys/devices/system/cpu/cpuN",
+      "content": "cpu0\ncpu1\ncpu2\ncpu3",
+      "sha256": "90c70e152cf6aa008af0e9cbddd45343e6ba5e06226166da62307bb9d3596cc0",
+      "skipped_reason": null
+    },
+    {
+      "key": "cpu0_core_type",
+      "command": "read /sys/devices/system/cpu/cpu0/topology/core_type",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/topology/core_type'"
+    },
+    {
+      "key": "cpu0_cpu_capacity",
+      "command": "read /sys/devices/system/cpu/cpu0/cpu_capacity",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpu_capacity'"
+    },
+    {
+      "key": "cpu1_core_type",
+      "command": "read /sys/devices/system/cpu/cpu1/topology/core_type",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/topology/core_type'"
+    },
+    {
+      "key": "cpu1_cpu_capacity",
+      "command": "read /sys/devices/system/cpu/cpu1/cpu_capacity",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/cpu_capacity'"
+    },
+    {
+      "key": "cpu2_core_type",
+      "command": "read /sys/devices/system/cpu/cpu2/topology/core_type",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/topology/core_type'"
+    },
+    {
+      "key": "cpu2_cpu_capacity",
+      "command": "read /sys/devices/system/cpu/cpu2/cpu_capacity",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/cpu_capacity'"
+    },
+    {
+      "key": "cpu3_core_type",
+      "command": "read /sys/devices/system/cpu/cpu3/topology/core_type",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/topology/core_type'"
+    },
+    {
+      "key": "cpu3_cpu_capacity",
+      "command": "read /sys/devices/system/cpu/cpu3/cpu_capacity",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/cpu_capacity'"
+    },
+    {
+      "key": "cache_index0_level",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index0/level",
+      "content": "1\n",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index0_type",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index0/type",
+      "content": "Data\n",
+      "sha256": "dc4dad0cef184fb5f194c67a101f83acad5e1c1bc80b03217b03152d2478aaaa",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index0_size",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index0/size",
+      "content": "48K\n",
+      "sha256": "a8a65783418b0f3e1a40010bde03c4713b57420000a6fe3116fb3b2d266c024a",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index0_shared_cpu_list",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index0/shared_cpu_list",
+      "content": "0\n",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index1_level",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index1/level",
+      "content": "1\n",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index1_type",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index1/type",
+      "content": "Instruction\n",
+      "sha256": "d25bf25583662ba3bb850925a74a7123053b5d6e5592e6e1c2a9d56653792e44",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index1_size",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index1/size",
+      "content": "32K\n",
+      "sha256": "1451566a7ba657a9c136b6408f17b8aa6c516681e01fd703df5d666d9af1b1d0",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index1_shared_cpu_list",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index1/shared_cpu_list",
+      "content": "0\n",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index2_level",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index2/level",
+      "content": "2\n",
+      "sha256": "53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index2_type",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index2/type",
+      "content": "Unified\n",
+      "sha256": "df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index2_size",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index2/size",
+      "content": "2048K\n",
+      "sha256": "d080d15ede009d61eec7a2156dbeb8637a21d5d56a18a00fcd73b902a42703e8",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index2_shared_cpu_list",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list",
+      "content": "0\n",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index3_level",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index3/level",
+      "content": "3\n",
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index3_type",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index3/type",
+      "content": "Unified\n",
+      "sha256": "df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index3_size",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index3/size",
+      "content": "327680K\n",
+      "sha256": "c758ee6788d94b982a243292c6f9507ea778ae5c18086fa143d1a22c164bd146",
+      "skipped_reason": null
+    },
+    {
+      "key": "cache_index3_shared_cpu_list",
+      "command": "read /sys/devices/system/cpu/cpu0/cache/index3/shared_cpu_list",
+      "content": "0-3\n",
+      "sha256": "b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc",
+      "skipped_reason": null
+    },
+    {
+      "key": "swappiness",
+      "command": "read /proc/sys/vm/swappiness",
+      "content": "60\n",
+      "sha256": "95cf32708a31caa478a0e9141103ac567d85e5186e697e7e0c81f75589999e31",
+      "skipped_reason": null
+    },
+    {
+      "key": "getconf_page_size",
+      "command": "getconf PAGE_SIZE",
+      "content": "4096\n",
+      "sha256": "25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91",
+      "skipped_reason": null
+    },
+    {
+      "key": "dmidecode_memory",
+      "command": "dmidecode -t memory",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "dmidecode not in PATH"
+    },
+    {
+      "key": "sys_hypervisor_type",
+      "command": "read /sys/hypervisor/type",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "/sys/hypervisor absent"
+    },
+    {
+      "key": "systemd_detect_virt",
+      "command": "systemd-detect-virt",
+      "content": "docker\n",
+      "sha256": "00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd",
+      "skipped_reason": null
+    },
+    {
+      "key": "dockerenv",
+      "command": "test -e /.dockerenv",
+      "content": "EXISTS",
+      "sha256": "b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c",
+      "skipped_reason": null
+    },
+    {
+      "key": "containerenv",
+      "command": "test -e /run/.containerenv",
+      "content": "ABSENT",
+      "sha256": "08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc1_cgroup",
+      "command": "read /proc/1/cgroup",
+      "content": "0::/\n",
+      "sha256": "e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_self_cgroup",
+      "command": "read /proc/self/cgroup",
+      "content": "0::/\n",
+      "sha256": "e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_self_status",
+      "command": "read /proc/self/status",
+      "content": "Name:\tpython3\nUmask:\t0022\nState:\tR (running)\nTgid:\t4749\nNgid:\t0\nPid:\t4749\nPPid:\t4737\nTracerPid:\t0\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 20 24 25 27 29 30 44 46 1000 \nNStgid:\t4749\nNSpid:\t4749\nNSpgid:\t4737\nNSsid:\t4737\nKthread:\t0\nVmPeak:\t   32292 kB\nVmSize:\t   32256 kB\nVmLck:\t       0 kB\nVmPin:\t       0 kB\nVmHWM:\t   23856 kB\nVmRSS:\t   23856 kB\nRssAnon:\t   13116 kB\nRssFile:\t   10740 kB\nRssShmem:\t       0 kB\nVmData:\t   13652 kB\nVmStk:\t     132 kB\nVmExe:\t    2956 kB\nVmLib:\t    6000 kB\nVmPTE:\t     100 kB\nVmSwap:\t       0 kB\nHugetlbPages:\t       0 kB\nCoreDumping:\t0\nTHP_enabled:\t1\nuntag_mask:\t0xffffffffffffffff\nThreads:\t1\nSigQ:\t0/64043\nSigPnd:\t0000000000000000\nShdPnd:\t0000000000000000\nSigBlk:\t0000000000000000\nSigIgn:\t0000000001001000\nSigCgt:\t0000000000000002\nCapInh:\t0000000000000000\nCapPrm:\t0000000000000000\nCapEff:\t0000000000000000\nCapBnd:\t000001ffffffffff\nCapAmb:\t0000000000000000\nNoNewPrivs:\t0\nSeccomp:\t0\nSeccomp_filters:\t0\nSpeculation_Store_Bypass:\tthread vulnerable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tf\nCpus_allowed_list:\t0-3\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000001\nMems_allowed_list:\t0\nvoluntary_ctxt_switches:\t15\nnonvoluntary_ctxt_switches:\t3\n",
+      "sha256": "13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_mounts",
+      "command": "read /proc/mounts",
+      "content": "overlay / overlay rw,relatime,lowerdir=/var/lib/docker/overlay2/l/GQIYIES5NNCYJEJ7XNHCUILIFW:/var/lib/docker/overlay2/l/UBK2MSYVRO6OWZE5UD6ZOGWJYR:/var/lib/docker/overlay2/l/H4FZHGEFEAIT6SI3H7QMU7LXTJ:/var/lib/docker/overlay2/l/QRQUYSGXFJDPITCL4Q7LM3R37V:/var/lib/docker/overlay2/l/WQHY675VYZEM2NRTKUBBRRQEO7:/var/lib/docker/overlay2/l/WC6TLBRLOK36KERMT3PYZDEL7X:/var/lib/docker/overlay2/l/MU4QKMRLKQGT3C6O5SUR2YTXWI:/var/lib/docker/overlay2/l/ORNIRLW5TSFCDQXZUHQ27PLKIT:/var/lib/docker/overlay2/l/QI7SJEI2D2TI5LSDAO6OX6FT6X:/var/lib/docker/overlay2/l/EWWFVNMVINMIMF5QBBAKUPPMD6:/var/lib/docker/overlay2/l/RUZCLCJ3EUTXEUPRC2YWM5BRRB:/var/lib/docker/overlay2/l/Z4MKAAK66QRK37EIMRKN33JVQ2:/var/lib/docker/overlay2/l/MACCLMITUZFFS5ELCYAVO7RMUU:/var/lib/docker/overlay2/l/TAFWTTKZDH2VGWW2OQ7RDB4HEW:/var/lib/docker/overlay2/l/FGFACSKGRZXBRRUQMTAQHUWPMR:/var/lib/docker/overlay2/l/CZXDCBDWSG2SZQQDWQWESCRKS6:/var/lib/docker/overlay2/l/OEA6C5HQMCLM76CGVQVDUU53HK:/var/lib/docker/overlay2/l/SECLDPE5HYCIRKDVYA3BF3GGGL:/var/lib/docker/overlay2/l/OY5RBRKXATEVDV5GH7QZWP4NU3:/var/lib/docker/overlay2/l/5NTOB5K27ONOFTT4PJELBCGZYW:/var/lib/docker/overlay2/l/7LQSASPPWYHXD6YJIOLTX2IGMR:/var/lib/docker/overlay2/l/BOHSBJKTGK63NWCVXQKWSEML2O:/var/lib/docker/overlay2/l/ECOMKT5EDXIXR2W45BSGP5UMBB:/var/lib/docker/overlay2/l/W7AAZBJQH4ADIUE3575HJXV554:/var/lib/docker/overlay2/l/4MSZTPKLTZVH7EKF2IDBKAJFKH:/var/lib/docker/overlay2/l/KZEUMOUBBDUNF43DMO7NEDYWA2,upperdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/diff,workdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/work 0 0\nproc /proc proc rw,nosuid,nodev,noexec,relatime 0 0\ntmpfs /dev tmpfs rw,nosuid,size=65536k,mode=755 0 0\ndevpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mode=620,ptmxmode=666 0 0\nsysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0\ncgroup /sys/fs/cgroup cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot 0 0\nmqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0\nshm /dev/shm tmpfs rw,nosuid,nodev,noexec,relatime,size=65536k 0 0\n/dev/root /etc/resolv.conf ext4 rw,relatime 0 0\n/dev/root /etc/hostname ext4 rw,relatime 0 0\n/dev/root /etc/hosts ext4 rw,relatime 0 0\n",
+      "sha256": "3f210e757512fd38c4d3222cc70864012ca61569c8c12a024375003ca8c8b788",
+      "skipped_reason": null
+    },
+    {
+      "key": "dmi_sys_vendor",
+      "command": "read /sys/class/dmi/id/sys_vendor",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/sys_vendor'"
+    },
+    {
+      "key": "dmi_product_name",
+      "command": "read /sys/class/dmi/id/product_name",
+      "content": "",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "skipped_reason": "unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/product_name'"
+    },
+    {
+      "key": "cgroup_base_resolved",
+      "command": "resolve cgroup base",
+      "content": "/sys/fs/cgroup",
+      "sha256": "85bae2ead9d613eb16150e89460f06daea72d31beaa1c37c68457a29a0fdba68",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_version_probe",
+      "command": "test cgroup v2 memory.max",
+      "content": "v2",
+      "sha256": "fb04dcb6970e4c3d1873de51fd5a50d7bb46b3383113602665c350ec40b5f990",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_memory_max",
+      "command": "read /sys/fs/cgroup/memory.max",
+      "content": "17179869184\n",
+      "sha256": "c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_memory_high",
+      "command": "read /sys/fs/cgroup/memory.high",
+      "content": "max\n",
+      "sha256": "dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_memory_current",
+      "command": "read /sys/fs/cgroup/memory.current",
+      "content": "677376000\n",
+      "sha256": "b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_cpu_max",
+      "command": "read /sys/fs/cgroup/cpu.max",
+      "content": "400000 100000\n",
+      "sha256": "bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f",
+      "skipped_reason": null
+    },
+    {
+      "key": "cgroup_cpuset_cpus_effective",
+      "command": "read /sys/fs/cgroup/cpuset.cpus.effective",
+      "content": "0-3\n",
+      "sha256": "b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_stat_t0",
+      "command": "read /proc/stat",
+      "content": "cpu  5977 0 4347 736147 692 0 440 33 0 0\ncpu0 1449 0 1134 184053 76 0 157 1 0 0\ncpu1 1373 0 1111 183909 348 0 133 2 0 0\ncpu2 1592 0 1086 183954 195 0 55 26 0 0\ncpu3 1561 0 1014 184230 71 0 94 2 0 0\nintr 4178935 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19189 23152 32864 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nctxt 8344292\nbtime 1785687542\nprocesses 6571\nprocs_running 1\nprocs_blocked 0\nsoftirq 285951 0 34420 17 28317 42333 0 226 125648 0 54990\n",
+      "sha256": "d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d",
+      "skipped_reason": null
+    },
+    {
+      "key": "proc_stat_t1",
+      "command": "read /proc/stat",
+      "content": "cpu  5977 0 4347 738146 692 0 440 33 0 0\ncpu0 1449 0 1134 184553 76 0 157 1 0 0\ncpu1 1373 0 1111 184409 349 0 133 2 0 0\ncpu2 1592 0 1086 184453 195 0 55 26 0 0\ncpu3 1561 0 1014 184729 71 0 94 2 0 0\nintr 4179414 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 3 19198 23152 32866 38 43 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\nctxt 8344747\nbtime 1785687542\nprocesses 6571\nprocs_running 1\nprocs_blocked 0\nsoftirq 286307 0 34500 17 28319 42342 0 226 125858 0 55045\n",
+      "sha256": "bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079",
+      "skipped_reason": null
+    }
+  ],
+  "is_development_proxy": true,
+  "proxy_banner": "*** HOST CLASS = CONTAINER \u2014 PROFILE NOT REPRESENTATIVE OF AN EDGE TARGET *** (container (on VM/hypervisor=KVM)). Do not use host totals as effective capacity; cgroup/affinity limits apply.",
+  "target_reliability_statement": "HOST CLASS=container. This is NOT bare-metal and is not representative of an edge deployment target. Values that would NOT transfer to different hardware: hypervisor-synthesized cache sizes, guest CPUID flags that fail runtime enable (AMX/XTILEDATA), cgroup memory.max/cpu.max, steal time, sched affinity, DIMM/channel topology, storage of the container overlay, and HOST-LEVEL uarch implications. Model string='Intel(R) Xeon(R) Processor'.",
+  "model_name": {
+    "value": "Intel(R) Xeon(R) Processor",
+    "evidence": "Model name:                              Intel(R) Xeon(R) Processor  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "vendor": {
+    "value": "GenuineIntel",
+    "evidence": "Vendor ID:                               GenuineIntel  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "cpu_family": {
+    "value": "6",
+    "evidence": "CPU family:                              6  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "model": {
+    "value": "207",
+    "evidence": "Model:                                   207  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "stepping": {
+    "value": "2",
+    "evidence": "Stepping:                                2  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "arch": {
+    "value": "x86_64",
+    "evidence": "uname -m \u2192 x86_64 [sha256=aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62]"
+  },
+  "base_mhz": {
+    "value": "UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)",
+    "evidence": "UNDETECTED (reason: no cpufreq base_frequency, no lscpu 'CPU base MHz'; /proc/cpuinfo 'cpu MHz' is current freq and was not used as base)"
+  },
+  "max_mhz": {
+    "value": "UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')",
+    "evidence": "UNDETECTED (reason: no cpufreq cpuinfo_max_freq and no lscpu 'CPU max MHz')"
+  },
+  "uarch_host_level": {
+    "value": "Emerald Rapids (Intel Xeon; CPUID model 0xCF)",
+    "evidence": "HOST-LEVEL INFORMATION ONLY: lookup('GenuineIntel', family=6, model=207/0xCF, stepping=2) \u2192 Emerald Rapids (Intel Xeon; CPUID model 0xCF). Any host memory-channel or L3 figure this uarch implies does NOT describe this guest's available share."
+  },
+  "logical_cores": {
+    "value": 4,
+    "evidence": "CPU(s):                                  4  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "physical_cores": {
+    "value": 4,
+    "evidence": "Core(s) per socket * Socket(s) = 4 * 1 = 4; from [Core(s) per socket:                      4  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]] [Socket(s):                               1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]]"
+  },
+  "threads_per_core": {
+    "value": 1,
+    "evidence": "Thread(s) per core:                      1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "sockets": {
+    "value": 1,
+    "evidence": "Socket(s):                               1  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "smt_enabled": {
+    "value": false,
+    "evidence": "/sys/devices/system/cpu/smt/active: 0 [sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa]; control: notsupported [sha256=f53cfd31e68d9fc43f08c8b6f8d97e4bc4d592da020860713b416ea60a6c0f24]"
+  },
+  "hybrid": {
+    "is_hybrid": {
+      "value": false,
+      "evidence": "no sysfs topology/core_type or varying cpu_capacity; lscpu -e has no core-type column \u2192 treated as non-hybrid (absence of hybrid signals) [lscpu -e sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a]"
+    },
+    "p_core_count": null,
+    "e_core_count": null,
+    "p_core_logical_ids": null,
+    "e_core_logical_ids": null
+  },
+  "numa_nodes": {
+    "value": "single node",
+    "evidence": "NUMA node(s):                            1; NUMA node0 CPU(s):                       0-3  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "cpu_to_node_map": {
+    "value": {
+      "0": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "evidence": "NUMA node0 CPU(s):                       0-3  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+  },
+  "cache": {
+    "l1d_bytes": {
+      "value": 49152,
+      "evidence": "read /sys/devices/system/cpu/cpu0/cache/index0/size: 48K [sha256=a8a65783418b0f3e1a40010bde03c4713b57420000a6fe3116fb3b2d266c024a]"
+    },
+    "l1i_bytes": {
+      "value": 32768,
+      "evidence": "read /sys/devices/system/cpu/cpu0/cache/index1/size: 32K [sha256=1451566a7ba657a9c136b6408f17b8aa6c516681e01fd703df5d666d9af1b1d0]"
+    },
+    "l2_bytes": {
+      "value": 2097152,
+      "evidence": "read /sys/devices/system/cpu/cpu0/cache/index2/size: 2048K [sha256=d080d15ede009d61eec7a2156dbeb8637a21d5d56a18a00fcd73b902a42703e8]"
+    },
+    "l2_sharing": {
+      "value": "per-core",
+      "evidence": "read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list: 0 \u2192 per-core [sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa]"
+    },
+    "l3_bytes": {
+      "value": 335544320,
+      "evidence": "read /sys/devices/system/cpu/cpu0/cache/index3/size: 327680K [sha256=c758ee6788d94b982a243292c6f9507ea778ae5c18086fa143d1a22c164bd146]"
+    },
+    "lscpu_l1d_bytes": {
+      "value": 196608,
+      "evidence": "L1d cache:                               192 KiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l1i_bytes": {
+      "value": 131072,
+      "evidence": "L1i cache:                               128 KiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l2_bytes": {
+      "value": 8388608,
+      "evidence": "L2 cache:                                8 MiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l3_bytes": {
+      "value": 335544320,
+      "evidence": "L3 cache:                                320 MiB (1 instance)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l1d_instances": {
+      "value": 4,
+      "evidence": "L1d cache:                               192 KiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l1i_instances": {
+      "value": 4,
+      "evidence": "L1i cache:                               128 KiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l2_instances": {
+      "value": 4,
+      "evidence": "L2 cache:                                8 MiB (4 instances)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "lscpu_l3_instances": {
+      "value": 1,
+      "evidence": "L3 cache:                                320 MiB (1 instance)  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    }
+  },
+  "host_class": {
+    "value": "container",
+    "evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED"
+  },
+  "host_class_banner": "*** HOST CLASS = CONTAINER \u2014 PROFILE NOT REPRESENTATIVE OF AN EDGE TARGET *** (container (on VM/hypervisor=KVM)). Do not use host totals as effective capacity; cgroup/affinity limits apply.",
+  "exec_env": {
+    "hypervisor_vendor_lscpu": {
+      "value": "KVM",
+      "evidence": "Hypervisor vendor:                       KVM  [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "virtualization_lscpu": {
+      "value": {
+        "Virtualization": "VT-x",
+        "Virtualization type": "full"
+      },
+      "evidence": "Virtualization:                          VT-x; Virtualization type:                     full [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]"
+    },
+    "hypervisor_sysfs": {
+      "value": "UNDETECTED (reason: /sys/hypervisor absent)",
+      "evidence": "UNDETECTED (reason: /sys/hypervisor absent)"
+    },
+    "systemd_detect_virt": {
+      "value": "docker",
+      "evidence": "systemd-detect-virt \u2192 docker [sha256=00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd]"
+    },
+    "dockerenv": {
+      "value": "EXISTS",
+      "evidence": "test -e /.dockerenv \u2192 EXISTS [sha256=b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c]"
+    },
+    "containerenv": {
+      "value": "ABSENT",
+      "evidence": "test -e /run/.containerenv \u2192 ABSENT [sha256=08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56]"
+    },
+    "proc1_cgroup": {
+      "value": "0::/\n",
+      "evidence": "/proc/1/cgroup verbatim (5 bytes) [sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107]: '0::/\\n'"
+    },
+    "cgroup_version": {
+      "value": "v2",
+      "evidence": "test cgroup v2 memory.max \u2192 v2 [sha256=fb04dcb6970e4c3d1873de51fd5a50d7bb46b3383113602665c350ec40b5f990]"
+    },
+    "memory_max": {
+      "value": "17179869184",
+      "evidence": "read /sys/fs/cgroup/memory.max: 17179869184 [sha256=c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b]"
+    },
+    "memory_high": {
+      "value": "max",
+      "evidence": "read /sys/fs/cgroup/memory.high: max [sha256=dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e]"
+    },
+    "memory_current": {
+      "value": "677376000",
+      "evidence": "read /sys/fs/cgroup/memory.current: 677376000 [sha256=b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288]"
+    },
+    "cpu_max": {
+      "value": "400000 100000",
+      "evidence": "read /sys/fs/cgroup/cpu.max: 400000 100000 [sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f]"
+    },
+    "cpu_max_quota_period": {
+      "value": 4.0,
+      "evidence": "cpu.max quota/period = 400000/100000 = 4.0 [from read /sys/fs/cgroup/cpu.max: 400000 100000 [sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f]]"
+    },
+    "cpuset_cpus_effective": {
+      "value": "0-3",
+      "evidence": "read /sys/fs/cgroup/cpuset.cpus.effective: 0-3 [sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc]"
+    },
+    "cpuset_size": {
+      "value": 4,
+      "evidence": "cpuset.cpus.effective=0-3 \u2192 4 CPUs; read /sys/fs/cgroup/cpuset.cpus.effective: 0-3 [sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc]"
+    },
+    "os_cpu_count": {
+      "value": 4,
+      "evidence": "python os.cpu_count() (Python 3.12.3) \u2192 4"
+    },
+    "sched_affinity_len": {
+      "value": 4,
+      "evidence": "python len(os.sched_getaffinity(0)) (Python 3.12.3) \u2192 4"
+    },
+    "sched_affinity_set": {
+      "value": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "evidence": "python os.sched_getaffinity(0) (Python 3.12.3) \u2192 [0, 1, 2, 3]"
+    },
+    "steal_sample_t0": {
+      "value": {
+        "steal": 33,
+        "total_jiffies": 747636
+      },
+      "evidence": "/proc/stat t0 cpu line field 8 (steal, 1-indexed among numeric fields) = 33; line='cpu  5977 0 4347 736147 692 0 440 33 0 0' [sha256=d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d]"
+    },
+    "steal_sample_t1": {
+      "value": {
+        "steal": 33,
+        "total_jiffies": 749635
+      },
+      "evidence": "/proc/stat t1 (t0+5s) steal=33; line='cpu  5977 0 4347 738146 692 0 440 33 0 0' [sha256=bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079]"
+    },
+    "steal_percent": {
+      "value": 0.0,
+      "evidence": "delta_steal=0, delta_jiffies=1999, steal%=0.000000 (sampled 5s apart)"
+    },
+    "effective_memory_limit": {
+      "value": 16792014848,
+      "evidence": "min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)"
+    },
+    "effective_memory_winner": "MemTotal (/proc)",
+    "effective_mem_inputs": "min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)",
+    "effective_cpu_count": {
+      "value": 4,
+      "evidence": "min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count"
+    },
+    "effective_cpu_winner": "affinity_count",
+    "effective_cores": {
+      "value": 4,
+      "evidence": "min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count"
+    },
+    "effective_cores_inputs": "min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count",
+    "effective_mem_bytes": {
+      "value": 16792014848,
+      "evidence": "min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc)"
+    }
+  },
+  "storage": {
+    "cache_dir": {
+      "value": "/home/ubuntu/.cache/localmodel",
+      "evidence": "intended model cache dir default ~/.cache/localmodel \u2192 /home/ubuntu/.cache/localmodel; disk_usage probed via /home/ubuntu/.cache"
+    },
+    "total_bytes": {
+      "value": 270436077568,
+      "evidence": "shutil.disk_usage('/home/ubuntu/.cache').total (Python 3.12.3) \u2192 270436077568"
+    },
+    "free_bytes": {
+      "value": 248112996352,
+      "evidence": "shutil.disk_usage('/home/ubuntu/.cache').free (Python 3.12.3) \u2192 248112996352"
+    },
+    "filesystem_type": {
+      "value": "overlay",
+      "evidence": "/proc/mounts match mountpoint=/: overlay / overlay rw,relatime,lowerdir=/var/lib/docker/overlay2/l/GQIYIES5NNCYJEJ7XNHCUILIFW:/var/lib/docker/overlay2/l/UBK2MSYVRO6OWZE5UD6ZOGWJYR:/var/lib/docker/overlay2/l/H4FZHGEFEAIT6SI3H7QMU7LXTJ:/var/lib/docker/overlay2/l/QRQUYSGXFJDPITCL4Q7LM3R37V:/var/lib/docker/overlay2/l/WQHY675VYZEM2NRTKUBBRRQEO7:/var/lib/docker/overlay2/l/WC6TLBRLOK36KERMT3PYZDEL7X:/var/lib/docker/overlay2/l/MU4QKMRLKQGT3C6O5SUR2YTXWI:/var/lib/docker/overlay2/l/ORNIRLW5TSFCDQXZUHQ27PLKIT:/var/lib/docker/overlay2/l/QI7SJEI2D2TI5LSDAO6OX6FT6X:/var/lib/docker/overlay2/l/EWWFVNMVINMIMF5QBBAKUPPMD6:/var/lib/docker/overlay2/l/RUZCLCJ3EUTXEUPRC2YWM5BRRB:/var/lib/docker/overlay2/l/Z4MKAAK66QRK37EIMRKN33JVQ2:/var/lib/docker/overlay2/l/MACCLMITUZFFS5ELCYAVO7RMUU:/var/lib/docker/overlay2/l/TAFWTTKZDH2VGWW2OQ7RDB4HEW:/var/lib/docker/overlay2/l/FGFACSKGRZXBRRUQMTAQHUWPMR:/var/lib/docker/overlay2/l/CZXDCBDWSG2SZQQDWQWESCRKS6:/var/lib/docker/overlay2/l/OEA6C5HQMCLM76CGVQVDUU53HK:/var/lib/docker/overlay2/l/SECLDPE5HYCIRKDVYA3BF3GGGL:/var/lib/docker/overlay2/l/OY5RBRKXATEVDV5GH7QZWP4NU3:/var/lib/docker/overlay2/l/5NTOB5K27ONOFTT4PJELBCGZYW:/var/lib/docker/overlay2/l/7LQSASPPWYHXD6YJIOLTX2IGMR:/var/lib/docker/overlay2/l/BOHSBJKTGK63NWCVXQKWSEML2O:/var/lib/docker/overlay2/l/ECOMKT5EDXIXR2W45BSGP5UMBB:/var/lib/docker/overlay2/l/W7AAZBJQH4ADIUE3575HJXV554:/var/lib/docker/overlay2/l/4MSZTPKLTZVH7EKF2IDBKAJFKH:/var/lib/docker/overlay2/l/KZEUMOUBBDUNF43DMO7NEDYWA2,upperdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/diff,workdir=/var/lib/docker/overlay2/6d2f2d75a3f02519d9bf0d2ece4e123601b58087bbf51b1c1f9aa6222552fdd4/work 0 0 [sha256=3f210e757512fd38c4d3222cc70864012ca61569c8c12a024375003ca8c8b788]"
+    },
+    "rotational": {
+      "value": "UNDETECTED (reason: overlay mount; no single block device)",
+      "evidence": "mount source=overlay fstype=overlay \u2014 rotational attribute not attributable to one device"
+    },
+    "sparse_mmap_note": {
+      "value": "OVERLAY \u2014 sparse usually OK via upperdir; mmap OK; not a network FS",
+      "evidence": "fstype=overlay from /proc/mounts"
+    }
+  },
+  "thermal_power": {
+    "on_ac_power": {
+      "value": "UNDETECTED (reason: /sys/class/power_supply absent or empty)",
+      "evidence": "UNDETECTED (reason: /sys/class/power_supply absent or empty)"
+    },
+    "battery_present": {
+      "value": false,
+      "evidence": "no BAT* under /sys/class/power_supply"
+    },
+    "battery_capacity": {
+      "value": "UNDETECTED (reason: no BAT* capacity)",
+      "evidence": "UNDETECTED (reason: no BAT* capacity)"
+    },
+    "thermal_zones": {
+      "value": "UNDETECTED (reason: no readable thermal_zone*)",
+      "evidence": "/sys/class/thermal empty/absent"
+    },
+    "cpufreq_governors": {
+      "value": "UNDETECTED (reason: no cpufreq policy*/scaling_governor)",
+      "evidence": "/sys/devices/system/cpu/cpufreq absent (common under KVM/container)"
+    },
+    "thermal_throttling": {
+      "value": "UNDETECTED (reason: no thermal_throttle sysfs nodes)",
+      "evidence": "/sys/devices/system/cpu/cpu*/thermal_throttle/core_throttle_count absent"
+    },
+    "platform_notes": "Linux sysfs path exercised. macOS: pmset -g batt; powermetrics (often sudo). Android/Termux: power_supply + thermal_zone often readable unprivileged; cpufreq governors frequently blocked."
+  },
+  "memory_budget": {
+    "os_reserve_bytes": {
+      "value": 1073741824,
+      "evidence": "PROVISIONAL policy: 1 GiB absolute OS reserve \u2014 justified as headroom for kernel/page-cache/agent so model load does not sit at cgroup OOM edge. NOT measured."
+    },
+    "runtime_overhead_bytes": {
+      "value": 536870912,
+      "evidence": "PROVISIONAL policy: 512 MiB runtime overhead \u2014 loader, tokenizer, native allocator arenas, scratch. NOT measured."
+    },
+    "kv_formula": "kv_budget(n_ctx) = 2 * n_layers * n_kv_heads * head_dim * elem_bytes * n_ctx = 2*32*8*128*2 * n_ctx = 131072 * n_ctx  (PROVISIONAL stand-in for a 7B-class GQA model; not measured)",
+    "rows": [
+      {
+        "n_ctx": 2048,
+        "os_reserve_bytes": 1073741824,
+        "runtime_overhead_bytes": 536870912,
+        "kv_budget_bytes": 268435456,
+        "weight_budget_bytes": 14912966656,
+        "assumptions": "effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=268435456 via 131072*n_ctx"
+      },
+      {
+        "n_ctx": 4096,
+        "os_reserve_bytes": 1073741824,
+        "runtime_overhead_bytes": 536870912,
+        "kv_budget_bytes": 536870912,
+        "weight_budget_bytes": 14644531200,
+        "assumptions": "effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=536870912 via 131072*n_ctx"
+      },
+      {
+        "n_ctx": 8192,
+        "os_reserve_bytes": 1073741824,
+        "runtime_overhead_bytes": 536870912,
+        "kv_budget_bytes": 1073741824,
+        "weight_budget_bytes": 14107660288,
+        "assumptions": "effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=1073741824 via 131072*n_ctx"
+      },
+      {
+        "n_ctx": 32768,
+        "os_reserve_bytes": 1073741824,
+        "runtime_overhead_bytes": 536870912,
+        "kv_budget_bytes": 4294967296,
+        "weight_budget_bytes": 10886434816,
+        "assumptions": "effective_mem=16792014848; os_reserve=1073741824 (1 GiB absolute); runtime_overhead=536870912 (512 MiB); kv=4294967296 via 131072*n_ctx"
+      }
+    ],
+    "provisional_note": "PROVISIONAL \u2014 entire budget table will be REPLACED by measured values in a later phase. CPUID/topology do not validate these numbers.",
+    "effective_mem_bytes": 16792014848
+  },
+  "isa": {
+    "arch_family": "x86",
+    "flags": {
+      "sse4_2": {
+        "value": "PRESENT",
+        "evidence": "sse4_2"
+      },
+      "avx": {
+        "value": "PRESENT",
+        "evidence": "avx"
+      },
+      "avx2": {
+        "value": "PRESENT",
+        "evidence": "avx2"
+      },
+      "fma": {
+        "value": "PRESENT",
+        "evidence": "fma"
+      },
+      "f16c": {
+        "value": "PRESENT",
+        "evidence": "f16c"
+      },
+      "avx_vnni": {
+        "value": "PRESENT",
+        "evidence": "avx_vnni"
+      },
+      "avx512f": {
+        "value": "PRESENT",
+        "evidence": "avx512f"
+      },
+      "avx512bw": {
+        "value": "PRESENT",
+        "evidence": "avx512bw"
+      },
+      "avx512vl": {
+        "value": "PRESENT",
+        "evidence": "avx512vl"
+      },
+      "avx512_vnni": {
+        "value": "PRESENT",
+        "evidence": "avx512_vnni"
+      },
+      "avx512_bf16": {
+        "value": "PRESENT",
+        "evidence": "avx512_bf16"
+      },
+      "avx512_fp16": {
+        "value": "PRESENT",
+        "evidence": "avx512_fp16"
+      },
+      "avx512_vbmi2": {
+        "value": "PRESENT",
+        "evidence": "avx512_vbmi2"
+      },
+      "avx512_bitalg": {
+        "value": "PRESENT",
+        "evidence": "avx512_bitalg"
+      },
+      "sha_ni": {
+        "value": "PRESENT",
+        "evidence": "sha_ni"
+      },
+      "amx_tile": {
+        "value": "PRESENT",
+        "evidence": "amx_tile"
+      },
+      "amx_int8": {
+        "value": "PRESENT",
+        "evidence": "amx_int8"
+      },
+      "amx_bf16": {
+        "value": "PRESENT",
+        "evidence": "amx_bf16"
+      }
+    },
+    "flag_match_mode": "whitespace-tokenized",
+    "absent_branch_note": "ABSENT-branch formatting NOT exercised on this host (every flag in the printed set is PRESENT).",
+    "cpuid_tier": {
+      "value": "AMX",
+      "evidence": "from flags in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144]; amx_tile/amx_int8 PRESENT \u2192 AMX"
+    },
+    "usable_tier": {
+      "value": "AVX512_VNNI",
+      "evidence": "CPUID claims AMX but prctl ARCH_REQ_XCOMP_PERM rc=-1 errno=22; usable_tier drops to AVX512_VNNI (do not claim AMX on CPUID alone)"
+    },
+    "tier_runtime_verified": false,
+    "tier_runtime_verified_note": "tier_runtime_verified=false: CPUID presence does NOT imply the inference runtime has kernels for that tier; this is to be confirmed by probe in a later phase.",
+    "quant_kernel_reasoning": "ladder x86: AMX>AVX512_VNNI>AVX512>AVX_VNNI>AVX2>SSE_ONLY; ARM: ARM_SME>ARM_I8MM>ARM_DOTPROD>ARM_BASELINE. cpuid_tier=AMX (amx_tile/amx_int8 PRESENT \u2192 AMX); usable_tier=AVX512_VNNI (CPUID claims AMX but prctl ARCH_REQ_XCOMP_PERM rc=-1 errno=22; usable_tier drops to AVX512_VNNI (do not claim AMX on CPUID alone)). llama.cpp AMX support is build-flag gated and covers a limited quant set; usable_tier will be re-confirmed against the actual binary in Phase 5.",
+    "quant_kernel_tier": {
+      "value": "AVX512_VNNI",
+      "evidence": "usable_tier (not cpuid alone): CPUID claims AMX but prctl ARCH_REQ_XCOMP_PERM rc=-1 errno=22; usable_tier drops to AVX512_VNNI (do not claim AMX on CPUID alone)"
+    },
+    "macos_sysctl_feats": {}
+  },
+  "parser_negative_control": {
+    "match_mode": "whitespace-tokenized (explicit split on whitespace; NOT substring / NOT regex-prefix). Previous Phase 1 used word-boundary regex which is equivalent for these tokens; Phase 1.5 states and uses tokenized matching.",
+    "probes": [
+      {
+        "flag": "i8mm",
+        "result": "ABSENT",
+        "evidence": "not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)",
+        "expectation": "ABSENT (ARM flag; must be ABSENT on x86)",
+        "status": "PASS"
+      },
+      {
+        "flag": "asimddp",
+        "result": "ABSENT",
+        "evidence": "not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)",
+        "expectation": "ABSENT (ARM flag; must be ABSENT on x86)",
+        "status": "PASS"
+      },
+      {
+        "flag": "sve",
+        "result": "ABSENT",
+        "evidence": "not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)",
+        "expectation": "ABSENT (ARM flag; must be ABSENT on x86)",
+        "status": "PASS"
+      },
+      {
+        "flag": "zzz_nonexistent_flag",
+        "result": "ABSENT",
+        "evidence": "not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)",
+        "expectation": "ABSENT (synthetic; exists nowhere)",
+        "status": "PASS"
+      },
+      {
+        "flag": "avx512",
+        "result": "ABSENT",
+        "evidence": "not found in lscpu Flags [sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144] (whitespace-tokenized)",
+        "expectation": "ABSENT (strict PREFIX of avx512f \u2014 NOT a real flag; must be ABSENT)",
+        "status": "PASS"
+      }
+    ],
+    "overall": "PASS"
+  },
+  "amx_runtime_probe": {
+    "prctl_rc": {
+      "value": -1,
+      "evidence": "ctypes.CDLL('libc.so.6') / libc.prctl; Python 3.12.3: prctl(ARCH_REQ_XCOMP_PERM=0x1023, XFEATURE_XTILEDATA=18) \u2192 return code -1"
+    },
+    "prctl_errno": {
+      "value": 22,
+      "evidence": "ctypes.get_errno() after ARCH_REQ_XCOMP_PERM \u2192 22"
+    },
+    "xcomp_supp": {
+      "value": {
+        "rc": -1,
+        "errno": 22,
+        "features": "0x0",
+        "bit18_xtiledata": false
+      },
+      "evidence": "ctypes.CDLL('libc.so.6') / libc.prctl; Python 3.12.3: prctl(ARCH_GET_XCOMP_SUPP=0x1021) \u2192 rc=-1 errno=22 features=0x0"
+    },
+    "xcomp_perm": {
+      "value": {
+        "rc": -1,
+        "errno": 22,
+        "features": "0x0",
+        "bit18_xtiledata": false
+      },
+      "evidence": "ctypes.CDLL('libc.so.6') / libc.prctl; Python 3.12.3: prctl(ARCH_GET_XCOMP_PERM=0x1022) \u2192 rc=-1 errno=22 features=0x0"
+    },
+    "status_xcomp": {
+      "value": "UNDETECTED (reason: no XCOMP* keys in /proc/self/status)",
+      "evidence": "/proc/self/status has no XCOMP keys (sha256=13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8)"
+    },
+    "note": "llama.cpp AMX support is build-flag gated and covers a limited quant set; usable_tier will be re-confirmed against the actual binary in Phase 5."
+  },
+  "mem_total_bytes": {
+    "value": 16792014848,
+    "evidence": "MemTotal:       16398452 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "mem_available_bytes": {
+    "value": 15825448960,
+    "evidence": "MemAvailable:   15454540 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "mem_free_bytes": {
+    "value": 8057008128,
+    "evidence": "MemFree:         7868172 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "mem_available_source_note": "MemAvailable used as primary /proc availability metric (reclaimable cache/buffers); downstream budgets use effective_mem_bytes, not raw MemAvailable.",
+  "swap_total_bytes": {
+    "value": 0,
+    "evidence": "SwapTotal:             0 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "swap_used_bytes": {
+    "value": 0,
+    "evidence": "SwapTotal - SwapFree = 0 - 0 from [SwapTotal:             0 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]] [SwapFree:              0 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]]"
+  },
+  "swappiness": {
+    "value": 60,
+    "evidence": "/proc/sys/vm/swappiness: 60 [sha256=95cf32708a31caa478a0e9141103ac567d85e5186e697e7e0c81f75589999e31]"
+  },
+  "page_size_bytes": {
+    "value": 4096,
+    "evidence": "getconf PAGE_SIZE \u2192 4096 [sha256=25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91]"
+  },
+  "hugepages_count": {
+    "value": 0,
+    "evidence": "HugePages_Total:       0  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "hugepages_size_bytes": {
+    "value": 2097152,
+    "evidence": "Hugepagesize:       2048 kB  [sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85]"
+  },
+  "memory_channels": {
+    "value": "UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)",
+    "evidence": "UNDETECTED (reason: dmidecode not available or not run; DIMM channel count requires DMI/SMBIOS (typically root). Skipped.)"
+  },
+  "dimm_count": {
+    "value": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)",
+    "evidence": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)"
+  },
+  "dimm_speed_mts": {
+    "value": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)",
+    "evidence": "UNDETECTED (reason: dmidecode -t memory not available (command not found / needs root); skipped)"
+  },
+  "measured_bandwidth_GBps": {
+    "value": "PENDING_PHASE_2",
+    "evidence": "placeholder: dmidecode-based theoretical bandwidth removed; measured_bandwidth_GBps will be filled by Phase 2 benchmarks"
+  },
+  "suggested_thread_count": {
+    "value": 4,
+    "evidence": "effective_cores=4 (winner=affinity_count); provisional pending Phase 2"
+  },
+  "suggested_thread_formula": "int(effective_cores) = int(4) = 4 [NOT raw os.cpu_count()/lscpu]",
+  "cross_checks": [
+    {
+      "name": "physical_cores * threads_per_core == logical_cores",
+      "left": "4 * 1 = 4",
+      "right": "logical_cores = 4",
+      "result": "PASS"
+    },
+    {
+      "name": "MemAvailable <= MemTotal",
+      "left": "MemAvailable=15825448960",
+      "right": "MemTotal=16792014848",
+      "result": "PASS"
+    },
+    {
+      "name": "effective_mem <= MemTotal",
+      "left": "effective_mem=16792014848 (winner=MemTotal (/proc); inputs: min(MemTotal=16792014848, cgroup memory.max=17179869184) = 16792014848; winner=MemTotal (/proc))",
+      "right": "MemTotal=16792014848",
+      "result": "PASS"
+    },
+    {
+      "name": "effective_cores <= logical_cores",
+      "left": "effective_cores=4 (min(affinity_count=4.0, cpu.max quota/period=4.0, logical_cores=4.0) = 4; winner=affinity_count)",
+      "right": "logical_cores=4",
+      "result": "PASS"
+    },
+    {
+      "name": "core-count sources agreement",
+      "left": "{'os.cpu_count()': 4, 'len(os.sched_getaffinity(0))': 4, 'cgroup cpuset.cpus.effective size': 4, 'lscpu CPU(s)': 4}",
+      "right": "NOT INDEPENDENT: os.cpu_count, sched_getaffinity, lscpu CPU(s), and cpuset all derive from the same kernel CPU/affinity/cgroup view on Linux \u2014 agreement is expected, not corroboration from independent hardware probes",
+      "result": "NOT INDEPENDENT"
+    },
+    {
+      "name": "sum of lscpu -e unique CORE values == physical_cores",
+      "left": "unique CORE ids=[0, 1, 2, 3] count=4 [sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a]",
+      "right": "physical_cores=4",
+      "result": "PASS"
+    },
+    {
+      "name": "L1d: sysfs_per_core * lscpu_instances == lscpu_aggregate",
+      "left": "per_instance(49152) * instances(4) = 196608",
+      "right": "lscpu aggregate = 196608",
+      "result": "PASS"
+    },
+    {
+      "name": "L1i: sysfs_per_core * lscpu_instances == lscpu_aggregate",
+      "left": "per_instance(32768) * instances(4) = 131072",
+      "right": "lscpu aggregate = 131072",
+      "result": "PASS"
+    },
+    {
+      "name": "L2: sysfs_per_core * lscpu_instances == lscpu_aggregate",
+      "left": "per_instance(2097152) * instances(4) = 8388608",
+      "right": "lscpu aggregate = 8388608",
+      "result": "PASS"
+    },
+    {
+      "name": "L3: sysfs_per_core * lscpu_instances == lscpu_aggregate",
+      "left": "per_instance(335544320) * instances(1) = 335544320",
+      "right": "lscpu aggregate = 335544320",
+      "result": "PASS"
+    },
+    {
+      "name": "cache size physically plausible for core count",
+      "left": "L3 aggregate=335544320 bytes (320.0 MiB)",
+      "right": "logical_cores=4 (<=8)",
+      "result": "SUSPECT"
+    },
+    {
+      "name": "ISA flags internally consistent",
+      "left": "avx512_vnni=True \u2192 avx512f=True; amx_any=True \u2192 avx512f=True",
+      "right": "avx512_vnni\u21d2avx512f; amx\u21d2avx512f; i8mm\u21d2asimd",
+      "result": "PASS"
+    },
+    {
+      "name": "SECTION 3b parser negative control",
+      "left": "[('i8mm', 'ABSENT'), ('asimddp', 'ABSENT'), ('sve', 'ABSENT'), ('zzz_nonexistent_flag', 'ABSENT'), ('avx512', 'ABSENT')]",
+      "right": "all probes ABSENT",
+      "result": "PASS"
+    }
+  ],
+  "core_count_sources": {
+    "lscpu CPU(s)": 4,
+    "os.cpu_count()": 4,
+    "len(os.sched_getaffinity(0))": 4,
+    "/proc/cpuinfo processor entry count": 4,
+    "cgroup cpuset.cpus.effective size": 4,
+    "cgroup cpu.max quota/period": 4.0,
+    "effective_cpu_count": 4,
+    "lscpu -e unique CORE count": 4,
+    "lscpu Core(s) per socket * Socket(s)": 4
+  },
+  "self_critique": {
+    "fields that are heuristic, not directly read": [
+      "suggested_thread_count from effective_cores (provisional)",
+      "memory budget table (os_reserve 1GiB, runtime 512MiB, KV stand-in formula)",
+      "cpuid_tier priority ladder over flags; tier_runtime_verified=false always for now",
+      "usable_tier drops AMX\u2192AVX512_VNNI on failed prctl",
+      "hybrid=false from absence of sysfs hybrid signals",
+      "uarch decode from static lookup table (HOST-LEVEL ONLY)",
+      "HOST CLASS classification heuristics (container>VM>bare-metal)",
+      "sparse/mmap sanity note from fstype class, not a probe"
+    ],
+    "platform code paths not exercised on this machine": [
+      "macOS sysctl hw.optional.arm.FEAT_* path",
+      "macOS pmset/powermetrics path",
+      "Windows WMIC/PowerShell CIM path",
+      "ARM Linux ISA flag set and ARM_SME/I8MM tiers (0% exercised)",
+      "bare-metal HOST CLASS path (this host is container-on-KVM)",
+      "hybrid P/E core_type and cpu_capacity parsing",
+      "multi-node NUMA mapping",
+      "cgroup v1 fallback path",
+      "successful AMX prctl path (rc=0)",
+      "AC/battery power_supply nodes (absent here)",
+      "cpufreq governor sysfs (absent under KVM)",
+      "thermal_zone* readable path (absent here)"
+    ],
+    "places a default could have been silently substituted": [
+      "base_mhz: could have used /proc/cpuinfo cpu MHz \u2014 intentionally NOT done",
+      "usable_tier: could have kept AMX from CPUID \u2014 intentionally dropped",
+      "theoretical_peak_bandwidth DELETED; measured_bandwidth_GBps=PENDING_PHASE_2",
+      "effective_* could have reported host totals \u2014 min() with cgroup/affinity enforced",
+      "budget numbers are policy, not measurements \u2014 marked PROVISIONAL"
+    ],
+    "known parsing fragility": [
+      "lscpu English locale keys",
+      "whitespace tokenization assumes cpuid names are single tokens",
+      "KVM may expose synthetic cache sizes (L3 SUSPECT flagged)",
+      "overlay mounts hide underlying block rotational attribute",
+      "cgroup path resolution from 0::/ assumes v2 at /sys/fs/cgroup",
+      "core-count sources are NOT INDEPENDENT on Linux"
+    ]
+  },
+  "per_core_type_counts": {
+    "homogeneous": 4
+  },
+  "lscpu_unique_cores": 4,
+  "devices_reached_note": "DEVICES REACHED FROM THIS AGENT: only this Cursor cloud sandbox (HOST CLASS=container). No SSH targets, bare-metal hosts, or ARM devices are reachable from this environment. Bare-metal and ARM reports are therefore ABSENT \u2014 not fabricated."
+}
+
+=== SECTION 9: TARGET RELIABILITY STATEMENT ===
+HOST CLASS=container. This is NOT bare-metal and is not representative of an edge deployment target. Values that would NOT transfer to different hardware: hypervisor-synthesized cache sizes, guest CPUID flags that fail runtime enable (AMX/XTILEDATA), cgroup memory.max/cpu.max, steal time, sched affinity, DIMM/channel topology, storage of the container overlay, and HOST-LEVEL uarch implications. Model string='Intel(R) Xeon(R) Processor'.
+
+=== META: COMMANDS & VERSIONS ===
+Python: 3.12.3 (main, Mar 23 2026, 19:04:32) [GCC 13.3.0]
+platform.python_version(): 3.12.3
+platform.platform(): Linux-6.12.94+-x86_64-with-glibc2.39
+  - Python stdlib only (platform=3.12.3, subprocess, os, hashlib, ctypes for prctl, shutil.disk_usage). No third-party detection libs.
+Commands / reads (capture-once, sha256 shown):
+  $ lscpu  # sha256=a47d00a7e5ffaa3d063232f6d8a2339277ee3fde5878e533a494e9266223f144
+  $ read /proc/cpuinfo  # sha256=d619c33a3031f43948675d5f3f81af2c8d28334b77bba5e9f0ce0aa4b8705f88
+  $ read /proc/meminfo  # sha256=be26641ee17565ec185a57202e7d675a2e9fd01d8aa2c62815bf2eb1c277cc85
+  $ lscpu -e  # sha256=33ad51ecde430ff6c8464d89ad5884bd83b349487dd03f38c075dab2741e912a
+  $ numactl --hardware  # SKIPPED: numactl not in PATH sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ uname -m  # sha256=aaf631698ae5160ceb04a97681a14887fdcab47cd6e0f163c87485b3b1340b62
+  $ read /sys/devices/system/cpu/cpu0/cpufreq/base_frequency  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/base_frequency' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/smt/active  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa
+  $ read /sys/devices/system/cpu/smt/control  # sha256=f53cfd31e68d9fc43f08c8b6f8d97e4bc4d592da020860713b416ea60a6c0f24
+  $ list /sys/devices/system/cpu/cpuN  # sha256=90c70e152cf6aa008af0e9cbddd45343e6ba5e06226166da62307bb9d3596cc0
+  $ read /sys/devices/system/cpu/cpu0/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu0/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu0/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu1/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu1/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu1/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu2/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu2/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu2/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu3/topology/core_type  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/topology/core_type' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu3/cpu_capacity  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/devices/system/cpu/cpu3/cpu_capacity' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/level  # sha256=4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/type  # sha256=dc4dad0cef184fb5f194c67a101f83acad5e1c1bc80b03217b03152d2478aaaa
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/size  # sha256=a8a65783418b0f3e1a40010bde03c4713b57420000a6fe3116fb3b2d266c024a
+  $ read /sys/devices/system/cpu/cpu0/cache/index0/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/level  # sha256=4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/type  # sha256=d25bf25583662ba3bb850925a74a7123053b5d6e5592e6e1c2a9d56653792e44
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/size  # sha256=1451566a7ba657a9c136b6408f17b8aa6c516681e01fd703df5d666d9af1b1d0
+  $ read /sys/devices/system/cpu/cpu0/cache/index1/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/level  # sha256=53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/type  # sha256=df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/size  # sha256=d080d15ede009d61eec7a2156dbeb8637a21d5d56a18a00fcd73b902a42703e8
+  $ read /sys/devices/system/cpu/cpu0/cache/index2/shared_cpu_list  # sha256=9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/level  # sha256=1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/type  # sha256=df18bb7a601a795f3e732f70f839d226f06c7b71bf0f60de814dcace9388184a
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/size  # sha256=c758ee6788d94b982a243292c6f9507ea778ae5c18086fa143d1a22c164bd146
+  $ read /sys/devices/system/cpu/cpu0/cache/index3/shared_cpu_list  # sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc
+  $ read /proc/sys/vm/swappiness  # sha256=95cf32708a31caa478a0e9141103ac567d85e5186e697e7e0c81f75589999e31
+  $ getconf PAGE_SIZE  # sha256=25ac87b7309b7946b51c32e824793ff48b56b735efa16875cf33e4ba67523d91
+  $ dmidecode -t memory  # SKIPPED: dmidecode not in PATH sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/hypervisor/type  # SKIPPED: /sys/hypervisor absent sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ systemd-detect-virt  # sha256=00d151e7d392e68e2c756a6fc42640006ddc0a98d37dba3f90a7b73f63188bbd
+  $ test -e /.dockerenv  # sha256=b1ce38655e60454093fb2ef023e2bba4e2cec0a9ced6190d3b89f7435cb6247c
+  $ test -e /run/.containerenv  # sha256=08b6a0bc6906cd596f1458be5ac2911c478709b27e4f3c52e8edd0293e2f4c56
+  $ read /proc/1/cgroup  # sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107
+  $ read /proc/self/cgroup  # sha256=e57fd7b21104f091de366ace1464596378a498b0a5e63f1b21147a8998c20107
+  $ read /proc/self/status  # sha256=13e531fbbf26192f14a3477cdb2192a1c5bd1dd756316efbec26c3a64c0fc8f8
+  $ read /proc/mounts  # sha256=3f210e757512fd38c4d3222cc70864012ca61569c8c12a024375003ca8c8b788
+  $ read /sys/class/dmi/id/sys_vendor  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/sys_vendor' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ read /sys/class/dmi/id/product_name  # SKIPPED: unreadable: [Errno 2] No such file or directory: '/sys/class/dmi/id/product_name' sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  $ resolve cgroup base  # sha256=85bae2ead9d613eb16150e89460f06daea72d31beaa1c37c68457a29a0fdba68
+  $ test cgroup v2 memory.max  # sha256=fb04dcb6970e4c3d1873de51fd5a50d7bb46b3383113602665c350ec40b5f990
+  $ read /sys/fs/cgroup/memory.max  # sha256=c42316e609a7bc837c19fd213e9c8bb81b92613a194f5dab1f8cbc0efabb8f9b
+  $ read /sys/fs/cgroup/memory.high  # sha256=dbe7218fd3953d71eac340668b850fe4b57278326a462a0cf0ad506efbf8b02e
+  $ read /sys/fs/cgroup/memory.current  # sha256=b7a2625571da3ae8a531ecc8342c9e8dfd962c3a00ee564b72db2b8340aaf288
+  $ read /sys/fs/cgroup/cpu.max  # sha256=bd8ea316d63ccab47af9329b4b4b427cb510d04fe500195f5aa332d211d9fd3f
+  $ read /sys/fs/cgroup/cpuset.cpus.effective  # sha256=b2f03f42d35e331b1b8f8b03648dab495a27d703b10d8df4fe5c3346f34de4cc
+  $ read /proc/stat  # sha256=d83ced10ae5618a9bdd2e7dbc138be96a58f7051b9def7196283490e6abe453d
+  $ read /proc/stat  # sha256=bae41e72695bf2b0638d57e579ce1b1cb28e4daf58abfdea2d3611636b1b0079

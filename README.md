@@ -1,6 +1,7 @@
 # Local-model
 
-Phase 1 / 1.5: **DeviceProfile** CPU / memory / sandbox detection only.
+Phase 1 / 1.5b: **DeviceProfile** CPU / memory / sandbox / storage /
+thermal detection only.
 
 No benchmarks, model selection, download, or optimization code.
 
@@ -10,21 +11,14 @@ No benchmarks, model selection, download, or optimization code.
 python3 -m device_profile
 ```
 
-Prints a verifiable report (sections 0–9) to stdout: capture-once raw
-dump with sha256, identity/topology/ISA/memory with `<-` evidence,
-execution environment (cgroup/affinity/steal), parser negative control,
-AMX runtime probe (`cpuid_tier` vs `usable_tier`), cross-checks,
-effective_*–based provisional defaults, self-critique, JSON, and target
-reliability statement.
+Report opens with `HOST CLASS: bare-metal|VM|container` and evidence.
+If not bare-metal, a non-representative banner is printed.
 
 ## Design rules
 
-- Every field is either a value actually read from a raw source, or
-  `UNDETECTED (reason: ...)`. No silent defaults.
-- Each raw command/file is captured exactly once; Section 0 and evidence
-  share the same blob (sha256 printed).
-- Downstream defaults use `effective_memory_limit` and
-  `effective_cpu_count`, not raw `/proc` alone.
-- Prefer `/proc`, sysfs, and `lscpu` over third-party libraries
-  (`ctypes` only for AMX `prctl` probe).
-- macOS / Windows paths are stubbed as UNDETECTED in this phase.
+- Every field is a raw read or `UNDETECTED (reason: ...)`.
+- Capture-once with sha256; Section 0 and `<-` evidence share blobs.
+- Downstream defaults use `effective_cores` / `effective_mem_bytes`.
+- `measured_bandwidth_GBps` is `PENDING_PHASE_2` (not computed from DMI).
+- Memory budget is a PROVISIONAL table over `n_ctx`, not a single scalar.
+- `tier_runtime_verified=false` until a later runtime probe.

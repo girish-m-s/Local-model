@@ -5,7 +5,14 @@ from __future__ import annotations
 import platform
 import sys
 
-from .models import DeviceProfile, EvidenceField, HybridInfo, IsaFlags, CacheInfo, undetected
+from .models import (
+    CacheInfo,
+    DeviceProfile,
+    EvidenceField,
+    HybridInfo,
+    IsaFlags,
+    undetected,
+)
 
 
 def detect_device_profile() -> DeviceProfile:
@@ -15,14 +22,18 @@ def detect_device_profile() -> DeviceProfile:
 
         return detect_linux()
     if system == "darwin":
-        return _unsupported_stub("macos", "macOS detector not implemented in Phase 1 scaffold")
+        return _unsupported_stub(
+            "macos",
+            "macOS full detector not implemented; FEAT_* sysctl / pmset noted as unexercised",
+        )
     if system == "windows":
-        return _unsupported_stub("windows", "Windows detector not implemented in Phase 1 scaffold")
+        return _unsupported_stub(
+            "windows", "Windows detector not implemented in Phase 1.5b"
+        )
     return _unsupported_stub(system, f"unsupported platform: {system}")
 
 
 def _unsupported_stub(platform_name: str, reason: str) -> DeviceProfile:
-    """Return a profile full of UNDETECTED rather than fabricating values."""
     u = undetected(reason)
     return DeviceProfile(
         platform=platform_name,
@@ -30,6 +41,13 @@ def _unsupported_stub(platform_name: str, reason: str) -> DeviceProfile:
         detection_libraries=[f"Python {platform.python_version()} stdlib only"],
         commands_run=[],
         raw_source_dump=f"UNDETECTED (reason: {reason})",
+        host_class=EvidenceField(
+            value="UNDETECTED (reason: platform stub)",
+            evidence=reason,
+        ),
+        host_class_banner=f"*** PLATFORM STUB: {reason} ***",
+        target_reliability_statement=reason,
+        devices_reached_note=reason,
         model_name=u,
         vendor=u,
         cpu_family=u,
@@ -70,23 +88,15 @@ def _unsupported_stub(platform_name: str, reason: str) -> DeviceProfile:
         memory_channels=u,
         dimm_count=u,
         dimm_speed_mts=u,
-        theoretical_peak_bandwidth_GBps=u,
-        bandwidth_formula="UNDETECTED",
-        bandwidth_confidence="guess",
         suggested_thread_count=u,
         suggested_thread_formula="UNDETECTED",
-        usable_ram_for_model_bytes=u,
-        usable_ram_formula="UNDETECTED",
-        is_development_proxy=True,
-        proxy_banner=f"*** PLATFORM STUB: {reason} ***",
-        target_reliability_statement=reason,
         cross_checks=[],
         self_critique={
             "fields that are heuristic, not directly read": [],
             "platform code paths not exercised on this machine": [
-                "linux lscpu//proc path",
-                "macos sysctl path",
-                "windows CIM path",
+                "linux path",
+                "macos path",
+                "windows path",
             ],
             "places a default could have been silently substituted": [
                 "entire profile left UNDETECTED rather than guessed",
@@ -99,7 +109,7 @@ def _unsupported_stub(platform_name: str, reason: str) -> DeviceProfile:
 def main(argv: list[str] | None = None) -> int:
     from .report import format_report
 
-    _ = argv  # reserved
+    _ = argv
     profile = detect_device_profile()
     sys.stdout.write(format_report(profile))
     sys.stdout.write("\n")

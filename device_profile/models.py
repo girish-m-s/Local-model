@@ -11,8 +11,10 @@ class QuantKernelTier(str, Enum):
     AMX = "AMX"
     AVX512_VNNI = "AVX512_VNNI"
     AVX512 = "AVX512"
+    AVX_VNNI = "AVX_VNNI"
     AVX2 = "AVX2"
     SSE_ONLY = "SSE_ONLY"
+    ARM_SME = "ARM_SME"
     ARM_I8MM = "ARM_I8MM"
     ARM_DOTPROD = "ARM_DOTPROD"
     ARM_BASELINE = "ARM_BASELINE"
@@ -83,17 +85,23 @@ class IsaFlags:
     arch_family: str  # "x86" | "arm" | "other"
     flags: dict[str, EvidenceField] = field(default_factory=dict)
     flag_match_mode: str = "whitespace-tokenized"
+    absent_branch_note: str = ""
     cpuid_tier: EvidenceField = field(
         default_factory=lambda: undetected("tier not computed")
     )
     usable_tier: EvidenceField = field(
         default_factory=lambda: undetected("tier not computed")
     )
+    tier_runtime_verified: bool = False
+    tier_runtime_verified_note: str = (
+        "tier_runtime_verified=false: CPUID presence does NOT imply the "
+        "inference runtime has kernels for that tier; confirm by probe later."
+    )
     quant_kernel_reasoning: str = ""
-    # Back-compat alias used in older report bits
     quant_kernel_tier: EvidenceField = field(
         default_factory=lambda: undetected("tier not computed")
     )
+    macos_sysctl_feats: dict[str, EvidenceField] = field(default_factory=dict)
 
 
 @dataclass
@@ -146,8 +154,19 @@ class ExecutionEnvironment:
     steal_percent: EvidenceField
     effective_memory_limit: EvidenceField
     effective_memory_winner: str
-    effective_cpu_count: EvidenceField
-    effective_cpu_winner: str
+    effective_mem_inputs: str = ""
+    effective_cpu_count: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    effective_cpu_winner: str = ""
+    # Spec aliases
+    effective_cores: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    effective_cores_inputs: str = ""
+    effective_mem_bytes: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
 
 
 @dataclass
@@ -201,8 +220,15 @@ class DeviceProfile:
         )
     )
 
-    # Execution environment (Phase 1.5)
+    # Host class / execution environment
+    host_class: EvidenceField = field(
+        default_factory=lambda: undetected("unset")
+    )
+    host_class_banner: str = ""
     exec_env: Optional[ExecutionEnvironment] = None
+    storage: Any = None  # extras.StorageInfo
+    thermal_power: Any = None  # extras.ThermalPowerInfo
+    memory_budget: Any = None  # extras.MemoryBudget
 
     # ISA
     isa: IsaFlags = field(default_factory=lambda: IsaFlags(arch_family="other"))
@@ -243,26 +269,22 @@ class DeviceProfile:
     dimm_speed_mts: EvidenceField = field(
         default_factory=lambda: undetected("unset")
     )
-    theoretical_peak_bandwidth_GBps: EvidenceField = field(
-        default_factory=lambda: undetected("unset")
+    # Bandwidth is measured, not computed from DMI.
+    measured_bandwidth_GBps: EvidenceField = field(
+        default_factory=lambda: EvidenceField(
+            value="PENDING_PHASE_2",
+            evidence=(
+                "placeholder: theoretical DMI bandwidth deleted; "
+                "bandwidth will be measured in Phase 2, not computed"
+            ),
+        )
     )
-    bandwidth_formula: str = ""
-    bandwidth_confidence: str = ""
 
     # Derived (provisional) — MUST use effective_* limits
     suggested_thread_count: EvidenceField = field(
         default_factory=lambda: undetected("unset")
     )
     suggested_thread_formula: str = ""
-    usable_ram_for_model_bytes: EvidenceField = field(
-        default_factory=lambda: undetected("unset")
-    )
-    usable_ram_formula: str = ""
-    usable_ram_from_memavailable_bytes: EvidenceField = field(
-        default_factory=lambda: undetected("unset")
-    )
-    usable_ram_warning: str = ""
-    headroom_factor: float = 0.70
 
     # Cross-checks & critique
     cross_checks: list[CrossCheck] = field(default_factory=list)
@@ -270,6 +292,7 @@ class DeviceProfile:
     self_critique: dict[str, list[str]] = field(default_factory=dict)
     per_core_type_counts: dict[str, int] = field(default_factory=dict)
     lscpu_unique_cores: Optional[int] = None
+    devices_reached_note: str = ""
 
     def to_json_dict(self) -> dict[str, Any]:
         def convert(obj: Any) -> Any:
