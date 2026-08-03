@@ -1,0 +1,1325 @@
+NOTE: This is a harness smoke log from the cloud container with PHASE2_LOAD_THRESHOLD=100 OVERRIDE. It is NOT a Phase 2.1 device deliverable.
+=== PHASE 2.1 MEASUREMENT HARNESS REPORT ===
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+*** NON-BARE-METAL HOST — bandwidth/thermal numbers may be unrepresentative of an edge target ***
+profile_effective_cores: 4
+profile_effective_mem_bytes: 16792014848
+usable_tier (from Phase 1.5): AVX512_VNNI
+total_runtime_s: 103.72
+kernel_compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_8vio3r47/kernels.so
+  <- log: '(empty)'
+
+=== BENCH 1 — ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c) ===
+status: INVALID
+pre: loadavg=(0.0, 0.22, 0.62) MemAvailable=15825240064 MemFree=15313756160 OK
+  <- /proc/loadavg: 0.00 0.22 0.62 5/231 6625
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14954840 kB
+  <- MemAvailable:   15454336 kB
+quiet_gate: status=OK readings=[(0.0, 0.22, 0.62)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=0.0 threshold=100.0; /proc/loadavg: 0.00 0.22 0.62 5/231 6625; MemTotal:       16398452 kB; MemFree:        14954840 kB; MemAvailable:   15454336 kB
+backend: numpy numpy 2.4.4 allocation + OpenMP-C stream_triad_reps
+  <- numpy_available=True (numpy 2.4.4); compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_8vio3r47/kernels.so; omp=True; lib=/tmp/phase2_kernels_8vio3r47/kernels.so
+working_set_bytes: 536870904
+  <- policy: L3 SUSPECT or undetected (l3=335544320, logical_cores=4); using 512 MiB working set as required by Phase 2 spec
+l3_suspect_fallback: True
+bytes_moved_per_iter: 536870904
+reps (constant across sweep): 120
+calibration: calibrated at OMP_NUM_THREADS=4; final reps=120; last_time_s=0.9402928239996982; bytes_moved_per_timed_call=64424508480
+  <- cal_step reps=1 time_s=0.008283433000087825
+  <- cal_step reps=120 time_s=0.9402928239996982
+prefault_wall_s: 0.2991148669998438
+  <- full write of a,b,c (536870904 bytes) + 1 serial triad before timing; prefault_wall_s=0.2991148669998438
+cache_proof: ws=536870904 L3=335544320 ratio=1.599999976158142
+  <- working_set=536870904 vs L3=335544320; ratio=1.600x; L3 SUSPECT → forced 512 MiB policy; triad always writes `a`, so results cannot be pure register/L1 reuse
+threads=1: reps=120 median=17.2850 min=17.1898 max=17.4214 mean=17.2993 CV%=0.51 GB/s
+  DISCARDED warmup: time_s=3.7476194769997164 gbs=17.19078174168772 reps=120
+  raw_gbs: [17.18975846649731, 17.255390203178656, 17.34522600922441, 17.42135677925566, 17.284995922893295]
+  raw_times_s: [3.747842566000145, 3.733587460000308, 3.7142501600001196, 3.6980190060003224, 3.727192576000107]
+  bytes_moved_per_timed_call: 64424508480 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=17.18975846649731 expected=17.18975846649731 rel_err=0.0
+  reconstruct[OK]: reported=17.255390203178656 expected=17.255390203178656 rel_err=0.0
+  reconstruct[OK]: reported=17.34522600922441 expected=17.34522600922441 rel_err=0.0
+  reconstruct[OK]: reported=17.42135677925566 expected=17.42135677925566 rel_err=0.0
+  reconstruct[OK]: reported=17.284995922893295 expected=17.284995922893295 rel_err=0.0
+  <- OMP_NUM_THREADS=1; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=2: reps=120 median=71.1243 min=69.8517 max=71.4323 mean=70.9217 CV%=0.91 GB/s
+  DISCARDED warmup: time_s=0.9238002029997006 gbs=69.73857363400134 reps=120
+  raw_gbs: [71.39191085211255, 71.4323230278175, 71.12427460635008, 69.85168358288348, 70.80818919656672]
+  raw_times_s: [0.9024062770004093, 0.9018957490002322, 0.9058019760000207, 0.9223043050001252, 0.909845445999963]
+  bytes_moved_per_timed_call: 64424508480 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=71.39191085211255 expected=71.39191085211255 rel_err=0.0
+  reconstruct[OK]: reported=71.4323230278175 expected=71.4323230278175 rel_err=0.0
+  reconstruct[OK]: reported=71.12427460635008 expected=71.12427460635008 rel_err=0.0
+  reconstruct[OK]: reported=69.85168358288348 expected=69.85168358288348 rel_err=0.0
+  reconstruct[OK]: reported=70.80818919656672 expected=70.80818919656672 rel_err=0.0
+  <- OMP_NUM_THREADS=2; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=3: reps=120 median=70.5639 min=61.2529 max=71.8849 mean=68.8227 CV%=6.25 GB/s
+  DISCARDED warmup: time_s=0.9075042239996947 gbs=70.9908634871783 reps=120
+  raw_gbs: [71.88492208343517, 70.72510704873855, 70.56393662906304, 69.68644293587028, 61.25289279986565]
+  raw_times_s: [0.896217267999873, 0.9109142590000374, 0.9129948179997882, 0.9244912750000367, 1.0517790349999814]
+  bytes_moved_per_timed_call: 64424508480 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=71.88492208343517 expected=71.88492208343517 rel_err=0.0
+  reconstruct[OK]: reported=70.72510704873855 expected=70.72510704873855 rel_err=0.0
+  reconstruct[OK]: reported=70.56393662906304 expected=70.56393662906304 rel_err=0.0
+  reconstruct[OK]: reported=69.68644293587028 expected=69.68644293587028 rel_err=0.0
+  reconstruct[OK]: reported=61.25289279986565 expected=61.25289279986565 rel_err=0.0
+  <- OMP_NUM_THREADS=3; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+threads=4: reps=120 median=77.3454 min=75.8749 max=78.6914 mean=77.5154 CV%=1.50 GB/s
+  DISCARDED warmup: time_s=1.003978162000294 gbs=64.16923287618394 reps=120
+  raw_gbs: [75.87488547783249, 77.08806539454783, 77.34540895686914, 78.57721660319153, 78.69137971942935]
+  raw_times_s: [0.8490887079997265, 0.83572610300007, 0.8329454760000772, 0.8198878919997696, 0.8186984230001144]
+  bytes_moved_per_timed_call: 64424508480 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=75.87488547783249 expected=75.87488547783249 rel_err=0.0
+  reconstruct[OK]: reported=77.08806539454783 expected=77.08806539454783 rel_err=0.0
+  reconstruct[OK]: reported=77.34540895686914 expected=77.34540895686914 rel_err=0.0
+  reconstruct[OK]: reported=78.57721660319153 expected=78.57721660319153 rel_err=0.0
+  reconstruct[OK]: reported=78.69137971942935 expected=78.69137971942935 rel_err=0.0
+  <- OMP_NUM_THREADS=4; os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+validity: SUPERLINEAR — INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve
+  <- threads=2: median/median(1)=4.114798 > 2 (SUPERLINEAR — INVALID)
+  <- threads=3: median/median(1)=4.082381 > 3 (SUPERLINEAR — INVALID)
+  <- threads=4: median/median(1)=4.474714 > 4 (SUPERLINEAR — INVALID)
+saturation_thread_count: NOT REPORTED  <- SUPERLINEAR — INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve
+post: loadavg=(1.34, 0.52, 0.7) MemAvailable=15281049600 MemFree=14769438720 CONTAMINATED
+  <- /proc/loadavg: 1.34 0.52 0.70 4/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14423280 kB
+  <- MemAvailable:   14922900 kB
+
+=== BENCH 2 — THREAD SATURATION FOR COMPUTE ===
+status: INVALID
+pre: loadavg=(1.34, 0.52, 0.7) MemAvailable=15815356416 MemFree=15303745536 OK
+  <- /proc/loadavg: 1.34 0.52 0.70 1/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14945064 kB
+  <- MemAvailable:   15444684 kB
+quiet_gate: status=OK readings=[(1.34, 0.52, 0.7)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=1.34 threshold=100.0; /proc/loadavg: 1.34 0.52 0.70 1/239 6634; MemTotal:       16398452 kB; MemFree:        14945064 kB; MemAvailable:   15444684 kB
+sizing_rule: working_set_bytes(n_threads) = 0.5 * L2_per_core * n_threads; cache pressure per core constant across sweep
+L2/fit: L2_per_core=2097152; per-thread target = 0.5*L2 = 1048576.0; fp32 uses 2 float32 vectors; int8 uses 2 int8 vectors
+isa_verification: NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.
+calibration: reps calibrated at 1 thread with per-thread WS; reps_fp32=3776, reps_i8=4572 held constant across sweep
+host is non-hybrid; P-only/E-only pinned curves NOT run (no core_type/cpu_capacity signals)
+-- curve: all_cores --
+  <- affinity: os.sched_setaffinity(0, [0, 1, 2, 3]) → affinity=[0, 1, 2, 3]
+  fp32 threads=1: bytes_per_thread=1048576.0 ws=1048576 reps=3776 median=3.9958 min=3.9818 max=3.9961 CV%=0.15 GFLOPS
+    DISCARDED warmup: time_s=0.2476982550001594 gflops=3.99621605731281
+    raw_gflops: [3.98184056316286, 3.9960209817143313, 3.9958291673463076, 3.993471022401338, 3.99612377637219]
+    raw_times_s: [0.24859251100042457, 0.24771034700006567, 0.24772223799982385, 0.24786851800035947, 0.2477039750001495]
+  fp32 threads=2: bytes_per_thread=1048576.0 ws=2097152 reps=3776 median=14.7068 min=14.4456 max=14.7250 CV%=1.00 GFLOPS
+    DISCARDED warmup: time_s=0.13503476899995803 gflops=14.660753690781782
+    raw_gflops: [14.445590143454034, 14.454100957392333, 14.725024741668301, 14.706849753729795, 14.713739260256379]
+    raw_times_s: [0.1370460789999015, 0.1369653839997227, 0.13444537599980322, 0.13461152599984416, 0.13454849599975205]
+  fp32 threads=3: bytes_per_thread=1048576.0 ws=3145728 reps=3776 median=14.8251 min=14.5962 max=15.0498 CV%=1.15 GFLOPS
+    DISCARDED warmup: time_s=0.20266649099994538 gflops=14.652482595165672
+    raw_gflops: [14.864190039170145, 15.049765485393994, 14.71239327896833, 14.825080032801532, 14.59616284389049]
+    raw_times_s: [0.19977995599992937, 0.19731651200027045, 0.2018412080001326, 0.2003069949996643, 0.20344848600007026]
+  fp32 threads=4: bytes_per_thread=1048576.0 ws=4194304 reps=3776 median=14.9128 min=14.5859 max=15.1374 CV%=1.52 GFLOPS
+    DISCARDED warmup: time_s=0.2703209109999989 gflops=14.647120569965882
+    raw_gflops: [14.58594253518287, 14.912752583657419, 15.137415215829357, 14.755382089805432, 15.069419159738525]
+    raw_times_s: [0.27145472200027143, 0.26550584500000696, 0.2615653279999606, 0.2683375429996886, 0.26274555999998483]
+  int8 threads=1: bytes_per_thread=1048576.0 ws=1048576 reps=4572 median=19.7735 min=19.6295 max=19.7870 CV%=0.39 GOPS
+    DISCARDED warmup: time_s=0.24203798200005622 gops=19.807178329551956
+    raw_gops: [19.78696805076878, 19.773610377178244, 19.77353363156471, 19.629518112084885, 19.645322057881625]
+    raw_times_s: [0.2422851979999905, 0.24244886900032725, 0.2424498099999255, 0.24422858699972494, 0.24403211400021974]
+  int8 threads=2: bytes_per_thread=1048576.0 ws=2097152 reps=4572 median=72.4354 min=70.2308 max=72.7690 CV%=1.46 GOPS
+    DISCARDED warmup: time_s=0.13178881800013187 gops=72.7541159371382
+    raw_gops: [72.76896692511488, 70.23076465394466, 72.57268974425426, 72.43542250276089, 71.56312254532769]
+    raw_times_s: [0.131761921999896, 0.13652391499999794, 0.13211828000021342, 0.13236864800001058, 0.13398212099991724]
+  int8 threads=3: bytes_per_thread=1048576.0 ws=3145728 reps=4572 median=73.6306 min=46.4816 max=74.2668 CV%=17.83 NOISY GOPS
+    DISCARDED warmup: time_s=0.19514694500003316 gops=73.69968520899754
+    raw_gops: [74.26676258551399, 46.48164815349253, 73.63057665238433, 73.66146821806849, 73.08224200972133]
+    raw_times_s: [0.19365686499986623, 0.3094182110003203, 0.19533010700024533, 0.19524819100024615, 0.1967956650000815]
+  int8 threads=4: bytes_per_thread=1048576.0 ws=4194304 reps=4572 median=75.0335 min=74.6007 max=75.2729 CV%=0.36 GOPS
+    DISCARDED warmup: time_s=0.2553736219997518 gops=75.09138076922697
+    raw_gops: [75.2729236818368, 75.03354549637179, 74.89145213835711, 75.21183079153141, 74.60074722833372]
+    raw_times_s: [0.2547577129998899, 0.2555704619999233, 0.2560553620000974, 0.25496464700017896, 0.2570531609999307]
+  validity: SUPERLINEAR — INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve
+    <- threads=2: median/median(1)=3.680550 > 2 (SUPERLINEAR — INVALID)
+    <- threads=3: median/median(1)=3.710139 > 3 (SUPERLINEAR — INVALID)
+  knee(fp32): NOT REPORTED  <- NOT REPORTED — SUPERLINEAR — INVALID
+post: loadavg=(1.75, 0.63, 0.73) MemAvailable=15809773568 MemFree=15297839104 CONTAMINATED
+  <- /proc/loadavg: 1.75 0.63 0.73 4/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14939296 kB
+  <- MemAvailable:   15439232 kB
+
+=== BENCH 3 — SUSTAINED VS BURST (thermal, STREAM/DRAM-bound) ===
+status: SKIPPED
+pre: loadavg=(1.75, 0.63, 0.73) MemAvailable=15809773568 MemFree=15297839104 OK
+  <- /proc/loadavg: 1.75 0.63 0.73 4/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14939296 kB
+  <- MemAvailable:   15439232 kB
+quiet_gate: status=OK readings=[(1.75, 0.63, 0.73)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=1.75 threshold=100.0; /proc/loadavg: 1.75 0.63 0.73 4/239 6634; MemTotal:       16398452 kB; MemFree:        14939296 kB; MemAvailable:   15439232 kB
+kernel: stream_triad_reps (same as BENCH 1)
+sat_threads (from BENCH 1 BW saturation): None
+duration_s: 20.0; bucket_s: 10.0
+battery_dual_run: NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only
+SKIPPED: BENCH 1 saturation_thread_count unavailable (curve INVALID or BLOCKED); cannot choose DRAM-bound thread count
+post: loadavg=(1.75, 0.63, 0.73) MemAvailable=15809773568 MemFree=15297839104 CONTAMINATED
+  <- /proc/loadavg: 1.75 0.63 0.73 4/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14939296 kB
+  <- MemAvailable:   15439232 kB
+
+=== BENCH 4 — mmap / PAGE-FAULT COST ===
+status: OK
+pre: loadavg=(1.75, 0.63, 0.73) MemAvailable=15809773568 MemFree=15297839104 OK
+  <- /proc/loadavg: 1.75 0.63 0.73 4/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14939296 kB
+  <- MemAvailable:   15439232 kB
+quiet_gate: status=OK readings=[(1.75, 0.63, 0.73)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=1.75 threshold=100.0; /proc/loadavg: 1.75 0.63 0.73 4/239 6634; MemTotal:       16398452 kB; MemFree:        14939296 kB; MemAvailable:   15439232 kB
+cached_file_bytes: 6716805939 (0.4x effective_mem=16792014848)
+oversized_file_bytes: 25188022272 (1.5x effective_mem)
+disk free/total on /home/ubuntu/.cache/localmodel: 248111734784 / 270436077568
+-- file: cached_0.4x_mem path=/home/ubuntu/.cache/localmodel/phase21_mmap_cached.bin --
+  write: 5.52376167500006s (1.2159840221564098 GB/s file_size/time)
+  <- os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase21_mmap_cached.bin', POSIX_FADV_DONTNEED) OK
+  cold: 2.976956290000089s effective_read_gbs=2.256267328668033 pages_per_second=550846.515788094
+    minflt_delta=153737 (before=15122 after=168859) majflt_delta=1 (before=21 after=22)
+    io_read_bytes_delta=6716809216 (before=1433600 after=6718242816)
+    <- /proc/self/stat minflt=15122 majflt=21; raw_tail=['15122', '6123', '21', '3']
+    <- /proc/self/stat minflt=168859 majflt=22; raw_tail=['168859', '6123', '22', '3']
+    <- /proc/self/io read_bytes=1433600; raw_line='read_bytes: 1433600'
+    <- /proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)
+  warm: 0.49336353399985455s effective_read_gbs=0.0 pages_per_second=3323808.6866802834
+    minflt_delta=102491 (before=168859 after=271350) majflt_delta=0 (before=22 after=22)
+    io_read_bytes_delta=0 (before=6718242816 after=6718242816)
+    <- /proc/self/stat minflt=168859 majflt=22; raw_tail=['168859', '6123', '22', '3']
+    <- /proc/self/stat minflt=271350 majflt=22; raw_tail=['271350', '6123', '22', '3']
+    <- /proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'
+    <- /proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)
+-- file: oversized_1.5x_mem path=/home/ubuntu/.cache/localmodel/phase21_mmap_oversized.bin --
+  write: 16.15136890900021s (1.5594976756406196 GB/s file_size/time)
+  <- os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase21_mmap_oversized.bin', POSIX_FADV_DONTNEED) OK
+  cold: 10.372471155000312s effective_read_gbs=2.428353277016102 pages_per_second=592859.6867715092
+    minflt_delta=576509 (before=273926 after=850435) majflt_delta=1 (before=22 after=23)
+    io_read_bytes_delta=25188024320 (before=6718242816 after=31906267136)
+    <- /proc/self/stat minflt=273926 majflt=22; raw_tail=['273926', '6123', '22', '3']
+    <- /proc/self/stat minflt=850435 majflt=23; raw_tail=['850435', '6123', '23', '3']
+    <- /proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'
+    <- /proc/self/io read_bytes=31906267136; raw_line='read_bytes: 31906267136'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)
+  warm: 10.499752186000023s effective_read_gbs=2.3989160766655777 pages_per_second=585672.8702796821
+    minflt_delta=576508 (before=850435 after=1426943) majflt_delta=1 (before=23 after=24)
+    io_read_bytes_delta=25188024320 (before=31906267136 after=57094291456)
+    <- /proc/self/stat minflt=850435 majflt=23; raw_tail=['850435', '6123', '23', '3']
+    <- /proc/self/stat minflt=1426943 majflt=24; raw_tail=['1426943', '6123', '24', '3']
+    <- /proc/self/io read_bytes=31906267136; raw_line='read_bytes: 31906267136'
+    <- /proc/self/io read_bytes=57094291456; raw_line='read_bytes: 57094291456'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)
+delta (cached - oversized): {'cold_read_gbs_cached_minus_oversized': -0.172085948348069, 'warm_read_gbs_cached_minus_oversized': -2.3989160766655777, 'cold_pages_per_second_cached_minus_oversized': -42013.17098341521, 'deliverable': 'cached vs oversized cold/warm effective_read_gbs delta; large negative/near-zero cold delta on oversized indicates page-cache / reclaim pressure penalty for models that do not fit in RAM'}
+note: Two files: cached=0.4*effective_mem, oversized=1.5*effective_mem. Effective read bandwidth = /proc/self/io read_bytes delta / time. pages_per_second = pages touched / time (not a bandwidth). minflt + read_bytes reported; majflt alone is insufficient for mmap readahead.
+post: loadavg=(1.62, 0.76, 0.77) MemAvailable=15852695552 MemFree=15365038080 CONTAMINATED
+  <- /proc/loadavg: 1.62 0.76 0.77 2/239 6634
+  <- MemTotal:       16398452 kB
+  <- MemFree:        15004920 kB
+  <- MemAvailable:   15481148 kB
+
+=== SECTION D — DERIVED OUTPUT ===
+measured_bandwidth_GBps (BENCH1 saturated median): None
+model_GiB uses 2^30 bytes (GGUF convention). measured_bandwidth_GBps uses decimal 1e9 bytes/s (STREAM convention). upper_tok_s = BW_bytes_per_s / model_bytes.
+predicted_decode_tok_s(model_bytes) = measured_bandwidth_GBps * 1e9 / model_bytes
+UPPER BOUND assuming perfect bandwidth utilization. Real engines typically hit 40-70% of it.
+ model_GiB     bytes(2^30)     upper_tok_s  realistic_0.55x  upper_if_1e9
+0.55x realistic band: UNVALIDATED ASSUMPTION — to be checked in Phase 4 against a real engine.
+
+-- KV-cache extension (weights-only model is incomplete) --
+config: {'name': 'representative_dense_7B_llama2_like', 'n_layers': 32, 'n_kv_heads': 32, 'head_dim': 128, 'bytes_per_element': 2, 'model_weight_GiB': 7.0, 'note': 'Assumed dense Transformer decode: every weight read every token + full KV cache up to n_ctx. NOT a real GGUF measurement.'}
+UPPER BOUND with perfect bandwidth utilization. KV term grows with n_ctx and can dominate at long context.
+  n_ctx=512: kv_bytes=268435456 total_bytes/token=7784628224 kv_share=0.034482758620689655 upper_tok_s=None (weights_only=None)
+  n_ctx=4096: kv_bytes=2147483648 total_bytes/token=9663676416 kv_share=0.2222222222222222 upper_tok_s=None (weights_only=None)
+  n_ctx=32768: kv_bytes=17179869184 total_bytes/token=24696061952 kv_share=0.6956521739130435 upper_tok_s=None (weights_only=None)
+
+MoE: WRONG FOR MoE: this model assumes every weight is read every token. Mixture-of-Experts models only activate a subset of experts per token, so weight bytes/token are much smaller and MoE will be systematically UNDERRATED (predicted tok/s too low) by BW/model_bytes. FLAG FOR PHASE 3 selection policy.
+Prefill/TTFT: OPEN GAP: prefill / time-to-first-token is compute-bound (or mixed), not bandwidth-bound. Nothing in this harness predicts TTFT.
+
+recommended_thread_count: None  <- BENCH 2 fp32 knee on all_cores = None (not raw core count 4); bw_sat_threads=None; bench2_status=INVALID
+recommended_thread_count_sustained: None  <- BENCH 3 SKIPPED: BENCH 1 saturation_thread_count unavailable (curve INVALID or BLOCKED); cannot choose DRAM-bound thread count
+
+=== SELF-CRITIQUE ===
+- measurements blocked or contaminated:
+  - no bench BLOCKED by loadavg>0.3 after retries (or gate not exercised)
+- likely wrong under virtualization:
+  - BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers
+  - BENCH 3 thermal/cpufreq often absent under KVM — THERMAL BLIND path
+  - BENCH 4 overlay FS + virtio block ≠ bare-metal NVMe latency
+  - steal time / noisy neighbors can still inflate CV (see NOISY tags)
+- where a benchmark may have been served from cache rather than RAM:
+  - BENCH 1 working_set=536870904 vs L3=335544320 (suspect_fallback=True); prefault_s=0.2991148669998438
+  - BENCH 2 per-thread 0.5*L2 — compute-bound by design, not DRAM
+  - BENCH 4 uses posix_fadvise(DONTNEED); without root drop_caches, cold pass may still hit page cache — trust io read_bytes delta
+- ISA tier verification:
+  - NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.
+  - Phase 1.5 usable_tier=AVX512_VNNI was NOT exercised by these scalar C/+OpenMP kernels
+- other:
+  - total_runtime_s=103.7 budget=600 over=False
+  - 0.55x decode band is an unvalidated assumption pending Phase 4
+  - Phase 2.1: constant reps + reconstruction assert; SUPERLINEAR gate; CONTAMINATED aborts; STREAM thermals; GiB prediction table
+
+=== PHASE 2.1 JSON ===
+{
+  "phase": "2.1",
+  "host_class": "container",
+  "host_class_evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED",
+  "effective_cores": 4,
+  "effective_mem_bytes": 16792014848,
+  "usable_tier": "AVX512_VNNI",
+  "kernel_compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_8vio3r47/kernels.so",
+  "kernel_compile_log": "(empty)",
+  "total_runtime_s": 103.71756625175476,
+  "runtime_budget_s": 600,
+  "runtime_over_budget": false,
+  "bench1": {
+    "name": "BENCH 1 \u2014 ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c)",
+    "status": "INVALID",
+    "backend": "numpy numpy 2.4.4 allocation + OpenMP-C stream_triad_reps",
+    "backend_evidence": "numpy_available=True (numpy 2.4.4); compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_8vio3r47/kernels.so; omp=True; lib=/tmp/phase2_kernels_8vio3r47/kernels.so",
+    "working_set_bytes": 536870904,
+    "working_set_policy": "L3 SUSPECT or undetected (l3=335544320, logical_cores=4); using 512 MiB working set as required by Phase 2 spec",
+    "l3_suspect_fallback": true,
+    "n_elements_per_array": 22369621,
+    "bytes_moved_per_iter": 536870904,
+    "pre": "SystemSnapshot(when='bench1_pre_attempt1', loadavg_1_5_15=(0.0, 0.22, 0.62), mem_available_bytes=15825240064, mem_free_bytes=15313756160, mem_total_bytes=16792014848, contaminated=False, evidence=['/proc/loadavg: 0.00 0.22 0.62 5/231 6625', 'MemTotal:       16398452 kB', 'MemFree:        14954840 kB', 'MemAvailable:   15454336 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          0.0,
+          0.22,
+          0.62
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=0.0 threshold=100.0; /proc/loadavg: 0.00 0.22 0.62 5/231 6625; MemTotal:       16398452 kB; MemFree:        14954840 kB; MemAvailable:   15454336 kB"
+      ]
+    },
+    "thread_sweeps": [
+      {
+        "threads": 1,
+        "reps": 120,
+        "bytes_moved_per_iter": 536870904,
+        "bytes_moved_per_timed_call": 64424508480,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "1",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 3.7476194769997164,
+          "gbs": 17.19078174168772,
+          "reps": 120
+        },
+        "raw_times_s": [
+          3.747842566000145,
+          3.733587460000308,
+          3.7142501600001196,
+          3.6980190060003224,
+          3.727192576000107
+        ],
+        "raw_gbs": [
+          17.18975846649731,
+          17.255390203178656,
+          17.34522600922441,
+          17.42135677925566,
+          17.284995922893295
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 17.18975846649731,
+            "expected_gbs": 17.18975846649731,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 3.747842566000145,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 17.255390203178656,
+            "expected_gbs": 17.255390203178656,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 3.733587460000308,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 17.34522600922441,
+            "expected_gbs": 17.34522600922441,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 3.7142501600001196,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 17.42135677925566,
+            "expected_gbs": 17.42135677925566,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 3.6980190060003224,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 17.284995922893295,
+            "expected_gbs": 17.284995922893295,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 3.727192576000107,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 17.284995922893295,
+        "min_gbs": 17.18975846649731,
+        "max_gbs": 17.42135677925566,
+        "mean_gbs": 17.29934547620987,
+        "cv_pct": 0.5100269792745333,
+        "noisy": false
+      },
+      {
+        "threads": 2,
+        "reps": 120,
+        "bytes_moved_per_iter": 536870904,
+        "bytes_moved_per_timed_call": 64424508480,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "2",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9238002029997006,
+          "gbs": 69.73857363400134,
+          "reps": 120
+        },
+        "raw_times_s": [
+          0.9024062770004093,
+          0.9018957490002322,
+          0.9058019760000207,
+          0.9223043050001252,
+          0.909845445999963
+        ],
+        "raw_gbs": [
+          71.39191085211255,
+          71.4323230278175,
+          71.12427460635008,
+          69.85168358288348,
+          70.80818919656672
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 71.39191085211255,
+            "expected_gbs": 71.39191085211255,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9024062770004093,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 71.4323230278175,
+            "expected_gbs": 71.4323230278175,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9018957490002322,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 71.12427460635008,
+            "expected_gbs": 71.12427460635008,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9058019760000207,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 69.85168358288348,
+            "expected_gbs": 69.85168358288348,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9223043050001252,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 70.80818919656672,
+            "expected_gbs": 70.80818919656672,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.909845445999963,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 71.12427460635008,
+        "min_gbs": 69.85168358288348,
+        "max_gbs": 71.4323230278175,
+        "mean_gbs": 70.92167625314606,
+        "cv_pct": 0.9139761764724422,
+        "noisy": false
+      },
+      {
+        "threads": 3,
+        "reps": 120,
+        "bytes_moved_per_iter": 536870904,
+        "bytes_moved_per_timed_call": 64424508480,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "3",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9075042239996947,
+          "gbs": 70.9908634871783,
+          "reps": 120
+        },
+        "raw_times_s": [
+          0.896217267999873,
+          0.9109142590000374,
+          0.9129948179997882,
+          0.9244912750000367,
+          1.0517790349999814
+        ],
+        "raw_gbs": [
+          71.88492208343517,
+          70.72510704873855,
+          70.56393662906304,
+          69.68644293587028,
+          61.25289279986565
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 71.88492208343517,
+            "expected_gbs": 71.88492208343517,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.896217267999873,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 70.72510704873855,
+            "expected_gbs": 70.72510704873855,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9109142590000374,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 70.56393662906304,
+            "expected_gbs": 70.56393662906304,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9129948179997882,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 69.68644293587028,
+            "expected_gbs": 69.68644293587028,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.9244912750000367,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 61.25289279986565,
+            "expected_gbs": 61.25289279986565,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 1.0517790349999814,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 70.56393662906304,
+        "min_gbs": 61.25289279986565,
+        "max_gbs": 71.88492208343517,
+        "mean_gbs": 68.82266029939453,
+        "cv_pct": 6.252852344459274,
+        "noisy": false
+      },
+      {
+        "threads": 4,
+        "reps": 120,
+        "bytes_moved_per_iter": 536870904,
+        "bytes_moved_per_timed_call": 64424508480,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "omp_num_threads": "4",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 1.003978162000294,
+          "gbs": 64.16923287618394,
+          "reps": 120
+        },
+        "raw_times_s": [
+          0.8490887079997265,
+          0.83572610300007,
+          0.8329454760000772,
+          0.8198878919997696,
+          0.8186984230001144
+        ],
+        "raw_gbs": [
+          75.87488547783249,
+          77.08806539454783,
+          77.34540895686914,
+          78.57721660319153,
+          78.69137971942935
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 75.87488547783249,
+            "expected_gbs": 75.87488547783249,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.8490887079997265,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 77.08806539454783,
+            "expected_gbs": 77.08806539454783,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.83572610300007,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 77.34540895686914,
+            "expected_gbs": 77.34540895686914,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.8329454760000772,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 78.57721660319153,
+            "expected_gbs": 78.57721660319153,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.8198878919997696,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 78.69137971942935,
+            "expected_gbs": 78.69137971942935,
+            "rel_err": 0.0,
+            "reps": 120,
+            "bytes_moved_per_iter": 536870904,
+            "time_s": 0.8186984230001144,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 77.34540895686914,
+        "min_gbs": 75.87488547783249,
+        "max_gbs": 78.69137971942935,
+        "mean_gbs": 77.51539123037406,
+        "cv_pct": 1.5007501527690184,
+        "noisy": false
+      }
+    ],
+    "cache_proof": {
+      "working_set_bytes": 536870904,
+      "l3_bytes": 335544320,
+      "ratio_ws_over_l3": 1.599999976158142,
+      "evidence": "working_set=536870904 vs L3=335544320; ratio=1.600x; L3 SUSPECT \u2192 forced 512 MiB policy; triad always writes `a`, so results cannot be pure register/L1 reuse"
+    },
+    "calibration": {
+      "target_s": 1.0,
+      "threads": 4,
+      "reps": 120,
+      "history": [
+        {
+          "reps": 1,
+          "time_s": 0.008283433000087825
+        },
+        {
+          "reps": 120,
+          "time_s": 0.9402928239996982
+        }
+      ],
+      "evidence": "calibrated at OMP_NUM_THREADS=4; final reps=120; last_time_s=0.9402928239996982; bytes_moved_per_timed_call=64424508480"
+    },
+    "prefault": {
+      "wall_time_s": 0.2991148669998438,
+      "evidence": "full write of a,b,c (536870904 bytes) + 1 serial triad before timing; prefault_wall_s=0.2991148669998438"
+    },
+    "saturation": {
+      "saturation_thread_count": null,
+      "bandwidth_saturated_median_gbs": null,
+      "bandwidth_1thread_median_gbs": 17.284995922893295,
+      "ratio_sat_over_1": null,
+      "peak_median_gbs": 77.34540895686914,
+      "rule": "NOT REPORTED \u2014 curve INVALID (see validity.flag)",
+      "invalid": true,
+      "flag": "SUPERLINEAR \u2014 INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve"
+    },
+    "validity": {
+      "valid": false,
+      "superlinear": true,
+      "violations": [
+        "threads=2: median/median(1)=4.114798 > 2 (SUPERLINEAR \u2014 INVALID)",
+        "threads=3: median/median(1)=4.082381 > 3 (SUPERLINEAR \u2014 INVALID)",
+        "threads=4: median/median(1)=4.474714 > 4 (SUPERLINEAR \u2014 INVALID)"
+      ],
+      "flag": "SUPERLINEAR \u2014 INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve"
+    },
+    "post": "SystemSnapshot(when='bench1_post', loadavg_1_5_15=(1.34, 0.52, 0.7), mem_available_bytes=15281049600, mem_free_bytes=14769438720, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.34 0.52 0.70 4/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14423280 kB', 'MemAvailable:   14922900 kB'])",
+    "notes": [
+      "reps held constant across thread sweep: 120 (calibrated at threads=4 targeting ~1.0s)"
+    ],
+    "FAIL": [],
+    "reps": 120
+  },
+  "bench2": {
+    "name": "BENCH 2 \u2014 THREAD SATURATION FOR COMPUTE",
+    "status": "INVALID",
+    "l2_bytes_per_core": 2097152,
+    "sizing_rule": "working_set_bytes(n_threads) = 0.5 * L2_per_core * n_threads; cache pressure per core constant across sweep",
+    "fit_evidence": "L2_per_core=2097152; per-thread target = 0.5*L2 = 1048576.0; fp32 uses 2 float32 vectors; int8 uses 2 int8 vectors",
+    "isa_verification": "NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.",
+    "pre": "SystemSnapshot(when='bench2_pre_attempt1', loadavg_1_5_15=(1.34, 0.52, 0.7), mem_available_bytes=15815356416, mem_free_bytes=15303745536, mem_total_bytes=16792014848, contaminated=False, evidence=['/proc/loadavg: 1.34 0.52 0.70 1/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14945064 kB', 'MemAvailable:   15444684 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          1.34,
+          0.52,
+          0.7
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=1.34 threshold=100.0; /proc/loadavg: 1.34 0.52 0.70 1/239 6634; MemTotal:       16398452 kB; MemFree:        14945064 kB; MemAvailable:   15444684 kB"
+      ]
+    },
+    "curves": {
+      "all_cores": {
+        "affinity": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "cpus": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fp32": [
+          {
+            "threads": 1,
+            "reps": 3776,
+            "n_elements": 131072,
+            "working_set_bytes": 1048576,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.2476982550001594,
+              "gflops": 3.99621605731281
+            },
+            "raw_times_s": [
+              0.24859251100042457,
+              0.24771034700006567,
+              0.24772223799982385,
+              0.24786851800035947,
+              0.2477039750001495
+            ],
+            "raw_gflops": [
+              3.98184056316286,
+              3.9960209817143313,
+              3.9958291673463076,
+              3.993471022401338,
+              3.99612377637219
+            ],
+            "median_gflops": 3.9958291673463076,
+            "min_gflops": 3.98184056316286,
+            "max_gflops": 3.99612377637219,
+            "cv_pct": 0.1539133373895305,
+            "noisy": false
+          },
+          {
+            "threads": 2,
+            "reps": 3776,
+            "n_elements": 262144,
+            "working_set_bytes": 2097152,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.13503476899995803,
+              "gflops": 14.660753690781782
+            },
+            "raw_times_s": [
+              0.1370460789999015,
+              0.1369653839997227,
+              0.13444537599980322,
+              0.13461152599984416,
+              0.13454849599975205
+            ],
+            "raw_gflops": [
+              14.445590143454034,
+              14.454100957392333,
+              14.725024741668301,
+              14.706849753729795,
+              14.713739260256379
+            ],
+            "median_gflops": 14.706849753729795,
+            "min_gflops": 14.445590143454034,
+            "max_gflops": 14.725024741668301,
+            "cv_pct": 0.9960872121718136,
+            "noisy": false
+          },
+          {
+            "threads": 3,
+            "reps": 3776,
+            "n_elements": 393216,
+            "working_set_bytes": 3145728,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.20266649099994538,
+              "gflops": 14.652482595165672
+            },
+            "raw_times_s": [
+              0.19977995599992937,
+              0.19731651200027045,
+              0.2018412080001326,
+              0.2003069949996643,
+              0.20344848600007026
+            ],
+            "raw_gflops": [
+              14.864190039170145,
+              15.049765485393994,
+              14.71239327896833,
+              14.825080032801532,
+              14.59616284389049
+            ],
+            "median_gflops": 14.825080032801532,
+            "min_gflops": 14.59616284389049,
+            "max_gflops": 15.049765485393994,
+            "cv_pct": 1.14941726202785,
+            "noisy": false
+          },
+          {
+            "threads": 4,
+            "reps": 3776,
+            "n_elements": 524288,
+            "working_set_bytes": 4194304,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.2703209109999989,
+              "gflops": 14.647120569965882
+            },
+            "raw_times_s": [
+              0.27145472200027143,
+              0.26550584500000696,
+              0.2615653279999606,
+              0.2683375429996886,
+              0.26274555999998483
+            ],
+            "raw_gflops": [
+              14.58594253518287,
+              14.912752583657419,
+              15.137415215829357,
+              14.755382089805432,
+              15.069419159738525
+            ],
+            "median_gflops": 14.912752583657419,
+            "min_gflops": 14.58594253518287,
+            "max_gflops": 15.137415215829357,
+            "cv_pct": 1.51819975510189,
+            "noisy": false
+          }
+        ],
+        "int8": [
+          {
+            "threads": 1,
+            "reps": 4572,
+            "n_elements": 524288,
+            "working_set_bytes": 1048576,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.24203798200005622,
+              "gops": 19.807178329551956
+            },
+            "raw_times_s": [
+              0.2422851979999905,
+              0.24244886900032725,
+              0.2424498099999255,
+              0.24422858699972494,
+              0.24403211400021974
+            ],
+            "raw_gops": [
+              19.78696805076878,
+              19.773610377178244,
+              19.77353363156471,
+              19.629518112084885,
+              19.645322057881625
+            ],
+            "median_gops": 19.77353363156471,
+            "min_gops": 19.629518112084885,
+            "max_gops": 19.78696805076878,
+            "cv_pct": 0.3925357781540403,
+            "noisy": false
+          },
+          {
+            "threads": 2,
+            "reps": 4572,
+            "n_elements": 1048576,
+            "working_set_bytes": 2097152,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.13178881800013187,
+              "gops": 72.7541159371382
+            },
+            "raw_times_s": [
+              0.131761921999896,
+              0.13652391499999794,
+              0.13211828000021342,
+              0.13236864800001058,
+              0.13398212099991724
+            ],
+            "raw_gops": [
+              72.76896692511488,
+              70.23076465394466,
+              72.57268974425426,
+              72.43542250276089,
+              71.56312254532769
+            ],
+            "median_gops": 72.43542250276089,
+            "min_gops": 70.23076465394466,
+            "max_gops": 72.76896692511488,
+            "cv_pct": 1.4572760575616945,
+            "noisy": false
+          },
+          {
+            "threads": 3,
+            "reps": 4572,
+            "n_elements": 1572864,
+            "working_set_bytes": 3145728,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.19514694500003316,
+              "gops": 73.69968520899754
+            },
+            "raw_times_s": [
+              0.19365686499986623,
+              0.3094182110003203,
+              0.19533010700024533,
+              0.19524819100024615,
+              0.1967956650000815
+            ],
+            "raw_gops": [
+              74.26676258551399,
+              46.48164815349253,
+              73.63057665238433,
+              73.66146821806849,
+              73.08224200972133
+            ],
+            "median_gops": 73.63057665238433,
+            "min_gops": 46.48164815349253,
+            "max_gops": 74.26676258551399,
+            "cv_pct": 17.826242207942713,
+            "noisy": true
+          },
+          {
+            "threads": 4,
+            "reps": 4572,
+            "n_elements": 2097152,
+            "working_set_bytes": 4194304,
+            "bytes_per_thread": 1048576.0,
+            "discarded_warmup": {
+              "label": "DISCARDED",
+              "time_s": 0.2553736219997518,
+              "gops": 75.09138076922697
+            },
+            "raw_times_s": [
+              0.2547577129998899,
+              0.2555704619999233,
+              0.2560553620000974,
+              0.25496464700017896,
+              0.2570531609999307
+            ],
+            "raw_gops": [
+              75.2729236818368,
+              75.03354549637179,
+              74.89145213835711,
+              75.21183079153141,
+              74.60074722833372
+            ],
+            "median_gops": 75.03354549637179,
+            "min_gops": 74.60074722833372,
+            "max_gops": 75.2729236818368,
+            "cv_pct": 0.36001972589553627,
+            "noisy": false
+          }
+        ]
+      }
+    },
+    "knee": {
+      "all_cores": {
+        "fp32_knee_threads": null,
+        "rule": "NOT REPORTED \u2014 SUPERLINEAR \u2014 INVALID",
+        "fp32_medians": [
+          3.9958291673463076,
+          14.706849753729795,
+          14.825080032801532,
+          14.912752583657419
+        ],
+        "int8_medians": [
+          19.77353363156471,
+          72.43542250276089,
+          73.63057665238433,
+          75.03354549637179
+        ],
+        "invalid": true,
+        "flag": "SUPERLINEAR \u2014 INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve",
+        "violations": [
+          "threads=2: median/median(1)=3.680550 > 2 (SUPERLINEAR \u2014 INVALID)",
+          "threads=3: median/median(1)=3.710139 > 3 (SUPERLINEAR \u2014 INVALID)"
+        ]
+      }
+    },
+    "validity": {
+      "all_cores": {
+        "valid": false,
+        "superlinear": true,
+        "violations": [
+          "threads=2: median/median(1)=3.680550 > 2 (SUPERLINEAR \u2014 INVALID)",
+          "threads=3: median/median(1)=3.710139 > 3 (SUPERLINEAR \u2014 INVALID)"
+        ],
+        "flag": "SUPERLINEAR \u2014 INVALID: efficiency > 100% implies undisclosed work-unit change, cache cliff, or measurement bug; do not report saturation from this curve"
+      }
+    },
+    "post": "SystemSnapshot(when='bench2_post', loadavg_1_5_15=(1.75, 0.63, 0.73), mem_available_bytes=15809773568, mem_free_bytes=15297839104, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.75 0.63 0.73 4/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14939296 kB', 'MemAvailable:   15439232 kB'])",
+    "hybrid": false,
+    "calibration": {
+      "reps_fp32": 3776,
+      "reps_i8": 4572,
+      "n_fp32_at_1thread": 131072,
+      "n_i8_at_1thread": 524288,
+      "evidence": "reps calibrated at 1 thread with per-thread WS; reps_fp32=3776, reps_i8=4572 held constant across sweep"
+    },
+    "reps_fp32": 3776,
+    "reps_i8": 4572,
+    "hybrid_note": "host is non-hybrid; P-only/E-only pinned curves NOT run (no core_type/cpu_capacity signals)"
+  },
+  "bench3": {
+    "name": "BENCH 3 \u2014 SUSTAINED VS BURST (thermal, STREAM/DRAM-bound)",
+    "status": "SKIPPED",
+    "kernel": "stream_triad_reps (same as BENCH 1)",
+    "sat_threads": null,
+    "duration_s": 20.0,
+    "duration_override_env": "20",
+    "bucket_s": 10.0,
+    "n_elements_per_array": 22369621,
+    "reps_per_call": 120,
+    "bytes_moved_per_iter": 536870904,
+    "on_ac_power_at_profile": "UNDETECTED (reason: /sys/class/power_supply absent or empty)",
+    "battery_dual_run": "NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only",
+    "pre": "SystemSnapshot(when='bench3_pre_attempt1', loadavg_1_5_15=(1.75, 0.63, 0.73), mem_available_bytes=15809773568, mem_free_bytes=15297839104, mem_total_bytes=16792014848, contaminated=False, evidence=['/proc/loadavg: 1.75 0.63 0.73 4/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14939296 kB', 'MemAvailable:   15439232 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          1.75,
+          0.63,
+          0.73
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=1.75 threshold=100.0; /proc/loadavg: 1.75 0.63 0.73 4/239 6634; MemTotal:       16398452 kB; MemFree:        14939296 kB; MemAvailable:   15439232 kB"
+      ]
+    },
+    "buckets": [],
+    "post": "SystemSnapshot(when='bench3_post_skipped', loadavg_1_5_15=(1.75, 0.63, 0.73), mem_available_bytes=15809773568, mem_free_bytes=15297839104, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.75 0.63 0.73 4/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14939296 kB', 'MemAvailable:   15439232 kB'])",
+    "summary": {},
+    "thermal_blind": false,
+    "skip_reason": "BENCH 1 saturation_thread_count unavailable (curve INVALID or BLOCKED); cannot choose DRAM-bound thread count"
+  },
+  "bench4": {
+    "name": "BENCH 4 \u2014 mmap / PAGE-FAULT COST",
+    "status": "OK",
+    "cache_dir": "/home/ubuntu/.cache/localmodel",
+    "effective_mem_bytes": 16792014848,
+    "cached_file_bytes": 6716805939,
+    "oversized_file_bytes": 25188022272,
+    "required_bytes_total": 31904828211,
+    "disk_total": 270436077568,
+    "disk_free": 248111734784,
+    "pre": "SystemSnapshot(when='bench4_pre_attempt1', loadavg_1_5_15=(1.75, 0.63, 0.73), mem_available_bytes=15809773568, mem_free_bytes=15297839104, mem_total_bytes=16792014848, contaminated=False, evidence=['/proc/loadavg: 1.75 0.63 0.73 4/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        14939296 kB', 'MemAvailable:   15439232 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          1.75,
+          0.63,
+          0.73
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=1.75 threshold=100.0; /proc/loadavg: 1.75 0.63 0.73 4/239 6634; MemTotal:       16398452 kB; MemFree:        14939296 kB; MemAvailable:   15439232 kB"
+      ]
+    },
+    "files": {
+      "cached": {
+        "label": "cached_0.4x_mem",
+        "path": "/home/ubuntu/.cache/localmodel/phase21_mmap_cached.bin",
+        "file_bytes": 6716805939,
+        "write_seconds": 5.52376167500006,
+        "write_gbs_file_size_over_time": 1.2159840221564098,
+        "fadvise_evidence": "os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase21_mmap_cached.bin', POSIX_FADV_DONTNEED) OK",
+        "stride": 4096,
+        "pages": 1639846,
+        "cold": {
+          "seconds": 2.976956290000089,
+          "checksum": 50835226,
+          "minflt_before": 15122,
+          "minflt_after": 168859,
+          "minflt_delta": 153737,
+          "majflt_before": 21,
+          "majflt_after": 22,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 1433600,
+          "io_read_bytes_after": 6718242816,
+          "io_read_bytes_delta": 6716809216,
+          "effective_read_gbs": 2.256267328668033,
+          "pages_per_second": 550846.515788094,
+          "fault_evidence": [
+            "/proc/self/stat minflt=15122 majflt=21; raw_tail=['15122', '6123', '21', '3']",
+            "/proc/self/stat minflt=168859 majflt=22; raw_tail=['168859', '6123', '22', '3']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=1433600; raw_line='read_bytes: 1433600'",
+            "/proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)"
+        },
+        "warm": {
+          "seconds": 0.49336353399985455,
+          "checksum": 50835226,
+          "minflt_before": 168859,
+          "minflt_after": 271350,
+          "minflt_delta": 102491,
+          "majflt_before": 22,
+          "majflt_after": 22,
+          "majflt_delta": 0,
+          "io_read_bytes_before": 6718242816,
+          "io_read_bytes_after": 6718242816,
+          "io_read_bytes_delta": 0,
+          "effective_read_gbs": 0.0,
+          "pages_per_second": 3323808.6866802834,
+          "fault_evidence": [
+            "/proc/self/stat minflt=168859 majflt=22; raw_tail=['168859', '6123', '22', '3']",
+            "/proc/self/stat minflt=271350 majflt=22; raw_tail=['271350', '6123', '22', '3']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'",
+            "/proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)"
+        }
+      },
+      "oversized": {
+        "label": "oversized_1.5x_mem",
+        "path": "/home/ubuntu/.cache/localmodel/phase21_mmap_oversized.bin",
+        "file_bytes": 25188022272,
+        "write_seconds": 16.15136890900021,
+        "write_gbs_file_size_over_time": 1.5594976756406196,
+        "fadvise_evidence": "os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase21_mmap_oversized.bin', POSIX_FADV_DONTNEED) OK",
+        "stride": 4096,
+        "pages": 6149420,
+        "cold": {
+          "seconds": 10.372471155000312,
+          "checksum": 190632020,
+          "minflt_before": 273926,
+          "minflt_after": 850435,
+          "minflt_delta": 576509,
+          "majflt_before": 22,
+          "majflt_after": 23,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 6718242816,
+          "io_read_bytes_after": 31906267136,
+          "io_read_bytes_delta": 25188024320,
+          "effective_read_gbs": 2.428353277016102,
+          "pages_per_second": 592859.6867715092,
+          "fault_evidence": [
+            "/proc/self/stat minflt=273926 majflt=22; raw_tail=['273926', '6123', '22', '3']",
+            "/proc/self/stat minflt=850435 majflt=23; raw_tail=['850435', '6123', '23', '3']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=6718242816; raw_line='read_bytes: 6718242816'",
+            "/proc/self/io read_bytes=31906267136; raw_line='read_bytes: 31906267136'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)"
+        },
+        "warm": {
+          "seconds": 10.499752186000023,
+          "checksum": 190632020,
+          "minflt_before": 850435,
+          "minflt_after": 1426943,
+          "minflt_delta": 576508,
+          "majflt_before": 23,
+          "majflt_after": 24,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 31906267136,
+          "io_read_bytes_after": 57094291456,
+          "io_read_bytes_delta": 25188024320,
+          "effective_read_gbs": 2.3989160766655777,
+          "pages_per_second": 585672.8702796821,
+          "fault_evidence": [
+            "/proc/self/stat minflt=850435 majflt=23; raw_tail=['850435', '6123', '23', '3']",
+            "/proc/self/stat minflt=1426943 majflt=24; raw_tail=['1426943', '6123', '24', '3']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=31906267136; raw_line='read_bytes: 31906267136'",
+            "/proc/self/io read_bytes=57094291456; raw_line='read_bytes: 57094291456'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time (NOT file_size/time; NOT 1-byte-per-page)"
+        }
+      }
+    },
+    "delta": {
+      "cold_read_gbs_cached_minus_oversized": -0.172085948348069,
+      "warm_read_gbs_cached_minus_oversized": -2.3989160766655777,
+      "cold_pages_per_second_cached_minus_oversized": -42013.17098341521,
+      "deliverable": "cached vs oversized cold/warm effective_read_gbs delta; large negative/near-zero cold delta on oversized indicates page-cache / reclaim pressure penalty for models that do not fit in RAM"
+    },
+    "post": "SystemSnapshot(when='bench4_post', loadavg_1_5_15=(1.62, 0.76, 0.77), mem_available_bytes=15852695552, mem_free_bytes=15365038080, mem_total_bytes=16792014848, contaminated=True, evidence=['/proc/loadavg: 1.62 0.76 0.77 2/239 6634', 'MemTotal:       16398452 kB', 'MemFree:        15004920 kB', 'MemAvailable:   15481148 kB'])",
+    "note": "Two files: cached=0.4*effective_mem, oversized=1.5*effective_mem. Effective read bandwidth = /proc/self/io read_bytes delta / time. pages_per_second = pages touched / time (not a bandwidth). minflt + read_bytes reported; majflt alone is insufficient for mmap readahead."
+  },
+  "derived": {
+    "measured_bandwidth_GBps": null,
+    "bandwidth_saturation_threads": null,
+    "predictions": [],
+    "prediction_units_note": "model_GiB uses 2^30 bytes (GGUF convention). measured_bandwidth_GBps uses decimal 1e9 bytes/s (STREAM convention). upper_tok_s = BW_bytes_per_s / model_bytes.",
+    "kv_cache_predictions": {
+      "config": {
+        "name": "representative_dense_7B_llama2_like",
+        "n_layers": 32,
+        "n_kv_heads": 32,
+        "head_dim": 128,
+        "bytes_per_element": 2,
+        "model_weight_GiB": 7.0,
+        "note": "Assumed dense Transformer decode: every weight read every token + full KV cache up to n_ctx. NOT a real GGUF measurement."
+      },
+      "rows": [
+        {
+          "n_ctx": 512,
+          "kv_bytes": 268435456,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 7784628224,
+          "kv_share_of_total": 0.034482758620689655,
+          "upper_tok_s_weights_plus_kv": null,
+          "upper_tok_s_weights_only": null,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "n_ctx": 4096,
+          "kv_bytes": 2147483648,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 9663676416,
+          "kv_share_of_total": 0.2222222222222222,
+          "upper_tok_s_weights_plus_kv": null,
+          "upper_tok_s_weights_only": null,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "n_ctx": 32768,
+          "kv_bytes": 17179869184,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 24696061952,
+          "kv_share_of_total": 0.6956521739130435,
+          "upper_tok_s_weights_plus_kv": null,
+          "upper_tok_s_weights_only": null,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        }
+      ],
+      "note": "UPPER BOUND with perfect bandwidth utilization. KV term grows with n_ctx and can dominate at long context."
+    },
+    "moe_note": "WRONG FOR MoE: this model assumes every weight is read every token. Mixture-of-Experts models only activate a subset of experts per token, so weight bytes/token are much smaller and MoE will be systematically UNDERRATED (predicted tok/s too low) by BW/model_bytes. FLAG FOR PHASE 3 selection policy.",
+    "prefill_note": "OPEN GAP: prefill / time-to-first-token is compute-bound (or mixed), not bandwidth-bound. Nothing in this harness predicts TTFT.",
+    "recommended_thread_count": null,
+    "recommended_thread_count_evidence": "BENCH 2 fp32 knee on all_cores = None (not raw core count 4); bw_sat_threads=None; bench2_status=INVALID",
+    "recommended_thread_count_sustained": null,
+    "recommended_thread_count_sustained_evidence": "BENCH 3 SKIPPED: BENCH 1 saturation_thread_count unavailable (curve INVALID or BLOCKED); cannot choose DRAM-bound thread count"
+  },
+  "self_critique": {
+    "measurements blocked or contaminated": [
+      "no bench BLOCKED by loadavg>0.3 after retries (or gate not exercised)"
+    ],
+    "likely wrong under virtualization": [
+      "BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers",
+      "BENCH 3 thermal/cpufreq often absent under KVM \u2014 THERMAL BLIND path",
+      "BENCH 4 overlay FS + virtio block \u2260 bare-metal NVMe latency",
+      "steal time / noisy neighbors can still inflate CV (see NOISY tags)"
+    ],
+    "where a benchmark may have been served from cache rather than RAM": [
+      "BENCH 1 working_set=536870904 vs L3=335544320 (suspect_fallback=True); prefault_s=0.2991148669998438",
+      "BENCH 2 per-thread 0.5*L2 \u2014 compute-bound by design, not DRAM",
+      "BENCH 4 uses posix_fadvise(DONTNEED); without root drop_caches, cold pass may still hit page cache \u2014 trust io read_bytes delta"
+    ],
+    "ISA tier verification": [
+      "NOT VERIFIED: kernels are scalar C (+OpenMP). They do NOT dispatch to AMX/AVX512_VNNI/AVX2 specifically. Phase 1.5 usable_tier is NOT proven by these measurements.",
+      "Phase 1.5 usable_tier=AVX512_VNNI was NOT exercised by these scalar C/+OpenMP kernels"
+    ],
+    "other": [
+      "total_runtime_s=103.7 budget=600 over=False",
+      "0.55x decode band is an unvalidated assumption pending Phase 4",
+      "Phase 2.1: constant reps + reconstruction assert; SUPERLINEAR gate; CONTAMINATED aborts; STREAM thermals; GiB prediction table"
+    ]
+  }
+}

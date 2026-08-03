@@ -63,6 +63,21 @@ def build_kernels() -> NativeKernels:
         ]
         fn.restype = None
 
+    for name in (
+        "stream_triad_reps",
+        "stream_triad_reps_serial",
+    ):
+        fn = getattr(lib, name)
+        fn.argtypes = [
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.c_double,
+            ctypes.c_size_t,
+            ctypes.c_size_t,
+        ]
+        fn.restype = None
+
     for name in ("dot_fp32_reps", "dot_fp32_reps_serial"):
         fn = getattr(lib, name)
         fn.argtypes = [

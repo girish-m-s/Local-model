@@ -15,6 +15,26 @@ void stream_triad_serial(double *a, const double *b, const double *c, double sca
     }
 }
 
+/* Fixed-reps STREAM triad (constant work across thread sweep). */
+void stream_triad_reps(double *a, const double *b, const double *c, double scalar,
+                       size_t n, size_t reps) {
+    for (size_t r = 0; r < reps; r++) {
+#pragma omp parallel for schedule(static)
+        for (size_t i = 0; i < n; i++) {
+            a[i] = b[i] + scalar * c[i];
+        }
+    }
+}
+
+void stream_triad_reps_serial(double *a, const double *b, const double *c, double scalar,
+                              size_t n, size_t reps) {
+    for (size_t r = 0; r < reps; r++) {
+        for (size_t i = 0; i < n; i++) {
+            a[i] = b[i] + scalar * c[i];
+        }
+    }
+}
+
 /* FP32 accumulate: many passes over L2-sized vectors (compute-ish). */
 double dot_fp32_reps(const float *a, const float *b, size_t n, size_t reps) {
     double acc = 0.0;
