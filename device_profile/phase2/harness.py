@@ -18,18 +18,32 @@ from .report_phase2 import format_phase2_report
 from .util import GIB, effective_cores, effective_mem
 
 
-# Representative dense 7B-class decoder config (Llama-2-7B-like).
-# Stated explicitly — not detected from a model file.
-REP_7B = {
-    "name": "representative_dense_7B_llama2_like",
+# Representative dense 7B-class decoder configs. Stated explicitly — not from a GGUF.
+# Primary = GQA (matches shipping GGUF-class models); secondary = full MHA.
+REP_7B_GQA = {
+    "name": "representative_dense_7B_GQA_primary",
+    "attention": "GQA",
     "n_layers": 32,
-    "n_kv_heads": 32,
+    "n_kv_heads": 8,
     "head_dim": 128,
     "bytes_per_element": 2,  # fp16 KV
     "model_weight_GiB": 7.0,
     "note": (
-        "Assumed dense Transformer decode: every weight read every token + "
-        "full KV cache up to n_ctx. NOT a real GGUF measurement."
+        "PRIMARY: GQA (n_kv_heads=8). Dense decode: every weight every token + "
+        "KV up to n_ctx. NOT a real GGUF measurement."
+    ),
+}
+REP_7B_MHA = {
+    "name": "representative_dense_7B_MHA_secondary",
+    "attention": "MHA",
+    "n_layers": 32,
+    "n_kv_heads": 32,
+    "head_dim": 128,
+    "bytes_per_element": 2,
+    "model_weight_GiB": 7.0,
+    "note": (
+        "SECONDARY: full MHA (n_kv_heads=32). Overstates KV ~4x vs GQA; kept for "
+        "comparison only."
     ),
 }
 
@@ -224,46 +238,53 @@ def run_phase2() -> dict[str, Any]:
 
 
 def _kv_cache_predictions(measured_bw: float | None) -> dict[str, Any]:
-    cfg = dict(REP_7B)
-    n_layers = cfg["n_layers"]
-    n_kv_heads = cfg["n_kv_heads"]
-    head_dim = cfg["head_dim"]
-    bpe = cfg["bytes_per_element"]
-    model_bytes = int(cfg["model_weight_GiB"] * GIB)
+    def _rows(cfg: dict[str, Any]) -> list[dict[str, Any]]:
+        n_layers = cfg["n_layers"]
+        n_kv_heads = cfg["n_kv_heads"]
+        head_dim = cfg["head_dim"]
+        bpe = cfg["bytes_per_element"]
+        model_bytes = int(cfg["model_weight_GiB"] * GIB)
+        rows = []
+        for n_ctx in (512, 4096, 32768):
+            kv_bytes = 2 * n_layers * n_kv_heads * head_dim * n_ctx * bpe
+            total = model_bytes + kv_bytes
+            kv_share = kv_bytes / total if total else None
+            if measured_bw is None:
+                upper = None
+                upper_weights_only = None
+            else:
+                bps = measured_bw * 1e9
+                upper = bps / total
+                upper_weights_only = bps / model_bytes
+            rows.append(
+                {
+                    "attention": cfg["attention"],
+                    "n_ctx": n_ctx,
+                    "n_kv_heads": n_kv_heads,
+                    "kv_bytes": kv_bytes,
+                    "model_weight_bytes": model_bytes,
+                    "bytes_per_token_total": total,
+                    "kv_share_of_total": kv_share,
+                    "upper_tok_s_weights_plus_kv": upper,
+                    "upper_tok_s_weights_only": upper_weights_only,
+                    "formula": (
+                        "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*"
+                        "bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+                    ),
+                }
+            )
+        return rows
 
-    rows = []
-    for n_ctx in (512, 4096, 32768):
-        kv_bytes = 2 * n_layers * n_kv_heads * head_dim * n_ctx * bpe
-        total = model_bytes + kv_bytes
-        kv_share = kv_bytes / total if total else None
-        if measured_bw is None:
-            upper = None
-            upper_weights_only = None
-        else:
-            bps = measured_bw * 1e9
-            upper = bps / total
-            upper_weights_only = bps / model_bytes
-        rows.append(
-            {
-                "n_ctx": n_ctx,
-                "kv_bytes": kv_bytes,
-                "model_weight_bytes": model_bytes,
-                "bytes_per_token_total": total,
-                "kv_share_of_total": kv_share,
-                "upper_tok_s_weights_plus_kv": upper,
-                "upper_tok_s_weights_only": upper_weights_only,
-                "formula": (
-                    "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; "
-                    "tok_s = BW / (model_bytes + kv_bytes)"
-                ),
-            }
-        )
     return {
-        "config": cfg,
-        "rows": rows,
+        "primary_config": dict(REP_7B_GQA),
+        "secondary_config": dict(REP_7B_MHA),
+        "primary_GQA_rows": _rows(REP_7B_GQA),
+        "secondary_MHA_rows": _rows(REP_7B_MHA),
+        # Back-compat alias: primary rows
+        "rows": _rows(REP_7B_GQA),
         "note": (
-            "UPPER BOUND with perfect bandwidth utilization. "
-            "KV term grows with n_ctx and can dominate at long context."
+            "PRIMARY=GQA (n_kv_heads=8); SECONDARY=MHA (n_kv_heads=32, ~4x KV). "
+            "UPPER BOUND with perfect bandwidth utilization."
         ),
     }
 

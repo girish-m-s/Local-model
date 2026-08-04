@@ -20,7 +20,16 @@ class SystemSnapshot:
     mem_free_bytes: Optional[int]
     mem_total_bytes: Optional[int]
     contaminated: bool
+    load_threshold: float
+    threshold_overridden: bool
     evidence: list[str] = field(default_factory=list)
+
+
+def get_load_threshold() -> tuple[float, bool]:
+    """Single threshold for all snapshots / quiet gates. Returns (threshold, overridden)."""
+    if "PHASE2_LOAD_THRESHOLD" in os.environ:
+        return float(os.environ["PHASE2_LOAD_THRESHOLD"]), True
+    return 0.3, False
 
 
 @dataclass
@@ -64,10 +73,26 @@ def read_meminfo_bytes() -> tuple[dict[str, int], list[str]]:
     return out, evid
 
 
-def snapshot(when: str, contaminate_threshold: float = 0.3) -> SystemSnapshot:
+def snapshot(
+    when: str, contaminate_threshold: float | None = None
+) -> SystemSnapshot:
+    default_thr, default_over = get_load_threshold()
+    if contaminate_threshold is None:
+        threshold = default_thr
+        overridden = default_over
+    else:
+        threshold = contaminate_threshold
+        # Explicit arg that differs from default env/default still marks OVERRIDE
+        # when it came from PHASE2_LOAD_THRESHOLD or caller override path.
+        overridden = default_over or (abs(threshold - 0.3) > 1e-12)
     load, load_ev = read_loadavg()
     mem, mem_ev = read_meminfo_bytes()
-    contaminated = load[0] > contaminate_threshold
+    contaminated = load[0] > threshold
+    tag = "OVERRIDE" if overridden else "default"
+    thr_ev = (
+        f"load_threshold={threshold} ({tag}); contaminated={contaminated} "
+        f"(loadavg1={load[0]} > {threshold})"
+    )
     return SystemSnapshot(
         when=when,
         loadavg_1_5_15=load,
@@ -75,7 +100,9 @@ def snapshot(when: str, contaminate_threshold: float = 0.3) -> SystemSnapshot:
         mem_free_bytes=mem.get("MemFree"),
         mem_total_bytes=mem.get("MemTotal"),
         contaminated=contaminated,
-        evidence=[load_ev, *mem_ev],
+        load_threshold=threshold,
+        threshold_overridden=overridden,
+        evidence=[load_ev, thr_ev, *mem_ev],
     )
 
 
@@ -95,11 +122,9 @@ def ensure_quiet_load(
     """
     override_notes: list[str] = []
     if threshold is None:
-        if "PHASE2_LOAD_THRESHOLD" in os.environ:
-            threshold = float(os.environ["PHASE2_LOAD_THRESHOLD"])
+        threshold, overridden = get_load_threshold()
+        if overridden:
             override_notes.append(f"PHASE2_LOAD_THRESHOLD={threshold} (OVERRIDE)")
-        else:
-            threshold = 0.3
     if max_attempts is None:
         if "PHASE2_QUIET_ATTEMPTS" in os.environ:
             max_attempts = int(os.environ["PHASE2_QUIET_ATTEMPTS"])
@@ -176,8 +201,9 @@ def rep_stats(samples: Sequence[float], cv_noisy_pct: float = 10.0) -> RepStats:
 
 def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
     """
-    BENCH 1 buffer policy: 4x L3, or 512 MiB if L3 SUSPECT.
-    Returns (bytes, evidence, used_suspect_fallback).
+    BENCH 1 buffer policy (Phase 2.2): working_set = max(4 * L3_reported, 1 GiB).
+    Replaces the old 512 MiB SUSPECT fallback that left ratio_ws_over_l3≈1.6.
+    Returns (bytes, evidence, used_suspect_flag).
     """
     l3 = None
     if profile.cache.lscpu_l3_bytes is not None and isinstance(
@@ -199,17 +225,21 @@ def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
         if "plausible" in cc.name.lower() and cc.result == "SUSPECT":
             suspect = True
 
-    if suspect or l3 is None:
-        ws = 512 * 1024 * 1024
+    if l3 is None:
+        ws = GIB
         evid = (
-            f"L3 SUSPECT or undetected (l3={l3}, logical_cores={logical}); "
-            f"using 512 MiB working set as required by Phase 2 spec"
+            f"L3 undetected (logical_cores={logical}); "
+            f"working_set = 1 GiB floor (Phase 2.2); old 512 MiB SUSPECT fallback retired"
         )
         return ws, evid, True
 
-    ws = 4 * l3
-    evid = f"working_set = 4 * L3 = 4 * {l3} = {ws}"
-    return ws, evid, False
+    ws = max(4 * l3, GIB)
+    evid = (
+        f"working_set = max(4 * L3_reported, 1 GiB) = max(4*{l3}, {GIB}) = {ws}"
+        + (f"; L3_SUSPECT=True (logical_cores={logical})" if suspect else "")
+        + "; floor justified by DIAG B (512 MiB left ws inside reported L3)"
+    )
+    return ws, evid, suspect
 
 
 def effective_cores(profile: Any) -> int:
@@ -237,6 +267,46 @@ def l2_bytes_per_core(profile: Any) -> int:
 def set_omp_threads(n: int) -> None:
     os.environ["OMP_NUM_THREADS"] = str(n)
     os.environ["OMP_DYNAMIC"] = "false"
+
+
+def set_omp_env(
+    *,
+    threads: int | None,
+    proc_bind: str | None,
+    places: str | None,
+) -> None:
+    """Set or clear OpenMP env knobs. None clears the variable."""
+    os.environ["OMP_DYNAMIC"] = "false"
+    if threads is None:
+        os.environ.pop("OMP_NUM_THREADS", None)
+    else:
+        os.environ["OMP_NUM_THREADS"] = str(threads)
+    if proc_bind is None:
+        os.environ.pop("OMP_PROC_BIND", None)
+    else:
+        os.environ["OMP_PROC_BIND"] = proc_bind
+    if places is None:
+        os.environ.pop("OMP_PLACES", None)
+    else:
+        os.environ["OMP_PLACES"] = places
+
+
+def read_steal_jiffies() -> tuple[Optional[int], str]:
+    """Aggregate steal jiffies from /proc/stat cpu line (field index 8)."""
+    path = "/proc/stat"
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("cpu "):
+                    parts = line.split()
+                    # cpu user nice system idle iowait irq softirq steal guest guest_nice
+                    if len(parts) < 9:
+                        return None, f"UNDETECTED (reason: {path} cpu line short: {line!r})"
+                    steal = int(parts[8])
+                    return steal, f"{path} cpu steal_jiffies={steal}; raw={line.rstrip()!r}"
+        return None, f"UNDETECTED (reason: no cpu line in {path})"
+    except OSError as exc:
+        return None, f"UNDETECTED (reason: {path} failed: {exc})"
 
 
 def pin_to_cpus(cpus: list[int]) -> str:
@@ -279,32 +349,42 @@ def read_io_read_bytes() -> tuple[Optional[int], str]:
 
 
 def check_superlinear(
-    thread_counts: Sequence[int], medians: Sequence[float]
+    thread_counts: Sequence[int],
+    medians: Sequence[float],
+    *,
+    baseline_gbs: float | None = None,
+    baseline_label: str = "median(1)",
 ) -> dict[str, Any]:
     """
-    If bandwidth(n)/bandwidth(1) > n for any n, curve is SUPERLINEAR — INVALID.
+    If bandwidth(n)/baseline > n for any n, curve is SUPERLINEAR.
+    baseline defaults to median(1); DIAG C passes A1 serial instead.
     """
     violations: list[str] = []
-    one = None
-    for t, m in zip(thread_counts, medians):
-        if t == 1:
-            one = m
-            break
+    one = baseline_gbs
+    if one is None:
+        for t, m in zip(thread_counts, medians):
+            if t == 1:
+                one = m
+                break
     if one is None or one <= 0:
         return {
             "valid": False,
             "superlinear": False,
-            "violations": ["no positive 1-thread median"],
-            "flag": "INVALID — missing 1-thread baseline",
+            "violations": [f"no positive baseline ({baseline_label})"],
+            "flag": "INVALID — missing baseline",
+            "baseline_gbs": one,
+            "baseline_label": baseline_label,
         }
     for t, m in zip(thread_counts, medians):
+        # Efficiency vs own median(1): skip t==1. Vs external A1: only t>=2
+        # (t==1 vs A1 is a caveat, not SUPERLINEAR).
         if t <= 1:
             continue
         ratio = m / one
         if ratio > t + 1e-9:
             violations.append(
-                f"threads={t}: median/median(1)={ratio:.6f} > {t} "
-                f"(SUPERLINEAR — INVALID)"
+                f"threads={t}: median/{baseline_label}={ratio:.6f} > {t} "
+                f"(SUPERLINEAR)"
             )
     if violations:
         return {
@@ -312,16 +392,137 @@ def check_superlinear(
             "superlinear": True,
             "violations": violations,
             "flag": (
-                "SUPERLINEAR — INVALID: efficiency > 100% implies undisclosed "
-                "work-unit change, cache cliff, or measurement bug; "
-                "do not report saturation from this curve"
+                f"SUPERLINEAR vs {baseline_label}: efficiency > 100%; "
+                "implies undisclosed work-unit change, cache cliff, or measurement bug"
             ),
+            "baseline_gbs": one,
+            "baseline_label": baseline_label,
         }
     return {
         "valid": True,
         "superlinear": False,
         "violations": [],
         "flag": "OK",
+        "baseline_gbs": one,
+        "baseline_label": baseline_label,
+    }
+
+
+def evaluate_curve_validity(
+    thread_counts: Sequence[int],
+    medians: Sequence[float],
+    *,
+    serial_baseline_gbs: float,
+    cores: int,
+) -> dict[str, Any]:
+    """
+    DIAG C / Phase 2.2: validity that does not solely depend on OMP_NUM_THREADS=1.
+    - absolute plausibility (heuristic 1..60 GB/s per core)
+    - monotonicity beyond noise
+    - efficiency vs A1 serial baseline
+    May return VALID-WITH-CAVEAT.
+    """
+    flags: list[str] = []
+    caveats: list[str] = []
+    # Absolute per-core plausibility (HEURISTIC bounds)
+    abs_lo, abs_hi = 1.0, 60.0
+    for t, m in zip(thread_counts, medians):
+        per_core = m / max(t, 1)
+        if per_core > abs_hi:
+            flags.append(
+                f"threads={t}: per-core={per_core:.3f} GB/s > {abs_hi} "
+                f"(HEURISTIC absolute upper bound)"
+            )
+        if per_core < abs_lo:
+            flags.append(
+                f"threads={t}: per-core={per_core:.3f} GB/s < {abs_lo} "
+                f"(HEURISTIC absolute lower bound)"
+            )
+
+    # Monotonicity: allow 5% noise
+    for i in range(1, len(medians)):
+        if medians[i] + 1e-12 < medians[i - 1] * 0.95:
+            flags.append(
+                f"non-monotonic: threads {thread_counts[i-1]}→{thread_counts[i]} "
+                f"{medians[i-1]:.3f}→{medians[i]:.3f} (>5% drop)"
+            )
+
+    sl = check_superlinear(
+        thread_counts,
+        medians,
+        baseline_gbs=serial_baseline_gbs,
+        baseline_label="A1_serial",
+    )
+    if sl["superlinear"]:
+        flags.extend(sl["violations"])
+
+    # OMP_NUM_THREADS=1 vs A1 caveat (informational, not hard INVALID alone)
+    one_omp = None
+    for t, m in zip(thread_counts, medians):
+        if t == 1:
+            one_omp = m
+            break
+    a1_is_slow_outlier = False
+    if one_omp is not None and serial_baseline_gbs > 0:
+        r = one_omp / serial_baseline_gbs
+        if r > 1.5:
+            a1_is_slow_outlier = True
+            caveats.append(
+                f"OMP_NUM_THREADS=1 / A1_serial = {r:.3f} — A1 pure-serial is the "
+                f"SLOW outlier (codegen); do NOT use A1 as efficiency baseline; "
+                f"prefer OpenMP@1. SUPERLINEAR-vs-A1 flags are discounted."
+            )
+        elif r < 0.5:
+            caveats.append(
+                f"OMP_NUM_THREADS=1 / A1_serial = {r:.3f} — 1-thread OpenMP point "
+                f"is slow vs pure serial; prefer A1 for efficiency baseline"
+            )
+
+    # If A1 is the slow outlier, re-evaluate efficiency vs OpenMP@1 instead.
+    sl_omp1 = None
+    if a1_is_slow_outlier and one_omp and one_omp > 0:
+        sl_omp1 = check_superlinear(
+            thread_counts,
+            medians,
+            baseline_gbs=one_omp,
+            baseline_label="OMP_NUM_THREADS=1",
+        )
+        # Drop A1-superlinear from hard flags; keep as caveat only
+        flags = [f for f in flags if "A1_serial" not in f]
+        if sl_omp1["superlinear"]:
+            flags.extend(sl_omp1["violations"])
+        elif not flags:
+            status_hint = "VALID-WITH-CAVEAT"
+        else:
+            status_hint = None
+    else:
+        status_hint = None
+
+    hard_super = any("SUPERLINEAR" in f for f in flags)
+    if hard_super:
+        status = "INVALID"
+    elif flags:
+        status = "VALID-WITH-CAVEAT"
+        caveats.extend(flags)
+        flags = []
+    elif caveats or status_hint:
+        status = "VALID-WITH-CAVEAT"
+    else:
+        status = "VALID"
+
+    return {
+        "status": status,
+        "flags": flags,
+        "caveats": caveats,
+        "absolute_bounds_GBps_per_core": {
+            "lo": abs_lo,
+            "hi": abs_hi,
+            "note": "HEURISTIC — not ISA/DRAM derived",
+        },
+        "superlinear_vs_A1": sl,
+        "superlinear_vs_OMP1": sl_omp1,
+        "a1_is_slow_outlier": a1_is_slow_outlier,
+        "cores": cores,
     }
 
 

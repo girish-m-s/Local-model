@@ -1,0 +1,860 @@
+=== PHASE 2.2 BASELINE DIAGNOSTIC REPORT ===
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+effective_cores: 4
+effective_mem_bytes: 16792014848
+l3_reported_bytes: 335544320
+working_set_bytes: 1342177272
+  <- working_set = max(4 * L3_reported, 1 GiB) = max(4*335544320, 1073741824) = 1342177280; L3_SUSPECT=True (logical_cores=4); floor justified by DIAG B (512 MiB left ws inside reported L3)
+reps (constant): 11
+prefault_wall_s: 0.14154987099999516
+omp_compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_5n5zrqgy/kernels.so
+serial_compile: gcc -O3 -fPIC -shared /workspace/device_profile/phase2/kernels_serial.c -o /tmp/phase2_serial_kernels_ml2oom3y/kernels_serial.so
+note: Phase 2.2 is a debugging phase. Full BENCH 1–4 sweep is NOT re-run until the 1-thread baseline is explained. DIAG A is the deliverable.
+
+=== DIAG A — ISOLATE THE 1-THREAD PATH ===
+reps=11 bytes_moved_per_iter=1342177272
+cfg   median_GB/s   ratio_A1      CV%   stealΔ  description
+A1        15.6837     1.0000     0.52        0  pure serial C, compiled WITHOUT -fopenmp, no pragma
+     DISCARDED warmup gbs=15.7564 time_s=0.9370128300000147
+     raw_gbs: [15.683657566768755, 15.639105980084924, 15.811601385424261, 15.620266993080042, 15.76587783474941]
+     raw_times_s: [0.9413588589999904, 0.9440405359999886, 0.9337416010000084, 0.945179105999955, 0.9364496000000031]
+     env: OMP_NUM_THREADS=None OMP_PROC_BIND=None OMP_PLACES=None affinity=[0, 1, 2, 3]
+     reconstruct[OK]: reported=15.683657566768755 expected=15.683657566768755 rel_err=0.0
+     reconstruct[OK]: reported=15.639105980084924 expected=15.639105980084924 rel_err=0.0
+     reconstruct[OK]: reported=15.811601385424261 expected=15.811601385424261 rel_err=0.0
+     reconstruct[OK]: reported=15.620266993080042 expected=15.620266993080042 rel_err=0.0
+     reconstruct[OK]: reported=15.76587783474941 expected=15.76587783474941 rel_err=0.0
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  10434 0 1671 104818 818 0 341 3 0 0'
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  11091 0 1672 106791 819 0 343 3 0 0'
+A2        46.8398     2.9865     9.69        0  -fopenmp, OMP_NUM_THREADS=1, affinity=all cores (current)
+     DISCARDED warmup gbs=62.8806 time_s=0.2347933710000234
+     raw_gbs: [56.28248566484537, 44.48961923549545, 45.82770283590197, 46.8398168522752, 47.40250716061434]
+     raw_times_s: [0.2623187270000358, 0.33185156999996934, 0.3221621220000088, 0.31520084799996084, 0.3114592640000069]
+     env: OMP_NUM_THREADS=1 OMP_PROC_BIND=None OMP_PLACES=None affinity=[0, 1, 2, 3]
+     reconstruct[OK]: reported=56.28248566484537 expected=56.28248566484537 rel_err=0.0
+     reconstruct[OK]: reported=44.48961923549545 expected=44.48961923549545 rel_err=0.0
+     reconstruct[OK]: reported=45.82770283590197 expected=45.82770283590197 rel_err=0.0
+     reconstruct[OK]: reported=46.8398168522752 expected=46.8398168522752 rel_err=0.0
+     reconstruct[OK]: reported=47.40250716061434 expected=47.40250716061434 rel_err=0.0
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  11091 0 1672 106791 819 0 343 3 0 0'
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  11840 0 1672 106862 819 0 343 3 0 0'
+A3        49.3467     3.1464     0.59        0  -fopenmp, OMP_NUM_THREADS=1, OMP_PROC_BIND=close, OMP_PLACES=cores
+     DISCARDED warmup gbs=48.5077 time_s=0.30436288999999306
+     raw_gbs: [48.83041092884539, 49.15400471607615, 49.368814003792664, 49.34673129925206, 49.60742062325981]
+     raw_times_s: [0.3023515410000073, 0.30036108100000547, 0.2990541759999701, 0.2991880029999834, 0.2976157559999706]
+     env: OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores affinity=[0, 1, 2, 3]
+     reconstruct[OK]: reported=48.83041092884539 expected=48.83041092884539 rel_err=0.0
+     reconstruct[OK]: reported=49.15400471607615 expected=49.15400471607615 rel_err=0.0
+     reconstruct[OK]: reported=49.368814003792664 expected=49.368814003792664 rel_err=0.0
+     reconstruct[OK]: reported=49.34673129925206 expected=49.34673129925206 rel_err=0.0
+     reconstruct[OK]: reported=49.60742062325981 expected=49.60742062325981 rel_err=0.0
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  11840 0 1672 106862 819 0 343 3 0 0'
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  12636 0 1672 106911 819 0 343 3 0 0'
+A4        45.2970     2.8882     8.45        0  -fopenmp, OMP_NUM_THREADS=1, sched_setaffinity CPU 0 only
+     DISCARDED warmup gbs=47.0113 time_s=0.314050801999997
+     raw_gbs: [47.60805227084713, 45.297011127158925, 52.558654653368414, 44.29000565159035, 42.33897022442728]
+     raw_times_s: [0.31011455600003046, 0.32593651600001294, 0.2809042599999998, 0.33334721399995715, 0.3487082920000262]
+     env: OMP_NUM_THREADS=1 OMP_PROC_BIND=None OMP_PLACES=None affinity=[0]
+     reconstruct[OK]: reported=47.60805227084713 expected=47.60805227084713 rel_err=0.0
+     reconstruct[OK]: reported=45.297011127158925 expected=45.297011127158925 rel_err=0.0
+     reconstruct[OK]: reported=52.558654653368414 expected=52.558654653368414 rel_err=0.0
+     reconstruct[OK]: reported=44.29000565159035 expected=44.29000565159035 rel_err=0.0
+     reconstruct[OK]: reported=42.33897022442728 expected=42.33897022442728 rel_err=0.0
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  12636 0 1672 106911 819 0 343 3 0 0'
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  13470 0 1673 106981 819 0 343 3 0 0'
+A5        50.9103     3.2461     8.53        0  -fopenmp, OMP_NUM_THREADS=2, affinity=CPUs 0,1, PROC_BIND=close
+     DISCARDED warmup gbs=59.5516 time_s=0.24791870400002836
+     raw_gbs: [50.910319323920845, 54.705421965596734, 44.40817327798249, 54.047314857772115, 47.945925775636006]
+     raw_times_s: [0.2899991630000045, 0.26988092699997424, 0.33246019599999954, 0.27316713200002596, 0.3079291880000028]
+     env: OMP_NUM_THREADS=2 OMP_PROC_BIND=close OMP_PLACES=cores affinity=[0, 1]
+     reconstruct[OK]: reported=50.910319323920845 expected=50.910319323920845 rel_err=0.0
+     reconstruct[OK]: reported=54.705421965596734 expected=54.705421965596734 rel_err=0.0
+     reconstruct[OK]: reported=44.40817327798249 expected=44.40817327798249 rel_err=0.0
+     reconstruct[OK]: reported=54.047314857772115 expected=54.047314857772115 rel_err=0.0
+     reconstruct[OK]: reported=47.945925775636006 expected=47.945925775636006 rel_err=0.0
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  13470 0 1673 106981 819 0 343 3 0 0'
+     <- steal: /proc/stat cpu steal_jiffies=3; raw='cpu  14208 0 1673 107029 819 0 343 3 0 0'
+
+DIAG A CONCLUSION: A2/A1=2.99 (A1=15.68, A2=46.84 GB/s): pure-serial A1 is the ~3.0x SLOW outlier; A2≈A3≈A4≈A5 (spread=1.124) so OMP_NUM_THREADS=1 / affinity / PROC_BIND do NOT explain the gap — OpenMP-compiled triad (likely better auto-vectorization) does. Prior BENCH 1-thread ~4x-low signature matches the slow serial path, not OMP_NUM_THREADS=1. Use OpenMP@1 (A2) as the operational baseline, not A1. A3/A1=3.15 A4/A1=2.89 A5/A1=3.25.
+
+=== DIAG B — WORKING SET SIZE SWEEP ===
+fixed_threads: 2 L3=335544320
+  ratio=0.25: ws=83886072 reps=621 median=129.5800 GB/s CV%=1.52
+    raw_gbs: [128.13559797504246, 129.13353727705336, 129.58003594797424, 132.12168873211627, 132.73393228739715]
+  ratio=0.5: ws=167772144 reps=308 median=133.2939 GB/s CV%=0.45
+    raw_gbs: [133.62049199032285, 133.77081574350132, 132.22649240961698, 133.2938506739337, 133.27001825395868]
+  ratio=1.0: ws=335544312 reps=128 median=113.9460 GB/s CV%=1.86
+    raw_gbs: [116.21953536237973, 116.35288375700445, 112.99741810108509, 113.9460489803701, 111.39445674696451]
+  ratio=2.0: ws=671088624 reps=32 median=57.2046 GB/s CV%=4.67
+    raw_gbs: [58.42769374015624, 55.86811608563177, 58.55220971238138, 57.20463724389353, 52.14706113904335]
+  ratio=4.0: ws=1342177272 reps=12 median=42.4282 GB/s CV%=0.64
+    raw_gbs: [42.13405283265233, 42.295102864519976, 42.4282124361653, 42.62432723842749, 42.820130163181695]
+  ratio=8.0: ws=2684354544 reps=5 median=38.5961 GB/s CV%=1.71
+    raw_gbs: [38.47535683617084, 38.62127883418138, 38.59607685658614, 37.26499626162402, 38.98225874641682]
+escape_point: {'ratio_ws_over_l3': 8.0, 'median_gbs': 38.59607685658614, 'asymptotic_gbs': 38.59607685658614, 'peak_gbs': 133.2938506739337, 'note': 'escape = smallest ratio with GB/s ≤ 1.05 * asymptotic (largest ratio=8.0 → 38.596 GB/s); peak was 133.294 GB/s at small WS (cache). Chosen ratio=8.0 → 38.596 GB/s'}
+new_policy_bytes: 1342177280
+  <- Phase 2.2 policy: working_set = max(4 * L3_reported, 1 GiB) = max(4*335544320, 1073741824) = 1342177280. Escape point from sweep: {'ratio_ws_over_l3': 8.0, 'median_gbs': 38.59607685658614, 'asymptotic_gbs': 38.59607685658614, 'peak_gbs': 133.2938506739337, 'note': 'escape = smallest ratio with GB/s ≤ 1.05 * asymptotic (largest ratio=8.0 → 38.596 GB/s); peak was 133.294 GB/s at small WS (cache). Chosen ratio=8.0 → 38.596 GB/s'}. Prior SUSPECT fallback of 512 MiB left ratio_ws_over_l3≈1.6 (never escaped L3); 1 GiB floor forces ≥1 GiB even when L3 is SUSPECT.
+
+=== DIAG C — INDEPENDENT VALIDITY BASELINE ===
+serial_baseline_A1_gbs: 15.683657566768755
+omp_probe: [{'threads': 1, 'median_gbs': 60.173908695554815}, {'threads': 2, 'median_gbs': 61.069635947172735}, {'threads': 3, 'median_gbs': 61.31381460987462}, {'threads': 4, 'median_gbs': 59.85452144690778}]
+validity: {'status': 'VALID-WITH-CAVEAT', 'flags': [], 'caveats': ['OMP_NUM_THREADS=1 / A1_serial = 3.837 — A1 pure-serial is the SLOW outlier (codegen); do NOT use A1 as efficiency baseline; prefer OpenMP@1. SUPERLINEAR-vs-A1 flags are discounted.', 'threads=1: per-core=60.174 GB/s > 60.0 (HEURISTIC absolute upper bound)'], 'absolute_bounds_GBps_per_core': {'lo': 1.0, 'hi': 60.0, 'note': 'HEURISTIC — not ISA/DRAM derived'}, 'superlinear_vs_A1': {'valid': False, 'superlinear': True, 'violations': ['threads=2: median/A1_serial=3.893839 > 2 (SUPERLINEAR)', 'threads=3: median/A1_serial=3.909408 > 3 (SUPERLINEAR)'], 'flag': 'SUPERLINEAR vs A1_serial: efficiency > 100%; implies undisclosed work-unit change, cache cliff, or measurement bug', 'baseline_gbs': 15.683657566768755, 'baseline_label': 'A1_serial'}, 'superlinear_vs_OMP1': {'valid': True, 'superlinear': False, 'violations': [], 'flag': 'OK', 'baseline_gbs': 60.173908695554815, 'baseline_label': 'OMP_NUM_THREADS=1'}, 'a1_is_slow_outlier': True, 'cores': 4}
+  <- Efficiency baseline is A1 (pure serial, no OpenMP), not OMP_NUM_THREADS=1. Absolute per-core bounds 1..60 GB/s are heuristic.
+
+=== PRIMARY DELIVERABLE ===
+A2/A1=2.99 (A1=15.68, A2=46.84 GB/s): pure-serial A1 is the ~3.0x SLOW outlier; A2≈A3≈A4≈A5 (spread=1.124) so OMP_NUM_THREADS=1 / affinity / PROC_BIND do NOT explain the gap — OpenMP-compiled triad (likely better auto-vectorization) does. Prior BENCH 1-thread ~4x-low signature matches the slow serial path, not OMP_NUM_THREADS=1. Use OpenMP@1 (A2) as the operational baseline, not A1. A3/A1=3.15 A4/A1=2.89 A5/A1=3.25.
+
+=== PHASE 2.2 JSON ===
+{
+  "phase": "2.2",
+  "host_class": "container",
+  "host_class_evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED",
+  "effective_cores": 4,
+  "effective_mem_bytes": 16792014848,
+  "l3_reported_bytes": 335544320,
+  "working_set_bytes": 1342177272,
+  "working_set_policy": "working_set = max(4 * L3_reported, 1 GiB) = max(4*335544320, 1073741824) = 1342177280; L3_SUSPECT=True (logical_cores=4); floor justified by DIAG B (512 MiB left ws inside reported L3)",
+  "l3_suspect": true,
+  "bytes_moved_per_iter": 1342177272,
+  "reps": 11,
+  "calibration_history": [
+    {
+      "reps": 1,
+      "time_s": 0.08594477900004449
+    },
+    {
+      "reps": 11,
+      "time_s": 0.9535239149999484
+    }
+  ],
+  "prefault_wall_s": 0.14154987099999516,
+  "omp_compile": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_5n5zrqgy/kernels.so",
+  "serial_compile": "gcc -O3 -fPIC -shared /workspace/device_profile/phase2/kernels_serial.c -o /tmp/phase2_serial_kernels_ml2oom3y/kernels_serial.so",
+  "diag_a": {
+    "reps": 11,
+    "bytes_moved_per_iter": 1342177272,
+    "configs": {
+      "A1": {
+        "description": "pure serial C, compiled WITHOUT -fopenmp, no pragma",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "omp_num_threads": null,
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9370128300000147,
+          "gbs": 15.756401107122267
+        },
+        "raw_times_s": [
+          0.9413588589999904,
+          0.9440405359999886,
+          0.9337416010000084,
+          0.945179105999955,
+          0.9364496000000031
+        ],
+        "raw_gbs": [
+          15.683657566768755,
+          15.639105980084924,
+          15.811601385424261,
+          15.620266993080042,
+          15.76587783474941
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.683657566768755,
+            "expected_gbs": 15.683657566768755,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9413588589999904,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.639105980084924,
+            "expected_gbs": 15.639105980084924,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9440405359999886,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.811601385424261,
+            "expected_gbs": 15.811601385424261,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9337416010000084,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.620266993080042,
+            "expected_gbs": 15.620266993080042,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.945179105999955,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.76587783474941,
+            "expected_gbs": 15.76587783474941,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9364496000000031,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 15.683657566768755,
+        "min_gbs": 15.620266993080042,
+        "max_gbs": 15.811601385424261,
+        "cv_pct": 0.5235828782021594,
+        "steal_before": 3,
+        "steal_after": 3,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  10434 0 1671 104818 818 0 341 3 0 0'",
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  11091 0 1672 106791 819 0 343 3 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.0
+      },
+      "A2": {
+        "description": "-fopenmp, OMP_NUM_THREADS=1, affinity=all cores (current)",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "omp_num_threads": "1",
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.2347933710000234,
+          "gbs": 62.88060829450985
+        },
+        "raw_times_s": [
+          0.2623187270000358,
+          0.33185156999996934,
+          0.3221621220000088,
+          0.31520084799996084,
+          0.3114592640000069
+        ],
+        "raw_gbs": [
+          56.28248566484537,
+          44.48961923549545,
+          45.82770283590197,
+          46.8398168522752,
+          47.40250716061434
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 56.28248566484537,
+            "expected_gbs": 56.28248566484537,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2623187270000358,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 44.48961923549545,
+            "expected_gbs": 44.48961923549545,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.33185156999996934,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 45.82770283590197,
+            "expected_gbs": 45.82770283590197,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.3221621220000088,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 46.8398168522752,
+            "expected_gbs": 46.8398168522752,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.31520084799996084,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 47.40250716061434,
+            "expected_gbs": 47.40250716061434,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.3114592640000069,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 46.8398168522752,
+        "min_gbs": 44.48961923549545,
+        "max_gbs": 56.28248566484537,
+        "cv_pct": 9.69330260600037,
+        "steal_before": 3,
+        "steal_after": 3,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  11091 0 1672 106791 819 0 343 3 0 0'",
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  11840 0 1672 106862 819 0 343 3 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 2.986536568582161
+      },
+      "A3": {
+        "description": "-fopenmp, OMP_NUM_THREADS=1, OMP_PROC_BIND=close, OMP_PLACES=cores",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "omp_num_threads": "1",
+        "omp_proc_bind": "close",
+        "omp_places": "cores",
+        "affinity": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.30436288999999306,
+          "gbs": 48.50772047801339
+        },
+        "raw_times_s": [
+          0.3023515410000073,
+          0.30036108100000547,
+          0.2990541759999701,
+          0.2991880029999834,
+          0.2976157559999706
+        ],
+        "raw_gbs": [
+          48.83041092884539,
+          49.15400471607615,
+          49.368814003792664,
+          49.34673129925206,
+          49.60742062325981
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 48.83041092884539,
+            "expected_gbs": 48.83041092884539,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.3023515410000073,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 49.15400471607615,
+            "expected_gbs": 49.15400471607615,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.30036108100000547,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 49.368814003792664,
+            "expected_gbs": 49.368814003792664,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2990541759999701,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 49.34673129925206,
+            "expected_gbs": 49.34673129925206,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2991880029999834,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 49.60742062325981,
+            "expected_gbs": 49.60742062325981,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2976157559999706,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 49.34673129925206,
+        "min_gbs": 48.83041092884539,
+        "max_gbs": 49.60742062325981,
+        "cv_pct": 0.5882005265175132,
+        "steal_before": 3,
+        "steal_after": 3,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  11840 0 1672 106862 819 0 343 3 0 0'",
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  12636 0 1672 106911 819 0 343 3 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 3.1463790311139
+      },
+      "A4": {
+        "description": "-fopenmp, OMP_NUM_THREADS=1, sched_setaffinity CPU 0 only",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "omp_num_threads": "1",
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity": [
+          0
+        ],
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.314050801999997,
+          "gbs": 47.01134306289764
+        },
+        "raw_times_s": [
+          0.31011455600003046,
+          0.32593651600001294,
+          0.2809042599999998,
+          0.33334721399995715,
+          0.3487082920000262
+        ],
+        "raw_gbs": [
+          47.60805227084713,
+          45.297011127158925,
+          52.558654653368414,
+          44.29000565159035,
+          42.33897022442728
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 47.60805227084713,
+            "expected_gbs": 47.60805227084713,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.31011455600003046,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 45.297011127158925,
+            "expected_gbs": 45.297011127158925,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.32593651600001294,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 52.558654653368414,
+            "expected_gbs": 52.558654653368414,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2809042599999998,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 44.29000565159035,
+            "expected_gbs": 44.29000565159035,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.33334721399995715,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 42.33897022442728,
+            "expected_gbs": 42.33897022442728,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.3487082920000262,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 45.297011127158925,
+        "min_gbs": 42.33897022442728,
+        "max_gbs": 52.558654653368414,
+        "cv_pct": 8.45051391555422,
+        "steal_before": 3,
+        "steal_after": 3,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  12636 0 1672 106911 819 0 343 3 0 0'",
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  13470 0 1673 106981 819 0 343 3 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 2.88816629248118
+      },
+      "A5": {
+        "description": "-fopenmp, OMP_NUM_THREADS=2, affinity=CPUs 0,1, PROC_BIND=close",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "omp_num_threads": "2",
+        "omp_proc_bind": "close",
+        "omp_places": "cores",
+        "affinity": [
+          0,
+          1
+        ],
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.24791870400002836,
+          "gbs": 59.551577810758126
+        },
+        "raw_times_s": [
+          0.2899991630000045,
+          0.26988092699997424,
+          0.33246019599999954,
+          0.27316713200002596,
+          0.3079291880000028
+        ],
+        "raw_gbs": [
+          50.910319323920845,
+          54.705421965596734,
+          44.40817327798249,
+          54.047314857772115,
+          47.945925775636006
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 50.910319323920845,
+            "expected_gbs": 50.910319323920845,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.2899991630000045,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 54.705421965596734,
+            "expected_gbs": 54.705421965596734,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.26988092699997424,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 44.40817327798249,
+            "expected_gbs": 44.40817327798249,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.33246019599999954,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 54.047314857772115,
+            "expected_gbs": 54.047314857772115,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.27316713200002596,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 47.945925775636006,
+            "expected_gbs": 47.945925775636006,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.3079291880000028,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 50.910319323920845,
+        "min_gbs": 44.40817327798249,
+        "max_gbs": 54.705421965596734,
+        "cv_pct": 8.534878596284257,
+        "steal_before": 3,
+        "steal_after": 3,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  13470 0 1673 106981 819 0 343 3 0 0'",
+          "/proc/stat cpu steal_jiffies=3; raw='cpu  14208 0 1673 107029 819 0 343 3 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 3.246074399876719
+      }
+    },
+    "conclusion": "A2/A1=2.99 (A1=15.68, A2=46.84 GB/s): pure-serial A1 is the ~3.0x SLOW outlier; A2\u2248A3\u2248A4\u2248A5 (spread=1.124) so OMP_NUM_THREADS=1 / affinity / PROC_BIND do NOT explain the gap \u2014 OpenMP-compiled triad (likely better auto-vectorization) does. Prior BENCH 1-thread ~4x-low signature matches the slow serial path, not OMP_NUM_THREADS=1. Use OpenMP@1 (A2) as the operational baseline, not A1. A3/A1=3.15 A4/A1=2.89 A5/A1=3.25.",
+    "omp_thread_probe": [
+      {
+        "threads": 1,
+        "median_gbs": 60.173908695554815
+      },
+      {
+        "threads": 2,
+        "median_gbs": 61.069635947172735
+      },
+      {
+        "threads": 3,
+        "median_gbs": 61.31381460987462
+      },
+      {
+        "threads": 4,
+        "median_gbs": 59.85452144690778
+      }
+    ],
+    "recommended_threads_for_sweep": 2
+  },
+  "diag_b": {
+    "status": "OK",
+    "l3_reported_bytes": 335544320,
+    "fixed_threads": 2,
+    "points": [
+      {
+        "ratio_ws_over_l3": 0.25,
+        "working_set_bytes": 83886072,
+        "reps": 621,
+        "bytes_moved_per_iter": 83886072,
+        "raw_gbs": [
+          128.13559797504246,
+          129.13353727705336,
+          129.58003594797424,
+          132.12168873211627,
+          132.73393228739715
+        ],
+        "raw_times_s": [
+          0.4065478410000196,
+          0.4034060540000155,
+          0.4020160229999874,
+          0.39428235600001926,
+          0.39246370400002206
+        ],
+        "median_gbs": 129.58003594797424,
+        "cv_pct": 1.5247109114418649,
+        "status": "OK"
+      },
+      {
+        "ratio_ws_over_l3": 0.5,
+        "working_set_bytes": 167772144,
+        "reps": 308,
+        "bytes_moved_per_iter": 167772144,
+        "raw_gbs": [
+          133.62049199032285,
+          133.77081574350132,
+          132.22649240961698,
+          133.2938506739337,
+          133.27001825395868
+        ],
+        "raw_times_s": [
+          0.3867207760000042,
+          0.38628620200000796,
+          0.39079778500001794,
+          0.38766844899998887,
+          0.38773777500000506
+        ],
+        "median_gbs": 133.2938506739337,
+        "cv_pct": 0.4530511958007106,
+        "status": "OK"
+      },
+      {
+        "ratio_ws_over_l3": 1.0,
+        "working_set_bytes": 335544312,
+        "reps": 128,
+        "bytes_moved_per_iter": 335544312,
+        "raw_gbs": [
+          116.21953536237973,
+          116.35288375700445,
+          112.99741810108509,
+          113.9460489803701,
+          111.39445674696451
+        ],
+        "raw_times_s": [
+          0.36955639000001383,
+          0.36913285299999643,
+          0.38009427700001197,
+          0.376929892000021,
+          0.38556381699999065
+        ],
+        "median_gbs": 113.9460489803701,
+        "cv_pct": 1.8626638419023587,
+        "status": "OK"
+      },
+      {
+        "ratio_ws_over_l3": 2.0,
+        "working_set_bytes": 671088624,
+        "reps": 32,
+        "bytes_moved_per_iter": 671088624,
+        "raw_gbs": [
+          58.42769374015624,
+          55.86811608563177,
+          58.55220971238138,
+          57.20463724389353,
+          52.14706113904335
+        ],
+        "raw_times_s": [
+          0.36754550099999506,
+          0.3843844659999718,
+          0.3667638860000011,
+          0.3754037610000296,
+          0.411812967000003
+        ],
+        "median_gbs": 57.20463724389353,
+        "cv_pct": 4.667040221975495,
+        "status": "OK"
+      },
+      {
+        "ratio_ws_over_l3": 4.0,
+        "working_set_bytes": 1342177272,
+        "reps": 12,
+        "bytes_moved_per_iter": 1342177272,
+        "raw_gbs": [
+          42.13405283265233,
+          42.295102864519976,
+          42.4282124361653,
+          42.62432723842749,
+          42.820130163181695
+        ],
+        "raw_times_s": [
+          0.38225915100002794,
+          0.3808035960000211,
+          0.3796089049999978,
+          0.3778623219999986,
+          0.3761344769999937
+        ],
+        "median_gbs": 42.4282124361653,
+        "cv_pct": 0.6353849231538209,
+        "status": "OK"
+      },
+      {
+        "ratio_ws_over_l3": 8.0,
+        "working_set_bytes": 2684354544,
+        "reps": 5,
+        "bytes_moved_per_iter": 2684354544,
+        "raw_gbs": [
+          38.47535683617084,
+          38.62127883418138,
+          38.59607685658614,
+          37.26499626162402,
+          38.98225874641682
+        ],
+        "raw_times_s": [
+          0.3488407599999732,
+          0.3475227419999669,
+          0.3477496630000019,
+          0.36017104699999436,
+          0.3443046439999762
+        ],
+        "median_gbs": 38.59607685658614,
+        "cv_pct": 1.7080151847246983,
+        "status": "OK"
+      }
+    ],
+    "escape_point": {
+      "ratio_ws_over_l3": 8.0,
+      "median_gbs": 38.59607685658614,
+      "asymptotic_gbs": 38.59607685658614,
+      "peak_gbs": 133.2938506739337,
+      "note": "escape = smallest ratio with GB/s \u2264 1.05 * asymptotic (largest ratio=8.0 \u2192 38.596 GB/s); peak was 133.294 GB/s at small WS (cache). Chosen ratio=8.0 \u2192 38.596 GB/s"
+    },
+    "new_working_set_policy_bytes": 1342177280,
+    "justification": "Phase 2.2 policy: working_set = max(4 * L3_reported, 1 GiB) = max(4*335544320, 1073741824) = 1342177280. Escape point from sweep: {'ratio_ws_over_l3': 8.0, 'median_gbs': 38.59607685658614, 'asymptotic_gbs': 38.59607685658614, 'peak_gbs': 133.2938506739337, 'note': 'escape = smallest ratio with GB/s \u2264 1.05 * asymptotic (largest ratio=8.0 \u2192 38.596 GB/s); peak was 133.294 GB/s at small WS (cache). Chosen ratio=8.0 \u2192 38.596 GB/s'}. Prior SUSPECT fallback of 512 MiB left ratio_ws_over_l3\u22481.6 (never escaped L3); 1 GiB floor forces \u22651 GiB even when L3 is SUSPECT."
+  },
+  "diag_c": {
+    "omp_probe": [
+      {
+        "threads": 1,
+        "median_gbs": 60.173908695554815
+      },
+      {
+        "threads": 2,
+        "median_gbs": 61.069635947172735
+      },
+      {
+        "threads": 3,
+        "median_gbs": 61.31381460987462
+      },
+      {
+        "threads": 4,
+        "median_gbs": 59.85452144690778
+      }
+    ],
+    "serial_baseline_A1_gbs": 15.683657566768755,
+    "validity": {
+      "status": "VALID-WITH-CAVEAT",
+      "flags": [],
+      "caveats": [
+        "OMP_NUM_THREADS=1 / A1_serial = 3.837 \u2014 A1 pure-serial is the SLOW outlier (codegen); do NOT use A1 as efficiency baseline; prefer OpenMP@1. SUPERLINEAR-vs-A1 flags are discounted.",
+        "threads=1: per-core=60.174 GB/s > 60.0 (HEURISTIC absolute upper bound)"
+      ],
+      "absolute_bounds_GBps_per_core": {
+        "lo": 1.0,
+        "hi": 60.0,
+        "note": "HEURISTIC \u2014 not ISA/DRAM derived"
+      },
+      "superlinear_vs_A1": {
+        "valid": false,
+        "superlinear": true,
+        "violations": [
+          "threads=2: median/A1_serial=3.893839 > 2 (SUPERLINEAR)",
+          "threads=3: median/A1_serial=3.909408 > 3 (SUPERLINEAR)"
+        ],
+        "flag": "SUPERLINEAR vs A1_serial: efficiency > 100%; implies undisclosed work-unit change, cache cliff, or measurement bug",
+        "baseline_gbs": 15.683657566768755,
+        "baseline_label": "A1_serial"
+      },
+      "superlinear_vs_OMP1": {
+        "valid": true,
+        "superlinear": false,
+        "violations": [],
+        "flag": "OK",
+        "baseline_gbs": 60.173908695554815,
+        "baseline_label": "OMP_NUM_THREADS=1"
+      },
+      "a1_is_slow_outlier": true,
+      "cores": 4
+    },
+    "note": "Efficiency baseline is A1 (pure serial, no OpenMP), not OMP_NUM_THREADS=1. Absolute per-core bounds 1..60 GB/s are heuristic."
+  },
+  "primary_deliverable": {
+    "name": "DIAG A conclusion",
+    "conclusion": "A2/A1=2.99 (A1=15.68, A2=46.84 GB/s): pure-serial A1 is the ~3.0x SLOW outlier; A2\u2248A3\u2248A4\u2248A5 (spread=1.124) so OMP_NUM_THREADS=1 / affinity / PROC_BIND do NOT explain the gap \u2014 OpenMP-compiled triad (likely better auto-vectorization) does. Prior BENCH 1-thread ~4x-low signature matches the slow serial path, not OMP_NUM_THREADS=1. Use OpenMP@1 (A2) as the operational baseline, not A1. A3/A1=3.15 A4/A1=2.89 A5/A1=3.25."
+  },
+  "note": "Phase 2.2 is a debugging phase. Full BENCH 1\u20134 sweep is NOT re-run until the 1-thread baseline is explained. DIAG A is the deliverable."
+}
