@@ -92,23 +92,24 @@ def run_bench4(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
 
     c = out["files"].get("cached") or {}
     o = out["files"].get("oversized") or {}
+    warm_c = (c.get("warm") or {}).get("effective_read_gbs")
+    warm_o = (o.get("warm") or {}).get("effective_read_gbs")
+    cliff = (warm_c / warm_o) if (warm_c and warm_o and warm_o > 0) else None
     out["delta"] = {
         "cold_read_gbs_cached_minus_oversized": _sub(
             c.get("cold", {}).get("effective_read_gbs"),
             o.get("cold", {}).get("effective_read_gbs"),
         ),
-        "warm_read_gbs_cached_minus_oversized": _sub(
-            c.get("warm", {}).get("effective_read_gbs"),
-            o.get("warm", {}).get("effective_read_gbs"),
-        ),
+        "warm_read_gbs_cached_minus_oversized": _sub(warm_c, warm_o),
+        "warm_cliff_ratio_cached_over_oversized": cliff,
         "cold_pages_per_second_cached_minus_oversized": _sub(
             c.get("cold", {}).get("pages_per_second"),
             o.get("cold", {}).get("pages_per_second"),
         ),
         "deliverable": (
-            "cached vs oversized cold/warm effective_read_gbs delta; "
-            "large negative/near-zero cold delta on oversized indicates "
-            "page-cache / reclaim pressure penalty for models that do not fit in RAM"
+            "cached vs oversized warm effective_read_gbs; cliff_ratio = "
+            "warm_cached / warm_oversized (page-cache hit vs RAM-pressure miss). "
+            "Both io_basis_gbs and file_basis_gbs printed per pass for audit."
         ),
     }
     out["status"] = "OK"
@@ -172,10 +173,27 @@ def _timed_pass(
     if io0 is not None and io1 is not None:
         read_delta = io1 - io0
 
-    effective_gbs = (
-        (read_delta / dt / 1e9) if (read_delta is not None and dt > 0) else None
+    io_basis_gbs = (
+        (read_delta / dt / 1e9)
+        if (read_delta is not None and read_delta > 0 and dt > 0)
+        else None
     )
+    file_basis_gbs = (need / dt / 1e9) if dt > 0 else None
     pages_per_second = (pages / dt) if dt > 0 else None
+
+    # FIX 1 (Phase 2.2): delta==0 means fully page-cached — use file_bytes/time.
+    if read_delta == 0:
+        effective_gbs = file_basis_gbs
+        bandwidth_basis = "file_bytes / time"
+        bandwidth_note = "FULLY CACHED (io read_bytes delta = 0 is the proof)"
+    elif read_delta is not None and read_delta > 0:
+        effective_gbs = io_basis_gbs
+        bandwidth_basis = "/proc/self/io read_bytes delta / time"
+        bandwidth_note = "block I/O observed via read_bytes delta"
+    else:
+        effective_gbs = None
+        bandwidth_basis = "UNDETECTED"
+        bandwidth_note = "read_bytes unavailable; cannot choose basis"
 
     return {
         "seconds": dt,
@@ -189,14 +207,14 @@ def _timed_pass(
         "io_read_bytes_before": io0,
         "io_read_bytes_after": io1,
         "io_read_bytes_delta": read_delta,
+        "io_basis_gbs": io_basis_gbs,
+        "file_basis_gbs": file_basis_gbs,
         "effective_read_gbs": effective_gbs,
         "pages_per_second": pages_per_second,
         "fault_evidence": [flt0_ev, flt1_ev],
         "io_evidence": [io0_ev, io1_ev],
-        "bandwidth_basis": (
-            "/proc/self/io read_bytes delta / time "
-            "(NOT file_size/time; NOT 1-byte-per-page)"
-        ),
+        "bandwidth_basis": bandwidth_basis,
+        "bandwidth_note": bandwidth_note,
     }
 
 

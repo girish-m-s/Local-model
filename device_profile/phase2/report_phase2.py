@@ -16,15 +16,22 @@ def _snap_lines(label: str, snap: dict[str, Any] | Any) -> list[str]:
             "mem_available_bytes": snap.mem_available_bytes,
             "mem_free_bytes": snap.mem_free_bytes,
             "contaminated": snap.contaminated,
+            "load_threshold": getattr(snap, "load_threshold", None),
+            "threshold_overridden": getattr(snap, "threshold_overridden", False),
             "evidence": snap.evidence,
         }
     else:
         d = snap
+    thr = d.get("load_threshold")
+    over = d.get("threshold_overridden")
+    thr_tag = ""
+    if thr is not None:
+        thr_tag = f" threshold={thr}" + (" OVERRIDE" if over else "")
     lines = [
         f"{label}: loadavg={d.get('loadavg') or d.get('loadavg_1_5_15')} "
         f"MemAvailable={d.get('mem_available_bytes')} "
         f"MemFree={d.get('mem_free_bytes')} "
-        f"{'CONTAMINATED' if d.get('contaminated') else 'OK'}"
+        f"{'CONTAMINATED' if d.get('contaminated') else 'OK'}{thr_tag}"
     ]
     for ev in d.get("evidence") or []:
         lines.append(f"  <- {ev}")
@@ -303,6 +310,11 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                     f"pages_per_second={p.get('pages_per_second')}"
                 )
                 lines.append(
+                    f"    io_basis_gbs={p.get('io_basis_gbs')} "
+                    f"file_basis_gbs={p.get('file_basis_gbs')} "
+                    f"(both printed for audit)"
+                )
+                lines.append(
                     f"    minflt_delta={p.get('minflt_delta')} "
                     f"(before={p.get('minflt_before')} after={p.get('minflt_after')}) "
                     f"majflt_delta={p.get('majflt_delta')} "
@@ -315,8 +327,17 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                 )
                 for ev in (p.get("fault_evidence") or []) + (p.get("io_evidence") or []):
                     lines.append(f"    <- {ev}")
-                lines.append(f"    <- bandwidth_basis: {p.get('bandwidth_basis')}")
-        lines.append(f"delta (cached - oversized): {b4.get('delta')}")
+                lines.append(
+                    f"    <- bandwidth_basis: {p.get('bandwidth_basis')}; "
+                    f"{p.get('bandwidth_note')}"
+                )
+        delta = b4.get("delta") or {}
+        lines.append(f"delta (cached - oversized): {delta}")
+        if delta.get("warm_cliff_ratio_cached_over_oversized") is not None:
+            lines.append(
+                f"warm_cliff_ratio (cached/oversized): "
+                f"{delta.get('warm_cliff_ratio_cached_over_oversized')}"
+            )
         lines.append(f"note: {b4.get('note')}")
     lines.extend(_snap_lines("post", b4.get("post")))
     lines.append("")
@@ -353,13 +374,21 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     lines.append("")
     lines.append("-- KV-cache extension (weights-only model is incomplete) --")
     kv = d.get("kv_cache_predictions") or {}
-    cfg = kv.get("config") or {}
-    lines.append(f"config: {cfg}")
     lines.append(kv.get("note", ""))
-    for row in kv.get("rows") or []:
+    lines.append(f"PRIMARY GQA config: {kv.get('primary_config')}")
+    for row in kv.get("primary_GQA_rows") or kv.get("rows") or []:
         lines.append(
-            f"  n_ctx={row['n_ctx']}: kv_bytes={row['kv_bytes']} "
-            f"total_bytes/token={row['bytes_per_token_total']} "
+            f"  [GQA] n_ctx={row['n_ctx']} n_kv_heads={row.get('n_kv_heads')}: "
+            f"kv_bytes={row['kv_bytes']} total_bytes/token={row['bytes_per_token_total']} "
+            f"kv_share={row['kv_share_of_total']} "
+            f"upper_tok_s={row['upper_tok_s_weights_plus_kv']} "
+            f"(weights_only={row['upper_tok_s_weights_only']})"
+        )
+    lines.append(f"SECONDARY MHA config: {kv.get('secondary_config')}")
+    for row in kv.get("secondary_MHA_rows") or []:
+        lines.append(
+            f"  [MHA] n_ctx={row['n_ctx']} n_kv_heads={row.get('n_kv_heads')}: "
+            f"kv_bytes={row['kv_bytes']} total_bytes/token={row['bytes_per_token_total']} "
             f"kv_share={row['kv_share_of_total']} "
             f"upper_tok_s={row['upper_tok_s_weights_plus_kv']} "
             f"(weights_only={row['upper_tok_s_weights_only']})"
