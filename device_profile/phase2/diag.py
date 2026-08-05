@@ -32,7 +32,7 @@ def run_diag() -> dict[str, Any]:
     emem = effective_mem(profile)
     l3 = _l3_bytes(profile)
 
-    ws, ws_ev, suspect = resolve_working_set_bytes(profile)
+    ws, ws_ev, suspect, _l3_pol, _ws_ratio = resolve_working_set_bytes(profile)
     max_alloc = emem // 2 if emem else ws
     if max_alloc and ws > max_alloc:
         ws = max_alloc

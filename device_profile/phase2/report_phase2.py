@@ -1,4 +1,4 @@
-"""Format Phase 2.1 measurement report."""
+"""Format Phase 2.4 measurement report."""
 
 from __future__ import annotations
 
@@ -47,10 +47,23 @@ def _quiet_gate_lines(qg: dict[str, Any] | None) -> list[str]:
     return lines
 
 
+def _thread_verify_line(s: dict[str, Any]) -> str:
+    return (
+        f"  thread_verify: requested={s.get('requested_threads', s.get('threads'))} "
+        f"omp_get_num_threads_actual={s.get('omp_num_threads_actual')} "
+        f"n_distinct_cpus={s.get('n_distinct_cpus')} "
+        f"flag={s.get('thread_flag', 'OK' if s.get('thread_count_applied') else 'INVALID')}"
+    )
+
+
 def format_phase2_report(bundle: dict[str, Any]) -> str:
     lines: list[str] = []
-    phase = bundle.get("phase", "2")
+    phase = bundle.get("phase", "2.4")
     lines.append(f"=== PHASE {phase} MEASUREMENT HARNESS REPORT ===")
+    if bundle.get("smoke_not_deliverable"):
+        lines.append("*** SMOKE_NOT_DELIVERABLE — container/smoke path; not a device deliverable ***")
+    for note in bundle.get("override_notes") or []:
+        lines.append(f"  <- {note}")
     lines.append(f"HOST CLASS: {bundle.get('host_class')}")
     lines.append(f"  <- {bundle.get('host_class_evidence')}")
     if bundle.get("host_class") != "bare-metal":
@@ -77,20 +90,24 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
         lines.extend(_snap_lines("post", b1.get("post")))
         lines.append("")
     else:
-        lines.append(f"backend: {b1['backend']}")
-        lines.append(f"  <- {b1['backend_evidence']}")
-        lines.append(f"working_set_bytes: {b1['working_set_bytes']}")
-        lines.append(f"  <- policy: {b1['working_set_policy']}")
-        lines.append(f"l3_suspect_fallback: {b1['l3_suspect_fallback']}")
-        lines.append(f"bytes_moved_per_iter: {b1['bytes_moved_per_iter']}")
+        lines.append(f"backend: {b1.get('backend')}")
+        lines.append(f"working_set_bytes: {b1.get('working_set_bytes')}")
+        lines.append(f"  <- policy: {b1.get('working_set_policy')}")
+        lines.append(
+            f"l3_reported_bytes: {b1.get('l3_reported_bytes')} "
+            f"ratio_ws_over_l3: {b1.get('ratio_ws_over_l3')}"
+        )
+        lines.append(f"  <- {b1.get('diag_b_floor_note')}")
+        lines.append(f"l3_suspect: {b1.get('l3_suspect')}")
+        lines.append(f"bytes_moved_per_iter: {b1.get('bytes_moved_per_iter')}")
         lines.append(f"reps (constant across sweep): {b1.get('reps')}")
         cal = b1.get("calibration") or {}
         lines.append(f"calibration: {cal.get('evidence')}")
         for h in cal.get("history") or []:
-            lines.append(f"  <- cal_step reps={h['reps']} time_s={h['time_s']}")
-        pf = b1.get("prefault") or {}
-        lines.append(f"prefault_wall_s: {pf.get('wall_time_s')}")
-        lines.append(f"  <- {pf.get('evidence')}")
+            lines.append(
+                f"  <- cal_step reps={h.get('reps')} mean_time_s={h.get('mean_time_s')} "
+                f"actual_threads={h.get('actual_threads')} pid={h.get('pid')}"
+            )
         cp = b1.get("cache_proof") or {}
         lines.append(
             f"cache_proof: ws={cp.get('working_set_bytes')} L3={cp.get('l3_bytes')} "
@@ -98,6 +115,15 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
         )
         lines.append(f"  <- {cp.get('evidence')}")
         for s in b1.get("thread_sweeps") or []:
+            if s.get("status") == "INVALID":
+                lines.append(
+                    f"threads={s.get('threads')}: INVALID "
+                    f"req={s.get('requested_threads')} "
+                    f"actual={s.get('omp_num_threads_actual')} "
+                    f"n_distinct_cpus={s.get('n_distinct_cpus')}"
+                )
+                lines.append(_thread_verify_line(s))
+                continue
             noisy = " NOISY" if s.get("noisy") else ""
             lines.append(
                 f"threads={s['threads']}: reps={s.get('reps')} "
@@ -105,13 +131,15 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                 f"max={s['max_gbs']:.4f} mean={s['mean_gbs']:.4f} "
                 f"CV%={s['cv_pct']:.2f}{noisy} GB/s"
             )
+            lines.append(_thread_verify_line(s))
             disc = s.get("discarded_warmup") or {}
             lines.append(
                 f"  DISCARDED warmup: time_s={disc.get('time_s')} "
-                f"gbs={disc.get('gbs')} reps={disc.get('reps')}"
+                f"gbs={disc.get('gbs')} actual={disc.get('omp_num_threads_actual')} "
+                f"n_cpus={disc.get('n_distinct_cpus')}"
             )
-            lines.append(f"  raw_gbs: {s['raw_gbs']}")
-            lines.append(f"  raw_times_s: {s['raw_times_s']}")
+            lines.append(f"  raw_gbs: {s.get('raw_gbs')}")
+            lines.append(f"  raw_times_s: {s.get('raw_times_s')}")
             lines.append(
                 f"  bytes_moved_per_timed_call: {s.get('bytes_moved_per_timed_call')} "
                 f"(= reps * bytes_moved_per_iter)"
@@ -123,7 +151,8 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                     f"expected={chk.get('expected_gbs')} rel_err={chk.get('rel_err')}"
                 )
             lines.append(
-                f"  <- OMP_NUM_THREADS={s['omp_num_threads']}; {s['affinity_evidence']}"
+                f"  <- env_OMP_NUM_THREADS={s.get('env_OMP_NUM_THREADS')}; "
+                f"affinity={s.get('affinity_cpus')}"
             )
         for fail in b1.get("FAIL") or []:
             lines.append(f"FAIL: {fail}")
@@ -131,8 +160,19 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
         lines.append(f"validity: {val.get('flag')}")
         for v in val.get("violations") or []:
             lines.append(f"  <- {v}")
+        for e in b1.get("efficiency_curve") or []:
+            lines.append(
+                f"efficiency threads={e.get('threads')}: "
+                f"median_gbs={e.get('median_gbs')} eff={e.get('efficiency')}"
+            )
         sat = b1.get("saturation") or {}
-        if sat.get("invalid"):
+        if sat.get("no_saturation_observed"):
+            lines.append(f"saturation: {sat.get('flag')}")
+            lines.append(
+                f"  efficiency_at_max_cores={sat.get('efficiency_at_max_cores')} "
+                f"peak_median_gbs={sat.get('peak_median_gbs')}"
+            )
+        elif sat.get("invalid"):
             lines.append(
                 f"saturation_thread_count: NOT REPORTED  <- {sat.get('flag')}"
             )
@@ -147,82 +187,25 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                 f"{sat.get('bandwidth_1thread_median_gbs')} = "
                 f"{sat.get('ratio_sat_over_1')}"
             )
+        rec = b1.get("recommendation") or {}
+        lines.append(
+            f"recommended_thread_count (from BENCH 1 BW curve): "
+            f"{rec.get('recommended_thread_count')}  <- {rec.get('recommended_thread_count_evidence')}"
+        )
+        lines.append(
+            f"max_efficiency_thread_count (BENCH 3 source): "
+            f"{rec.get('max_efficiency_thread_count')}  "
+            f"<- {rec.get('max_efficiency_thread_count_evidence')}"
+        )
         lines.extend(_snap_lines("post", b1.get("post")))
         lines.append("")
 
-    # BENCH 2
-    b2 = bundle["bench2"]
-    lines.append(f"=== {b2['name']} ===")
-    lines.append(f"status: {b2.get('status')}")
-    lines.extend(_snap_lines("pre", b2.get("pre")))
-    lines.extend(_quiet_gate_lines(b2.get("quiet_gate")))
-    if b2.get("status") == "BLOCKED":
-        lines.append("BLOCKED: bench not run (loadavg gate).")
-        lines.extend(_snap_lines("post", b2.get("post")))
-        lines.append("")
-    else:
-        lines.append(f"sizing_rule: {b2.get('sizing_rule')}")
-        lines.append(f"L2/fit: {b2.get('fit_evidence')}")
-        lines.append(f"isa_verification: {b2.get('isa_verification')}")
-        cal = b2.get("calibration") or {}
-        lines.append(f"calibration: {cal.get('evidence')}")
-        if b2.get("hybrid_note"):
-            lines.append(b2["hybrid_note"])
-        for label, curve in (b2.get("curves") or {}).items():
-            lines.append(f"-- curve: {label} --")
-            lines.append(f"  <- affinity: {curve['affinity']}")
-            for r in curve["fp32"]:
-                noisy = " NOISY" if r.get("noisy") else ""
-                lines.append(
-                    f"  fp32 threads={r['threads']}: "
-                    f"bytes_per_thread={r.get('bytes_per_thread'):.1f} "
-                    f"ws={r.get('working_set_bytes')} reps={r.get('reps')} "
-                    f"median={r['median_gflops']:.4f} "
-                    f"min={r['min_gflops']:.4f} max={r['max_gflops']:.4f} "
-                    f"CV%={r['cv_pct']:.2f}{noisy} GFLOPS"
-                )
-                disc = r.get("discarded_warmup") or {}
-                lines.append(
-                    f"    DISCARDED warmup: time_s={disc.get('time_s')} "
-                    f"gflops={disc.get('gflops')}"
-                )
-                lines.append(f"    raw_gflops: {r['raw_gflops']}")
-                lines.append(f"    raw_times_s: {r['raw_times_s']}")
-            for r in curve["int8"]:
-                noisy = " NOISY" if r.get("noisy") else ""
-                lines.append(
-                    f"  int8 threads={r['threads']}: "
-                    f"bytes_per_thread={r.get('bytes_per_thread'):.1f} "
-                    f"ws={r.get('working_set_bytes')} reps={r.get('reps')} "
-                    f"median={r['median_gops']:.4f} "
-                    f"min={r['min_gops']:.4f} max={r['max_gops']:.4f} "
-                    f"CV%={r['cv_pct']:.2f}{noisy} GOPS"
-                )
-                disc = r.get("discarded_warmup") or {}
-                lines.append(
-                    f"    DISCARDED warmup: time_s={disc.get('time_s')} "
-                    f"gops={disc.get('gops')}"
-                )
-                lines.append(f"    raw_gops: {r['raw_gops']}")
-                lines.append(f"    raw_times_s: {r['raw_times_s']}")
-            knee = (b2.get("knee") or {}).get(label) or {}
-            val = (b2.get("validity") or {}).get(label) or {}
-            lines.append(f"  validity: {val.get('flag')}")
-            for v in val.get("violations") or []:
-                lines.append(f"    <- {v}")
-            if knee.get("invalid"):
-                lines.append(
-                    f"  knee(fp32): NOT REPORTED  <- {knee.get('rule')}"
-                )
-            else:
-                lines.append(
-                    f"  knee(fp32): {knee.get('fp32_knee_threads')}  "
-                    f"<- {knee.get('rule')}"
-                )
-        if b2.get("hybrid_conclusion"):
-            lines.append(f"hybrid_conclusion: {b2['hybrid_conclusion']}")
-        lines.extend(_snap_lines("post", b2.get("post")))
-        lines.append("")
+    # BENCH 2 deleted
+    b2 = bundle.get("bench2") or {}
+    lines.append(f"=== {b2.get('name', 'BENCH 2 — DELETED')} ===")
+    lines.append(f"status: {b2.get('status', 'DELETED')}")
+    lines.append(f"  <- {b2.get('reason')}")
+    lines.append("")
 
     # BENCH 3
     b3 = bundle["bench3"]
@@ -231,16 +214,27 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     lines.extend(_snap_lines("pre", b3.get("pre")))
     lines.extend(_quiet_gate_lines(b3.get("quiet_gate")))
     lines.append(f"kernel: {b3.get('kernel')}")
-    lines.append(f"sat_threads (from BENCH 1 BW saturation): {b3.get('sat_threads')}")
+    lines.append(
+        f"threads (BENCH 1 max-efficiency / recommended): {b3.get('sat_threads')}"
+    )
+    lines.append(
+        f"thread_verify: requested={b3.get('requested_threads')} "
+        f"actual={b3.get('omp_num_threads_actual')} "
+        f"n_distinct_cpus={b3.get('n_distinct_cpus')} "
+        f"applied={b3.get('thread_count_applied')} flag={b3.get('thread_flag')}"
+    )
     lines.append(f"duration_s: {b3.get('duration_s')}; bucket_s: {b3.get('bucket_s')}")
     lines.append(f"battery_dual_run: {b3.get('battery_dual_run')}")
     if b3.get("status") == "BLOCKED":
         lines.append("BLOCKED: bench not run (loadavg gate).")
     elif b3.get("status") == "SKIPPED":
         lines.append(f"SKIPPED: {b3.get('skip_reason')}")
+    elif b3.get("status") == "INVALID":
+        for f in b3.get("FAIL") or []:
+            lines.append(f"FAIL: {f}")
     elif b3.get("thermal_blind") or b3.get("status") == "THERMAL_BLIND":
         sm = b3.get("summary") or {}
-        lines.append(f"THERMAL BLIND — RESULT NOT MEANINGFUL")
+        lines.append("THERMAL BLIND — RESULT NOT MEANINGFUL")
         lines.append(f"  <- {sm.get('explanation') or sm.get('flag')}")
         for n in b3.get("notes") or []:
             lines.append(f"  <- {n}")
@@ -251,6 +245,8 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
             lines.append(
                 f"bucket[{b['bucket']}]: gbs={b['gbs']:.4f} "
                 f"calls={b['calls']} elapsed_s={b['elapsed_s']:.3f} "
+                f"actual_threads={b.get('omp_num_threads_actual')} "
+                f"n_cpus={b.get('n_distinct_cpus')} "
                 f"temps={b.get('temps_C')} freqs_kHz={b.get('freqs_kHz')}"
             )
             for ev in b.get("thermal_evidence") or []:
@@ -277,6 +273,7 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     lines.append(f"status: {b4.get('status')}")
     lines.extend(_snap_lines("pre", b4.get("pre")))
     lines.extend(_quiet_gate_lines(b4.get("quiet_gate")))
+    lines.append(f"thread_control: {b4.get('thread_control')}")
     lines.append(
         f"cached_file_bytes: {b4.get('cached_file_bytes')} "
         f"(0.4x effective_mem={b4.get('effective_mem_bytes')})"
@@ -297,6 +294,15 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
         for key in ("cached", "oversized"):
             f = (b4.get("files") or {}).get(key) or {}
             lines.append(f"-- file: {f.get('label')} path={f.get('path')} --")
+            lines.append(
+                f"  thread_verify: requested={f.get('requested_threads')} "
+                f"actual={f.get('omp_num_threads_actual')} "
+                f"n_distinct_cpus={f.get('n_distinct_cpus')} "
+                f"flag={f.get('thread_flag')}"
+            )
+            if f.get("status") == "INVALID":
+                lines.append(f"  INVALID: {f.get('error')}")
+                continue
             lines.append(
                 f"  write: {f.get('write_seconds')}s "
                 f"({f.get('write_gbs_file_size_over_time')} GB/s file_size/time)"
@@ -339,6 +345,8 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
                 f"{delta.get('warm_cliff_ratio_cached_over_oversized')}"
             )
         lines.append(f"note: {b4.get('note')}")
+        for fail in b4.get("FAIL") or []:
+            lines.append(f"FAIL: {fail}")
     lines.extend(_snap_lines("post", b4.get("post")))
     lines.append("")
 
@@ -346,7 +354,7 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     d = bundle["derived"]
     lines.append("=== SECTION D — DERIVED OUTPUT ===")
     lines.append(
-        f"measured_bandwidth_GBps (BENCH1 saturated median): "
+        f"measured_bandwidth_GBps (BENCH1 saturated / max-core median): "
         f"{d.get('measured_bandwidth_GBps')}"
     )
     lines.append(d.get("prediction_units_note", ""))
@@ -355,7 +363,7 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     )
     lines.append(
         "UPPER BOUND assuming perfect bandwidth utilization. Real engines typically "
-        "hit 40-70% of it."
+        "hit 40-70% of it. GiB = 2^30."
     )
     lines.append(
         f"{'model_GiB':>10}  {'bytes(2^30)':>14}  {'upper_tok_s':>14}  "
@@ -397,6 +405,7 @@ def format_phase2_report(bundle: dict[str, Any]) -> str:
     lines.append(f"MoE: {d.get('moe_note')}")
     lines.append(f"Prefill/TTFT: {d.get('prefill_note')}")
     lines.append("")
+    lines.append(f"bench3_thread_source: {d.get('bench3_thread_source')}")
     lines.append(
         f"recommended_thread_count: {d.get('recommended_thread_count')}  "
         f"<- {d.get('recommended_thread_count_evidence')}"

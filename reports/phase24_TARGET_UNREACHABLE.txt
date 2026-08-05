@@ -1,0 +1,50 @@
+=== PHASE 2.4 TARGET DEVICE STATUS ===
+generated_by: cursor cloud agent (bc-019fc342-825e-7eab-bcd3-89b205bdbc56)
+host_this_agent_runs_on: Ubuntu container on KVM (/.dockerenv; host_class=container)
+date: 2026-08-05
+
+MANDATORY TARGET SET (Phase 2.4):
+  1. One bare-metal x86 machine, on AC and on battery.
+  2. One ARM device.
+
+RESULT: BOTH TARGETS UNREACHABLE FROM THIS AGENT.
+
+Evidence of reachability attempts:
+  - This VM is itself HOST CLASS=container (not bare-metal).
+  - host.docker.internal TCP/22 Connection refused (prior Phase 2.x attempts).
+  - No SSH keys / known_hosts for a user laptop in ~/.ssh.
+  - No Termux / adb / Apple Silicon host advertised in environment or MCP.
+  - No private worker / multi-host fleet linked to this run.
+
+Therefore:
+  - ARM path remains 0% validated.
+  - Bare-metal x86 (AC + battery) remains 0% validated.
+  - A container re-run is a SMOKE test only — NOT the Phase 2.4 deliverable.
+
+WHAT WAS DELIVERED INSTEAD:
+  - Phase 2.4 harness: omp_set_num_threads in fresh subprocess for BENCH 1/3/4;
+    actual != requested → INVALID.
+  - BENCH 2 deleted; recommended_thread_count from BENCH 1 BW curve
+    (NO SATURATION OBSERVED — USE ALL PHYSICAL CORES when eff@max > 90%).
+  - BENCH 1 working_set = 8 × L3_reported (DIAG B floor note printed).
+  - BENCH 3 STREAM at BENCH 1 max-efficiency threads; THERMAL BLIND skip.
+  - BENCH 4 FULLY CACHED when io_read_bytes_delta==0 (file_bytes/time).
+  - SECTION D GQA primary / MHA secondary; GiB=2^30; MoE + TTFT notes.
+  - Quiet-gate defaults restored; deliverable aborts on PHASE2_* overrides
+    and on loadavg > 0.3 after 5 retries.
+
+HOW TO PRODUCE THE REAL DELIVERABLE (on each target device):
+  git clone <repo> && git checkout cursor/phase24-harness-rerun-bc56
+  # NO PHASE2_* env overrides
+  python3 -m device_profile.phase2 > reports/phase24_<host>_<ac|battery>.txt
+
+  Required filenames (suggested):
+    reports/phase24_baremetal_x86_ac.txt
+    reports/phase24_baremetal_x86_battery.txt
+    reports/phase24_arm_<device>.txt
+
+Container smoke only:
+  PHASE2_ALLOW_OVERRIDES=1 PHASE2_LOAD_THRESHOLD=100 PHASE2_QUIET_ATTEMPTS=1 \
+  PHASE2_QUIET_SLEEP_S=0 PHASE2_BENCH3_DURATION_S=20 \
+  python3 -m device_profile.phase2 --smoke \
+    > reports/phase24_container_SMOKE_NOT_DELIVERABLE.txt

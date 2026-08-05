@@ -199,13 +199,18 @@ def rep_stats(samples: Sequence[float], cv_noisy_pct: float = 10.0) -> RepStats:
     )
 
 
-def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
-    """
-    Interim buffer sizing for diagnostics/benches before DIAG B escape is known.
-    Phase 2.3: the authoritative policy is set FROM the DIAG B escape point
-    (see diag.run_diag_b); this helper must not invent a floor that disagrees
-    with a measured escape. Uses max(4*L3, 1 GiB) only as a pre-escape default
-    matching the observed near-floor consecutive pair at 4×/8× on this host.
+# DIAG B (Phase 2.3): 4×L3 was ~5.8% above STREAM floor; 8×L3 ~2.5%.
+WS_L3_MULTIPLIER = 8
+WS_FLOOR_PCT_AT_4X = 5.8
+WS_FLOOR_PCT_AT_8X = 2.5
+
+
+def resolve_working_set_bytes(
+    profile: Any,
+) -> tuple[int, str, bool, Optional[int], float]:
+    """Phase 2.4: working_set = 8 × L3_reported.
+
+    Returns (ws_bytes, evidence, l3_suspect, l3_bytes_or_None, ws_over_l3_ratio).
     """
     l3 = None
     if profile.cache.lscpu_l3_bytes is not None and isinstance(
@@ -231,18 +236,20 @@ def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
         ws = GIB
         evid = (
             f"L3 undetected (logical_cores={logical}); "
-            f"working_set = 1 GiB pre-escape default; authoritative policy from DIAG B escape"
+            f"working_set = 1 GiB fallback; cannot print ws/L3 ratio"
         )
-        return ws, evid, True
+        return ws, evid, True, None, float("nan")
 
-    ws = max(4 * l3, GIB)
+    ws = int(WS_L3_MULTIPLIER * l3)
+    ratio = float(ws) / float(l3)
     evid = (
-        f"pre-escape default working_set = max(4 * L3_reported, 1 GiB) = "
-        f"max(4*{l3}, {GIB}) = {ws}"
+        f"working_set = {WS_L3_MULTIPLIER} × L3_reported "
+        f"(L3={l3} B, ws={ws} B, ratio={ratio:.2f}×); "
+        f"DIAG B floor: {WS_L3_MULTIPLIER}× is {WS_FLOOR_PCT_AT_8X}% above STREAM floor "
+        f"(4× was {WS_FLOOR_PCT_AT_4X}%)"
         + (f"; L3_SUSPECT=True (logical_cores={logical})" if suspect else "")
-        + "; authoritative policy MUST come from DIAG B escape (Phase 2.3 Step 5)"
     )
-    return ws, evid, suspect
+    return ws, evid, suspect, int(l3), ratio
 
 
 def effective_cores(profile: Any) -> int:
