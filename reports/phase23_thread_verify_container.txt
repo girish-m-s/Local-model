@@ -1,0 +1,1821 @@
+=== PHASE 2.3 THREAD COUNT VERIFICATION REPORT ===
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+effective_cores: 4
+working_set_bytes: 1342177272
+reps (constant): 11
+note: Phase 2.3 single-bug phase: verify OpenMP thread counts. BENCH 1–4 not re-run. Phase 2.2 OpenMP@1 baseline NOT adopted.
+
+=== STEP 1 — INSTRUMENTED THREAD COUNT TABLE (DELIVERABLE) ===
+cfg       pid    env  req  actual   max  nCPU flag                               GB/s      /A1
+A1       3675   None None       1     1     1 SERIAL_NO_OMP                   15.6360   1.0000
+     cpu_ids=[2] status=OK
+     description: pure serial C, WITHOUT -fopenmp, no pragma
+     raw_gbs: [15.70947145575316, 14.560831848030132, 15.635979316006493, 15.533165324601342, 15.76503576986573]
+     raw_times_s: [0.9398120130001644, 1.013949625000123, 0.9442293120000613, 0.9504791639999439, 0.9364996189999601]
+     reconstruct[OK]: reported=15.70947145575316 rel_err=0.0
+     reconstruct[OK]: reported=14.560831848030132 rel_err=0.0
+     reconstruct[OK]: reported=15.635979316006493 rel_err=0.0
+     reconstruct[OK]: reported=15.533165324601342 rel_err=0.0
+     reconstruct[OK]: reported=15.76503576986573 rel_err=0.0
+A2       3684      1    1       1     1     1 OK                              15.6361   1.0000
+     cpu_ids=[0] status=OK
+     description: -fopenmp, requested 1 thread, affinity=all (omp_set_num_threads)
+     raw_gbs: [15.281115602720295, 15.588419948655412, 15.642018518169344, 15.65695482215762, 15.636139481275304]
+     raw_times_s: [0.9661565540000083, 0.9471101009999074, 0.943864756000039, 0.9429643349999424, 0.9442196400000284]
+     reconstruct[OK]: reported=15.281115602720295 rel_err=0.0
+     reconstruct[OK]: reported=15.588419948655412 rel_err=0.0
+     reconstruct[OK]: reported=15.642018518169344 rel_err=0.0
+     reconstruct[OK]: reported=15.65695482215762 rel_err=0.0
+     reconstruct[OK]: reported=15.636139481275304 rel_err=0.0
+A3       3690      1    1       1     1     1 OK                              15.6519   1.0010
+     cpu_ids=[0] status=OK
+     description: -fopenmp, requested 1, PROC_BIND=close, PLACES=cores
+     raw_gbs: [15.661472007328793, 15.620098030519246, 15.63916778859068, 15.651890704548626, 15.657348678315268]
+     raw_times_s: [0.9426923589999205, 0.9451893299999483, 0.9440368049999961, 0.9432694280001215, 0.9429406149999977]
+     reconstruct[OK]: reported=15.661472007328793 rel_err=0.0
+     reconstruct[OK]: reported=15.620098030519246 rel_err=0.0
+     reconstruct[OK]: reported=15.63916778859068 rel_err=0.0
+     reconstruct[OK]: reported=15.651890704548626 rel_err=0.0
+     reconstruct[OK]: reported=15.657348678315268 rel_err=0.0
+A4       3696      1    1       1     1     1 OK                              15.6377   1.0001
+     cpu_ids=[0] status=OK
+     description: -fopenmp, requested 1, affinity=CPU0 only
+     raw_gbs: [15.612258051401222, 15.620351640996567, 15.654545342115512, 15.637738068052508, 15.642326189138254]
+     raw_times_s: [0.9456639739998991, 0.9451739839998936, 0.9431094719998327, 0.9441231159999006, 0.9438461910001479]
+     reconstruct[OK]: reported=15.612258051401222 rel_err=0.0
+     reconstruct[OK]: reported=15.620351640996567 rel_err=0.0
+     reconstruct[OK]: reported=15.654545342115512 rel_err=0.0
+     reconstruct[OK]: reported=15.637738068052508 rel_err=0.0
+     reconstruct[OK]: reported=15.642326189138254 rel_err=0.0
+A5       3702      2    2       2     2     2 OK                              31.0900   1.9884
+     cpu_ids=[0, 1] status=OK
+     description: -fopenmp, requested 2, affinity=0,1, PROC_BIND=close
+     raw_gbs: [30.900238534987807, 28.134341776946197, 31.22146897998332, 31.24812508127694, 31.089981337711187]
+     raw_times_s: [0.4777940460000991, 0.5247661420000895, 0.4728781340002115, 0.4724747469999784, 0.47487805900004787]
+     reconstruct[OK]: reported=30.900238534987807 rel_err=0.0
+     reconstruct[OK]: reported=28.134341776946197 rel_err=0.0
+     reconstruct[OK]: reported=31.22146897998332 rel_err=0.0
+     reconstruct[OK]: reported=31.24812508127694 rel_err=0.0
+     reconstruct[OK]: reported=31.089981337711187 rel_err=0.0
+A6       3710      1    1       1     1     1 OK                              15.4238   0.9864
+     cpu_ids=[3] status=OK
+     description: -fopenmp, verified 1 thread, fresh subprocess (duplicate of A2)
+     raw_gbs: [15.495333644862173, 14.319388551034955, 14.958449778178808, 15.423815845953218, 15.447958789544789]
+     raw_times_s: [0.9527997479999613, 1.031046119000166, 0.9869973299998946, 0.9572177299999112, 0.9557217359999868]
+     reconstruct[OK]: reported=15.495333644862173 rel_err=0.0
+     reconstruct[OK]: reported=14.319388551034955 rel_err=0.0
+     reconstruct[OK]: reported=14.958449778178808 rel_err=0.0
+     reconstruct[OK]: reported=15.423815845953218 rel_err=0.0
+     reconstruct[OK]: reported=15.447958789544789 rel_err=0.0
+
+=== STEP 3 — DIAG A RESTATEMENT (DELIVERABLE) ===
+Thread verification: A1=actual:1/req:None[SERIAL_NO_OMP], A2=actual:1/req:1[OK], A3=actual:1/req:1[OK], A4=actual:1/req:1[OK], A5=actual:2/req:2[OK], A6=actual:1/req:1[OK] A6 (verified OpenMP@1)=15.42 GB/s ≈ A1=15.64 GB/s (ratio 0.99). Phase 2.2 conclusion is FALSIFIED — A1 is NOT a 3x outlier once OpenMP@1 is verified to run at 1 thread. Verified A2@1=15.64 vs A5@2=31.09 GB/s (ratio A5/A2=1.99 if a2>0).
+
+=== STEP 4 — CODEGEN / SOURCE CHECK ===
+vectorization_claim: Both triad loops look vector-xmm; nontemporal stores absent in both. Auto-vectorization does NOT explain a 3× gap.
+physical_argument: Working set=1342177272 vs L3_reported=335544320 (ratio=3.999999976158142). At ≥4× L3 a triad is DRAM-bound; instruction-level codegen (vector vs scalar) cannot plausibly produce a sustained ~3× bandwidth difference once both kernels miss in cache. If a 3× gap remains after verified thread counts, the cause is unknown — not auto-vectorization.
+omp_disassembly: {'so': '/tmp/phase2_kernels_k0q4bas0/kernels.so', 'symbol': 'stream_triad_reps_observed', 'vector_class': 'vector-xmm', 'nontemporal': False, 'has_zmm': False, 'has_ymm': False, 'has_xmm': True, 'nm_match': '0000000000001d40'}
+serial_disassembly: {'so': '/tmp/phase2_serial_kernels_e_k6g8w1/kernels_serial.so', 'symbol': 'stream_triad_reps_pure_serial_observed', 'vector_class': 'vector-xmm', 'nontemporal': False, 'has_zmm': False, 'has_ymm': False, 'has_xmm': True, 'nm_match': '0000000000001210'}
+--- diff kernels_serial.c vs kernels.c (truncated) ---
+--- /workspace/device_profile/phase2/kernels_serial.c	2026-08-05 21:17:11.561895351 +0000
++++ /workspace/device_profile/phase2/kernels.c	2026-08-05 21:17:11.665900843 +0000
+@@ -1,22 +1,57 @@
+-/* Pure-serial STREAM triad — MUST be compiled WITHOUT -fopenmp.
+- * Ground-truth baseline for DIAG A (A1). No OpenMP pragmas.
+- * Inner loop body must match kernels.c triad for fair comparison.
+- */
++/* Phase 2 synthetic kernels — compiled at runtime with -O3 -fopenmp */
+ #include <stdint.h>
+ #include <stddef.h>
++#include <string.h>
++#include <omp.h>
+ #include <sched.h>
+ 
+-void stream_triad_reps_pure_serial(double *a, const double *b, const double *c,
+-                                   double scalar, size_t n, size_t reps) {
++void phase2_omp_set_num_threads(int n) {
++    omp_set_num_threads(n);
++}
++
++int phase2_omp_get_max_threads(void) {
++    return omp_get_max_threads();
++}
++
++void stream_triad(double *a, const double *b, const double *c, double scalar, size_t n) {
++#pragma omp parallel for schedule(static)
++    for (size_t i = 0; i < n; i++) {
++        a[i] = b[i] + scalar * c[i];
++    }
++}
++
++void stream_triad_serial(double *a, const double *b, const double *c, double scalar, size_t n) {
++    for (size_t i = 0; i < n; i++) {
++        a[i] = b[i] + scalar * c[i];
++    }
++}
++
++/* Fixed-reps STREAM triad (legacy; uninstrumented). */
++void stream_triad_reps(double *a, const double *b, const double *c, double scalar,
++                       size_t n, size_t reps) {
+     for (size_t r = 0; r < reps; r++) {
++#pragma omp parallel for schedule(static)
+         for (size_t i = 0; i < n; i++) {
+             a[i] = b[i] + scalar * c[i];
+         }
+     }
+ }
+ 
+-/* Instrumented serial: reports thread_count=1 (no OpenMP) + sched_getcpu sample. */
+-void stream_triad_reps_pure_serial_observed(
++void stream_triad_reps_serial(double *a, const double *b, const double *c, double scalar,
++                              size_t n, size_t reps) {
++    for (size_t r = 0; r < reps; r++) {
++        for (size_t i = 0; i < n; i++) {
++            a[i] = b[i] + scalar * c[i];
++        }
++    }
++}
++
++/*
++ * Instrumented triad: records omp_get_num_threads() from the master of the
++ * parallel region and distinct sched_getcpu() values across workers.
++ * Phase 2.3 — never trust OMP_NUM_THREADS env alone.
++ */
++void stream_triad_reps_observed(
+     double *a, const double *b, const double *c, double scalar,
+     size_t n, size_t reps,
+     int *out_omp_num_threads,
+@@ -25,16 +60,111 @@
+     int *out_cpu_ids,
+     int cpu_ids_cap
+ ) {
+-    int cpu = sched_getcpu();
++    unsigned char seen[1024];
++    memset(seen, 0, sizeof(seen));
++    int actual_threads = 0;
++    int max_threads = omp_get_max_threads();
++
+     for (size_t r = 0; r < reps; r++) {
+-        for (size_t i = 0; i < n; i++) {
+-            a[i] = b[i] + scalar * c[i];
++#pragma omp parallel
++        {
++            if (omp_get_thread_num() == 0) {
++                actual_threads = omp_get_num_threads();
++            }
++            int cpu = sched_getcpu();
++            if (cpu >= 0 && cpu < (int)sizeof(seen)) {
++                seen[cpu] = 1;
++            }
++#pragma omp for schedule(static)
++            for (size_t i = 0; i < n; i++) {
++                a[i] = b[i] + scalar * c[i];
++            }
+         }
+     }
+-    if (out_omp_num_threads) *out_omp_num_threads = 1; /* serial — not from OpenMP */
+-    if (out_omp_max_threads) *out_omp_max_threads = 1;
+-    if (out_n_distinct_cpus) *out_n_distinct_cpus = 1;
++
++    int nd = 0;
+     if (out_cpu_ids && cpu_ids_cap > 0) {
+-        out_cpu_ids[0] = cpu;
++        for (int cpu = 0; cpu < (int)sizeof(seen); cpu++) {
++            if (seen[cpu]) {
++                if (nd < cpu_ids_cap) {
++                    out_cpu_ids[nd] = cpu;
++                }
++                nd++;
++            }
++        }
++    } else {
++        for (int cpu = 0; cpu < (int)sizeof(seen); cpu++) {
++            if (seen[cpu]) nd++;
++        }
++    }
++    if (out_omp_num_threads) *out_omp_num_threads = actual_threads;
++    if (out_omp_max_threads) *out_omp_max_threads = max_threads;
++    if (out_n_distinct_cpus) *out_n_distinct_cpus = nd;
++}
++
++/* FP32 accumulate: many passes over L2-sized vectors (compute-ish). */
++double dot_fp32_reps(const float *a, const float *b, size_t n, size_t reps) {
++    double acc = 0.0;
++    for (size_t r = 0; r < reps; r++) {
++        float local = 0.0f;
++#pragma omp parallel for reduction(+:local) schedule(static)
++        for (size_t i = 0; i < n; i++) {
++            local += a[i] * b[i];
++        }
++        acc += (double)local;
++    }
++    return acc;
++}
++
++double dot_fp32_reps_serial(const float *a, const float *b, size_t n, size_t reps) {
++    double acc = 0.0;
++    for (size_t r = 0; r < reps; r++) {
++        float local = 0.0f;
++        for (size_t i = 0; i < n; i++) {
++            local += a[i] * b[i];
++        }
++        acc += (double)local;
+     }
++    return acc;
++}
++
++/* int8 → int32 accumulate (GOPS counting as 2 ops per multiply-add pair? we count 1 mul+1 add = 2) */
++int64_t dot_i8_reps(const int8_t *a, const int8_t *b, size_t n, size_t reps) {
++    int64_t acc = 0;
++    for (size_t r = 0; r < reps; r++) {
++        int32_t local = 0;
++#pragma omp parallel for reduction(+:local) schedule(static)
++        for (size_t i = 0; i < n; i++) {
++            local += (int32_t)a[i] * (int32_t)b[i];
++        }
++        acc += local;
++    }
++    return acc;
++}
++
++int64_t dot_i8_reps_serial(const int8_t *a, const int8_t *b, size_t n, size_t reps) {
++    int64_t acc = 0;
++    for (size_t r = 0; r < reps; r++) {
++        int32_t local = 0;
++        for (size_t i = 0; i < n; i++) {
++            local += (int32_t)a[i] * (int32_t)b[i];
++        }
++        acc += local;
++    }
++    return acc;
++}
++
++/* Touch one byte per page (or stride) to force major/minor faults. */
++size_t stride_touch(const char *p, size_t nbytes, size_t stride) {
++    size_t acc = 0;
++    if (stride == 0) stride = 4096;
++    for (size_t i = 0; i < nbytes; i +=
+
+=== STEP 5 — DIAG B ESCAPE (corrected) ===
+target_bytes_moved (held constant): 12079595448
+  ratio=0.25: status=OK ws=83886072 reps=144 moved=12079594368 actual_threads=1 median=33.83021411505121 CV%=0.2850060346400505
+  ratio=0.5: status=OK ws=167772144 reps=72 moved=12079594368 actual_threads=1 median=33.64254704133216 CV%=0.35970239405235593
+  ratio=1.0: status=OK ws=335544312 reps=36 moved=12079595232 actual_threads=1 median=25.01787710859835 CV%=0.6452544791500775
+  ratio=2.0: status=OK ws=671088624 reps=18 moved=12079595232 actual_threads=1 median=17.20307009781694 CV%=0.22478945052304042
+  ratio=4.0: status=OK ws=1342177272 reps=9 moved=12079595448 actual_threads=1 median=15.76453768807882 CV%=0.1987908527465183
+  ratio=8.0: status=OK ws=2684354544 reps=4 moved=10737418176 actual_threads=1 median=15.264879386995169 CV%=1.4128014392352433
+  ratio=16.0: status=OK ws=5368709112 reps=2 moved=10737418224 actual_threads=1 median=14.886141375265682 CV%=4.593947280088469
+  ratio=32.0: status=SKIPPED ws=10737418240 reps=None moved=None actual_threads=None median=None CV%=None
+escape_point: {'ratio_ws_over_l3': 4.0, 'pair_ratios': [4.0, 8.0], 'pair_gbs': [15.76453768807882, 15.264879386995169], 'rel_diff': 0.03169508113526814, 'floor_gbs': 14.886141375265682, 'flag': 'OK', 'note': 'escape = smallest near-floor consecutive pair within 5%: 4.0 & 8.0 (15.765 vs 15.265); floor=14.886 GB/s'}
+working_set_policy: {'working_set_bytes': 1342177280, 'rule': 'working_set = escape_ratio * L3_reported = 4.0 * 335544320', 'from_escape': True}
+
+=== STEP 6 — VALIDITY GATE (not weakened) ===
+probe: [{'threads_requested': 1, 'threads': 1, 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 15.662169566849366, 'pid': 3775, 'n_distinct_cpus': 1}, {'threads_requested': 2, 'threads': 2, 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 30.84890884273211, 'pid': 3781, 'n_distinct_cpus': 2}, {'threads_requested': 3, 'threads': 3, 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 45.70233377327615, 'pid': 3789, 'n_distinct_cpus': 3}, {'threads_requested': 4, 'threads': 4, 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 60.155902968424066, 'pid': 3799, 'n_distinct_cpus': 4}]
+validity: {'status': 'VALID', 'flags': [], 'caveats': [], 'absolute_bounds_GBps_per_core': {'lo': 1.0, 'hi': 60.0, 'note': 'HEURISTIC — FLAG when exceeded, not a soft caveat'}, 'superlinear_vs_A1': {'valid': True, 'superlinear': False, 'violations': [], 'flag': 'OK', 'baseline_gbs': 15.635979316006493, 'baseline_label': 'A1_serial'}, 'baseline_policy': 'serial A1 baseline retained (Phase 2.3); OpenMP@1 must NOT replace it; SUPERLINEAR-vs-A1 is NOT discounted', 'cores': 4}
+  <- Phase 2.3: serial A1 baseline retained; absolute bound is FLAG; SUPERLINEAR-vs-A1 is NOT discounted.
+
+=== PRIMARY DELIVERABLE ===
+STEP 1 TABLE:
+  {'cfg': 'A1', 'pid': 3675, 'env_OMP_NUM_THREADS': None, 'requested_threads': None, 'omp_num_threads_actual': 1, 'omp_get_max_threads': 1, 'n_distinct_cpus': 1, 'cpu_ids': [2], 'thread_flag': 'SERIAL_NO_OMP', 'status': 'OK', 'median_gbs': 15.635979316006493, 'ratio_to_A1': 1.0}
+  {'cfg': 'A2', 'pid': 3684, 'env_OMP_NUM_THREADS': '1', 'requested_threads': 1, 'omp_num_threads_actual': 1, 'omp_get_max_threads': 1, 'n_distinct_cpus': 1, 'cpu_ids': [0], 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 15.636139481275304, 'ratio_to_A1': 1.0000102433794247}
+  {'cfg': 'A3', 'pid': 3690, 'env_OMP_NUM_THREADS': '1', 'requested_threads': 1, 'omp_num_threads_actual': 1, 'omp_get_max_threads': 1, 'n_distinct_cpus': 1, 'cpu_ids': [0], 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 15.651890704548626, 'ratio_to_A1': 1.001017613813664}
+  {'cfg': 'A4', 'pid': 3696, 'env_OMP_NUM_THREADS': '1', 'requested_threads': 1, 'omp_num_threads_actual': 1, 'omp_get_max_threads': 1, 'n_distinct_cpus': 1, 'cpu_ids': [0], 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 15.637738068052508, 'ratio_to_A1': 1.0001124810931552}
+  {'cfg': 'A5', 'pid': 3702, 'env_OMP_NUM_THREADS': '2', 'requested_threads': 2, 'omp_num_threads_actual': 2, 'omp_get_max_threads': 2, 'n_distinct_cpus': 2, 'cpu_ids': [0, 1], 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 31.089981337711187, 'ratio_to_A1': 1.988361631169753}
+  {'cfg': 'A6', 'pid': 3710, 'env_OMP_NUM_THREADS': '1', 'requested_threads': 1, 'omp_num_threads_actual': 1, 'omp_get_max_threads': 1, 'n_distinct_cpus': 1, 'cpu_ids': [3], 'thread_flag': 'OK', 'status': 'OK', 'median_gbs': 15.423815845953218, 'ratio_to_A1': 0.98643107247935}
+STEP 3 CONCLUSION:
+Thread verification: A1=actual:1/req:None[SERIAL_NO_OMP], A2=actual:1/req:1[OK], A3=actual:1/req:1[OK], A4=actual:1/req:1[OK], A5=actual:2/req:2[OK], A6=actual:1/req:1[OK] A6 (verified OpenMP@1)=15.42 GB/s ≈ A1=15.64 GB/s (ratio 0.99). Phase 2.2 conclusion is FALSIFIED — A1 is NOT a 3x outlier once OpenMP@1 is verified to run at 1 thread. Verified A2@1=15.64 vs A5@2=31.09 GB/s (ratio A5/A2=1.99 if a2>0).
+
+=== PHASE 2.3 JSON ===
+{
+  "phase": "2.3",
+  "host_class": "container",
+  "host_class_evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED",
+  "effective_cores": 4,
+  "effective_mem_bytes": 16792014848,
+  "l3_reported_bytes": 335544320,
+  "working_set_bytes": 1342177272,
+  "working_set_policy_pre": "working_set = max(4 * L3_reported, 1 GiB) = max(4*335544320, 1073741824) = 1342177280; L3_SUSPECT=True (logical_cores=4); floor justified by DIAG B (512 MiB left ws inside reported L3)",
+  "l3_suspect": true,
+  "bytes_moved_per_iter": 1342177272,
+  "reps": 11,
+  "calibration": {
+    "history": [
+      {
+        "reps": 1,
+        "median_time_s": 0.08530703899987202,
+        "pid": 3657
+      },
+      {
+        "reps": 11,
+        "median_time_s": 0.9447171899998921,
+        "pid": 3666
+      }
+    ],
+    "target_s": 1.0
+  },
+  "diag_a": {
+    "reps": 11,
+    "bytes_moved_per_iter": 1342177272,
+    "configs": {
+      "A1": {
+        "name": "A1",
+        "description": "pure serial C, WITHOUT -fopenmp, no pragma",
+        "pid": 3675,
+        "status": "OK",
+        "thread_flag": "SERIAL_NO_OMP",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": null,
+        "env_OMP_NUM_THREADS": null,
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          2
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "lib_path": "/tmp/phase2_serial_kernels_e_k6g8w1/kernels_serial.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared /workspace/device_profile/phase2/kernels_serial.c -o /tmp/phase2_serial_kernels_e_k6g8w1/kernels_serial.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9676774530000785,
+          "gbs": 15.257098267844837,
+          "observation": {
+            "omp_num_threads_actual": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.9398120130001644,
+          1.013949625000123,
+          0.9442293120000613,
+          0.9504791639999439,
+          0.9364996189999601
+        ],
+        "raw_gbs": [
+          15.70947145575316,
+          14.560831848030132,
+          15.635979316006493,
+          15.533165324601342,
+          15.76503576986573
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.70947145575316,
+            "expected_gbs": 15.70947145575316,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9398120130001644,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.560831848030132,
+            "expected_gbs": 14.560831848030132,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 1.013949625000123,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.635979316006493,
+            "expected_gbs": 15.635979316006493,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9442293120000613,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.533165324601342,
+            "expected_gbs": 15.533165324601342,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9504791639999439,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.76503576986573,
+            "expected_gbs": 15.76503576986573,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9364996189999601,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ],
+            "flag": "SERIAL_NO_OMP"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ],
+            "flag": "SERIAL_NO_OMP"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ],
+            "flag": "SERIAL_NO_OMP"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ],
+            "flag": "SERIAL_NO_OMP"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              2
+            ],
+            "flag": "SERIAL_NO_OMP"
+          }
+        ],
+        "median_gbs": 15.635979316006493,
+        "min_gbs": 14.560831848030132,
+        "max_gbs": 15.76503576986573,
+        "cv_pct": 3.235373407775213,
+        "steal_before": 6,
+        "steal_after": 6,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  23551 0 2265 530378 830 0 417 6 0 0'",
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  24227 0 2265 532407 830 0 417 6 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.0
+      },
+      "A2": {
+        "name": "A2",
+        "description": "-fopenmp, requested 1 thread, affinity=all (omp_set_num_threads)",
+        "pid": 3684,
+        "status": "OK",
+        "thread_flag": "OK",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": 1,
+        "env_OMP_NUM_THREADS": "1",
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "lib_path": "/tmp/phase2_kernels_r1u599q7/kernels.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_r1u599q7/kernels.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9459492870000759,
+          "gbs": 15.607549151838217,
+          "observation": {
+            "omp_num_threads_actual": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.9661565540000083,
+          0.9471101009999074,
+          0.943864756000039,
+          0.9429643349999424,
+          0.9442196400000284
+        ],
+        "raw_gbs": [
+          15.281115602720295,
+          15.588419948655412,
+          15.642018518169344,
+          15.65695482215762,
+          15.636139481275304
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.281115602720295,
+            "expected_gbs": 15.281115602720295,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9661565540000083,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.588419948655412,
+            "expected_gbs": 15.588419948655412,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9471101009999074,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.642018518169344,
+            "expected_gbs": 15.642018518169344,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.943864756000039,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.65695482215762,
+            "expected_gbs": 15.65695482215762,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9429643349999424,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.636139481275304,
+            "expected_gbs": 15.636139481275304,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9442196400000284,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          }
+        ],
+        "median_gbs": 15.636139481275304,
+        "min_gbs": 15.281115602720295,
+        "max_gbs": 15.65695482215762,
+        "cv_pct": 1.0186545911483087,
+        "steal_before": 6,
+        "steal_after": 6,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  24279 0 2287 532633 830 0 422 6 0 0'",
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  24948 0 2289 534635 830 0 425 6 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.0000102433794247
+      },
+      "A3": {
+        "name": "A3",
+        "description": "-fopenmp, requested 1, PROC_BIND=close, PLACES=cores",
+        "pid": 3690,
+        "status": "OK",
+        "thread_flag": "OK",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": 1,
+        "env_OMP_NUM_THREADS": "1",
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": "close",
+        "omp_places": "cores",
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "lib_path": "/tmp/phase2_kernels_q694jy97/kernels.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_q694jy97/kernels.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9443804889999683,
+          "gbs": 15.633476298979845,
+          "observation": {
+            "omp_num_threads_actual": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.9426923589999205,
+          0.9451893299999483,
+          0.9440368049999961,
+          0.9432694280001215,
+          0.9429406149999977
+        ],
+        "raw_gbs": [
+          15.661472007328793,
+          15.620098030519246,
+          15.63916778859068,
+          15.651890704548626,
+          15.657348678315268
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.661472007328793,
+            "expected_gbs": 15.661472007328793,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9426923589999205,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.620098030519246,
+            "expected_gbs": 15.620098030519246,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9451893299999483,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.63916778859068,
+            "expected_gbs": 15.63916778859068,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9440368049999961,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.651890704548626,
+            "expected_gbs": 15.651890704548626,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9432694280001215,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.657348678315268,
+            "expected_gbs": 15.657348678315268,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9429406149999977,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          }
+        ],
+        "median_gbs": 15.651890704548626,
+        "min_gbs": 15.620098030519246,
+        "max_gbs": 15.661472007328793,
+        "cv_pct": 0.1069710672686395,
+        "steal_before": 6,
+        "steal_after": 6,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  24996 0 2309 534840 830 0 429 6 0 0'",
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  25657 0 2309 536820 830 0 429 6 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.001017613813664
+      },
+      "A4": {
+        "name": "A4",
+        "description": "-fopenmp, requested 1, affinity=CPU0 only",
+        "pid": 3696,
+        "status": "OK",
+        "thread_flag": "OK",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": 1,
+        "env_OMP_NUM_THREADS": "1",
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity_evidence": "os.sched_setaffinity(0, [0]) \u2192 affinity=[0]",
+        "lib_path": "/tmp/phase2_kernels_qfs5q1js/kernels.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_qfs5q1js/kernels.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9432725619999474,
+          "gbs": 15.651838701527739,
+          "observation": {
+            "omp_num_threads_actual": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.9456639739998991,
+          0.9451739839998936,
+          0.9431094719998327,
+          0.9441231159999006,
+          0.9438461910001479
+        ],
+        "raw_gbs": [
+          15.612258051401222,
+          15.620351640996567,
+          15.654545342115512,
+          15.637738068052508,
+          15.642326189138254
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.612258051401222,
+            "expected_gbs": 15.612258051401222,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9456639739998991,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.620351640996567,
+            "expected_gbs": 15.620351640996567,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9451739839998936,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.654545342115512,
+            "expected_gbs": 15.654545342115512,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9431094719998327,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.637738068052508,
+            "expected_gbs": 15.637738068052508,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9441231159999006,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.642326189138254,
+            "expected_gbs": 15.642326189138254,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9438461910001479,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              0
+            ],
+            "flag": "OK"
+          }
+        ],
+        "median_gbs": 15.637738068052508,
+        "min_gbs": 15.612258051401222,
+        "max_gbs": 15.654545342115512,
+        "cv_pct": 0.109063089712253,
+        "steal_before": 6,
+        "steal_after": 6,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  25706 0 2329 537023 830 0 431 6 0 0'",
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  26368 0 2329 539004 831 0 432 6 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.0001124810931552
+      },
+      "A5": {
+        "name": "A5",
+        "description": "-fopenmp, requested 2, affinity=0,1, PROC_BIND=close",
+        "pid": 3702,
+        "status": "OK",
+        "thread_flag": "OK",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": 2,
+        "env_OMP_NUM_THREADS": "2",
+        "omp_num_threads_actual": 2,
+        "omp_max_threads": 2,
+        "n_distinct_cpus": 2,
+        "cpu_ids": [
+          0,
+          1
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": "close",
+        "omp_places": "cores",
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1]) \u2192 affinity=[0, 1]",
+        "lib_path": "/tmp/phase2_kernels_6rbjz3bj/kernels.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_6rbjz3bj/kernels.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.4885636809999596,
+          "gbs": 30.219090297056326,
+          "observation": {
+            "omp_num_threads_actual": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.4777940460000991,
+          0.5247661420000895,
+          0.4728781340002115,
+          0.4724747469999784,
+          0.47487805900004787
+        ],
+        "raw_gbs": [
+          30.900238534987807,
+          28.134341776946197,
+          31.22146897998332,
+          31.24812508127694,
+          31.089981337711187
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 30.900238534987807,
+            "expected_gbs": 30.900238534987807,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.4777940460000991,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 28.134341776946197,
+            "expected_gbs": 28.134341776946197,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.5247661420000895,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 31.22146897998332,
+            "expected_gbs": 31.22146897998332,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.4728781340002115,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 31.24812508127694,
+            "expected_gbs": 31.24812508127694,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.4724747469999784,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 31.089981337711187,
+            "expected_gbs": 31.089981337711187,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.47487805900004787,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 2,
+            "omp_max_threads": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 2,
+            "omp_max_threads": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 2,
+            "omp_max_threads": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 2,
+            "omp_max_threads": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 2,
+            "omp_max_threads": 2,
+            "n_distinct_cpus": 2,
+            "cpu_ids": [
+              0,
+              1
+            ],
+            "flag": "OK"
+          }
+        ],
+        "median_gbs": 31.089981337711187,
+        "min_gbs": 28.134341776946197,
+        "max_gbs": 31.24812508127694,
+        "cv_pct": 4.390928335020589,
+        "steal_before": 6,
+        "steal_after": 7,
+        "steal_delta": 1,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=6; raw='cpu  26429 0 2347 539178 831 0 439 6 0 0'",
+          "/proc/stat cpu steal_jiffies=7; raw='cpu  27106 0 2347 539858 831 0 446 7 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 1.988361631169753
+      },
+      "A6": {
+        "name": "A6",
+        "description": "-fopenmp, verified 1 thread, fresh subprocess (duplicate of A2)",
+        "pid": 3710,
+        "status": "OK",
+        "thread_flag": "OK",
+        "reps": 11,
+        "bytes_moved_per_iter": 1342177272,
+        "requested_threads": 1,
+        "env_OMP_NUM_THREADS": "1",
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          3
+        ],
+        "thread_count_applied": true,
+        "omp_proc_bind": null,
+        "omp_places": null,
+        "affinity_evidence": "os.sched_setaffinity(0, [0, 1, 2, 3]) \u2192 affinity=[0, 1, 2, 3]",
+        "lib_path": "/tmp/phase2_kernels_k0q4bas0/kernels.so",
+        "compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_k0q4bas0/kernels.so",
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 0.9546365540002171,
+          "gbs": 15.465519238850183,
+          "observation": {
+            "omp_num_threads_actual": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ]
+          }
+        },
+        "raw_times_s": [
+          0.9527997479999613,
+          1.031046119000166,
+          0.9869973299998946,
+          0.9572177299999112,
+          0.9557217359999868
+        ],
+        "raw_gbs": [
+          15.495333644862173,
+          14.319388551034955,
+          14.958449778178808,
+          15.423815845953218,
+          15.447958789544789
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 15.495333644862173,
+            "expected_gbs": 15.495333644862173,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9527997479999613,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.319388551034955,
+            "expected_gbs": 14.319388551034955,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 1.031046119000166,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.958449778178808,
+            "expected_gbs": 14.958449778178808,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9869973299998946,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.423815845953218,
+            "expected_gbs": 15.423815845953218,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9572177299999112,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 15.447958789544789,
+            "expected_gbs": 15.447958789544789,
+            "rel_err": 0.0,
+            "reps": 11,
+            "bytes_moved_per_iter": 1342177272,
+            "time_s": 0.9557217359999868,
+            "message": "OK"
+          }
+        ],
+        "per_rep_observations": [
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ],
+            "flag": "OK"
+          },
+          {
+            "omp_num_threads_actual": 1,
+            "omp_max_threads": 1,
+            "n_distinct_cpus": 1,
+            "cpu_ids": [
+              3
+            ],
+            "flag": "OK"
+          }
+        ],
+        "median_gbs": 15.423815845953218,
+        "min_gbs": 14.319388551034955,
+        "max_gbs": 15.495333644862173,
+        "cv_pct": 3.3171347245992076,
+        "steal_before": 7,
+        "steal_after": 7,
+        "steal_delta": 0,
+        "steal_evidence": [
+          "/proc/stat cpu steal_jiffies=7; raw='cpu  27153 0 2371 540072 831 0 448 7 0 0'",
+          "/proc/stat cpu steal_jiffies=7; raw='cpu  27833 0 2372 542108 831 0 449 7 0 0'"
+        ],
+        "FAIL": [],
+        "ratio_to_A1": 0.98643107247935
+      }
+    },
+    "thread_count_table": [
+      {
+        "cfg": "A1",
+        "pid": 3675,
+        "env_OMP_NUM_THREADS": null,
+        "requested_threads": null,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          2
+        ],
+        "thread_flag": "SERIAL_NO_OMP",
+        "status": "OK",
+        "median_gbs": 15.635979316006493,
+        "ratio_to_A1": 1.0
+      },
+      {
+        "cfg": "A2",
+        "pid": 3684,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.636139481275304,
+        "ratio_to_A1": 1.0000102433794247
+      },
+      {
+        "cfg": "A3",
+        "pid": 3690,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.651890704548626,
+        "ratio_to_A1": 1.001017613813664
+      },
+      {
+        "cfg": "A4",
+        "pid": 3696,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.637738068052508,
+        "ratio_to_A1": 1.0001124810931552
+      },
+      {
+        "cfg": "A5",
+        "pid": 3702,
+        "env_OMP_NUM_THREADS": "2",
+        "requested_threads": 2,
+        "omp_num_threads_actual": 2,
+        "omp_get_max_threads": 2,
+        "n_distinct_cpus": 2,
+        "cpu_ids": [
+          0,
+          1
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 31.089981337711187,
+        "ratio_to_A1": 1.988361631169753
+      },
+      {
+        "cfg": "A6",
+        "pid": 3710,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          3
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.423815845953218,
+        "ratio_to_A1": 0.98643107247935
+      }
+    ],
+    "conclusion": "Thread verification: A1=actual:1/req:None[SERIAL_NO_OMP], A2=actual:1/req:1[OK], A3=actual:1/req:1[OK], A4=actual:1/req:1[OK], A5=actual:2/req:2[OK], A6=actual:1/req:1[OK] A6 (verified OpenMP@1)=15.42 GB/s \u2248 A1=15.64 GB/s (ratio 0.99). Phase 2.2 conclusion is FALSIFIED \u2014 A1 is NOT a 3x outlier once OpenMP@1 is verified to run at 1 thread. Verified A2@1=15.64 vs A5@2=31.09 GB/s (ratio A5/A2=1.99 if a2>0).",
+    "omp_lib_path": "/tmp/phase2_kernels_k0q4bas0/kernels.so",
+    "serial_lib_path": "/tmp/phase2_serial_kernels_e_k6g8w1/kernels_serial.so"
+  },
+  "codegen": {
+    "source_diff_kernels_serial_vs_kernels": "--- /workspace/device_profile/phase2/kernels_serial.c\t2026-08-05 21:17:11.561895351 +0000\n+++ /workspace/device_profile/phase2/kernels.c\t2026-08-05 21:17:11.665900843 +0000\n@@ -1,22 +1,57 @@\n-/* Pure-serial STREAM triad \u2014 MUST be compiled WITHOUT -fopenmp.\n- * Ground-truth baseline for DIAG A (A1). No OpenMP pragmas.\n- * Inner loop body must match kernels.c triad for fair comparison.\n- */\n+/* Phase 2 synthetic kernels \u2014 compiled at runtime with -O3 -fopenmp */\n #include <stdint.h>\n #include <stddef.h>\n+#include <string.h>\n+#include <omp.h>\n #include <sched.h>\n \n-void stream_triad_reps_pure_serial(double *a, const double *b, const double *c,\n-                                   double scalar, size_t n, size_t reps) {\n+void phase2_omp_set_num_threads(int n) {\n+    omp_set_num_threads(n);\n+}\n+\n+int phase2_omp_get_max_threads(void) {\n+    return omp_get_max_threads();\n+}\n+\n+void stream_triad(double *a, const double *b, const double *c, double scalar, size_t n) {\n+#pragma omp parallel for schedule(static)\n+    for (size_t i = 0; i < n; i++) {\n+        a[i] = b[i] + scalar * c[i];\n+    }\n+}\n+\n+void stream_triad_serial(double *a, const double *b, const double *c, double scalar, size_t n) {\n+    for (size_t i = 0; i < n; i++) {\n+        a[i] = b[i] + scalar * c[i];\n+    }\n+}\n+\n+/* Fixed-reps STREAM triad (legacy; uninstrumented). */\n+void stream_triad_reps(double *a, const double *b, const double *c, double scalar,\n+                       size_t n, size_t reps) {\n     for (size_t r = 0; r < reps; r++) {\n+#pragma omp parallel for schedule(static)\n         for (size_t i = 0; i < n; i++) {\n             a[i] = b[i] + scalar * c[i];\n         }\n     }\n }\n \n-/* Instrumented serial: reports thread_count=1 (no OpenMP) + sched_getcpu sample. */\n-void stream_triad_reps_pure_serial_observed(\n+void stream_triad_reps_serial(double *a, const double *b, const double *c, double scalar,\n+                              size_t n, size_t reps) {\n+    for (size_t r = 0; r < reps; r++) {\n+        for (size_t i = 0; i < n; i++) {\n+            a[i] = b[i] + scalar * c[i];\n+        }\n+    }\n+}\n+\n+/*\n+ * Instrumented triad: records omp_get_num_threads() from the master of the\n+ * parallel region and distinct sched_getcpu() values across workers.\n+ * Phase 2.3 \u2014 never trust OMP_NUM_THREADS env alone.\n+ */\n+void stream_triad_reps_observed(\n     double *a, const double *b, const double *c, double scalar,\n     size_t n, size_t reps,\n     int *out_omp_num_threads,\n@@ -25,16 +60,111 @@\n     int *out_cpu_ids,\n     int cpu_ids_cap\n ) {\n-    int cpu = sched_getcpu();\n+    unsigned char seen[1024];\n+    memset(seen, 0, sizeof(seen));\n+    int actual_threads = 0;\n+    int max_threads = omp_get_max_threads();\n+\n     for (size_t r = 0; r < reps; r++) {\n-        for (size_t i = 0; i < n; i++) {\n-            a[i] = b[i] + scalar * c[i];\n+#pragma omp parallel\n+        {\n+            if (omp_get_thread_num() == 0) {\n+                actual_threads = omp_get_num_threads();\n+            }\n+            int cpu = sched_getcpu();\n+            if (cpu >= 0 && cpu < (int)sizeof(seen)) {\n+                seen[cpu] = 1;\n+            }\n+#pragma omp for schedule(static)\n+            for (size_t i = 0; i < n; i++) {\n+                a[i] = b[i] + scalar * c[i];\n+            }\n         }\n     }\n-    if (out_omp_num_threads) *out_omp_num_threads = 1; /* serial \u2014 not from OpenMP */\n-    if (out_omp_max_threads) *out_omp_max_threads = 1;\n-    if (out_n_distinct_cpus) *out_n_distinct_cpus = 1;\n+\n+    int nd = 0;\n     if (out_cpu_ids && cpu_ids_cap > 0) {\n-        out_cpu_ids[0] = cpu;\n+        for (int cpu = 0; cpu < (int)sizeof(seen); cpu++) {\n+            if (seen[cpu]) {\n+                if (nd < cpu_ids_cap) {\n+                    out_cpu_ids[nd] = cpu;\n+                }\n+                nd++;\n+            }\n+        }\n+    } else {\n+        for (int cpu = 0; cpu < (int)sizeof(seen); cpu++) {\n+            if (seen[cpu]) nd++;\n+        }\n+    }\n+    if (out_omp_num_threads) *out_omp_num_threads = actual_threads;\n+    if (out_omp_max_threads) *out_omp_max_threads = max_threads;\n+    if (out_n_distinct_cpus) *out_n_distinct_cpus = nd;\n+}\n+\n+/* FP32 accumulate: many passes over L2-sized vectors (compute-ish). */\n+double dot_fp32_reps(const float *a, const float *b, size_t n, size_t reps) {\n+    double acc = 0.0;\n+    for (size_t r = 0; r < reps; r++) {\n+        float local = 0.0f;\n+#pragma omp parallel for reduction(+:local) schedule(static)\n+        for (size_t i = 0; i < n; i++) {\n+            local += a[i] * b[i];\n+        }\n+        acc += (double)local;\n+    }\n+    return acc;\n+}\n+\n+double dot_fp32_reps_serial(const float *a, const float *b, size_t n, size_t reps) {\n+    double acc = 0.0;\n+    for (size_t r = 0; r < reps; r++) {\n+        float local = 0.0f;\n+        for (size_t i = 0; i < n; i++) {\n+            local += a[i] * b[i];\n+        }\n+        acc += (double)local;\n     }\n+    return acc;\n+}\n+\n+/* int8 \u2192 int32 accumulate (GOPS counting as 2 ops per multiply-add pair? we count 1 mul+1 add = 2) */\n+int64_t dot_i8_reps(const int8_t *a, const int8_t *b, size_t n, size_t reps) {\n+    int64_t acc = 0;\n+    for (size_t r = 0; r < reps; r++) {\n+        int32_t local = 0;\n+#pragma omp parallel for reduction(+:local) schedule(static)\n+        for (size_t i = 0; i < n; i++) {\n+            local += (int32_t)a[i] * (int32_t)b[i];\n+        }\n+        acc += local;\n+    }\n+    return acc;\n+}\n+\n+int64_t dot_i8_reps_serial(const int8_t *a, const int8_t *b, size_t n, size_t reps) {\n+    int64_t acc = 0;\n+    for (size_t r = 0; r < reps; r++) {\n+        int32_t local = 0;\n+        for (size_t i = 0; i < n; i++) {\n+            local += (int32_t)a[i] * (int32_t)b[i];\n+        }\n+        acc += local;\n+    }\n+    return acc;\n+}\n+\n+/* Touch one byte per page (or stride) to force major/minor faults. */\n+size_t stride_touch(const char *p, size_t nbytes, size_t stride) {\n+    size_t acc = 0;\n+    if (stride == 0) stride = 4096;\n+    for (size_t i = 0; i < nbytes; i += stride) {\n+        acc += (unsigned char)p[i];\n+    }\n+    return acc;\n+}\n+\n+/* Same, but takes an integer address (for read-only mmap via numpy.ctypes.data). */\n+size_t stride_touch_addr(uintptr_t addr, size_t nbytes, size_t stride) {\n+    return stride_touch((const char *)addr, nbytes, stride);\n }\n",
+    "source_diff_returncode": 1,
+    "omp_disassembly": {
+      "so": "/tmp/phase2_kernels_k0q4bas0/kernels.so",
+      "symbol": "stream_triad_reps_observed",
+      "vector_class": "vector-xmm",
+      "nontemporal": false,
+      "has_zmm": false,
+      "has_ymm": false,
+      "has_xmm": true,
+      "disasm_excerpt": "0000000000001d40 <stream_triad_reps_observed>:\n    1d40:\tf3 0f 1e fa          \tendbr64\n    1d44:\t41 57                \tpush   %r15\n    1d46:\t4d 89 c7             \tmov    %r8,%r15\n    1d49:\t41 56                \tpush   %r14\n    1d4b:\t49 89 ce             \tmov    %rcx,%r14\n    1d4e:\tb9 80 00 00 00       \tmov    $0x80,%ecx\n    1d53:\t41 55                \tpush   %r13\n    1d55:\t49 89 d5             \tmov    %rdx,%r13\n    1d58:\t41 54                \tpush   %r12\n    1d5a:\t49 89 f4             \tmov    %rsi,%r12\n    1d5d:\t55                   \tpush   %rbp\n    1d5e:\t48 89 fd             \tmov    %rdi,%rbp\n    1d61:\t53                   \tpush   %rbx\n    1d62:\t48 81 ec 98 04 00 00 \tsub    $0x498,%rsp\n    1d69:\t48 8b 84 24 d0 04 00 \tmov    0x4d0(%rsp),%rax\n    1d70:\t00 \n    1d71:\t4c 89 4c 24 18       \tmov    %r9,0x18(%rsp)\n    1d76:\t48 8d 9c 24 80 00 00 \tlea    0x80(%rsp),%rbx\n    1d7d:\t00 \n    1d7e:\t4c 8b 8c 24 e0 04 00 \tmov    0x4e0(%rsp),%r9\n    1d85:\t00 \n    1d86:\t4c 89 44 24 08       \tmov    %r8,0x8(%rsp)\n    1d8b:\t48 89 df             \tmov    %rbx,%rdi\n    1d8e:\t48 89 44 24 20       \tmov    %rax,0x20(%rsp)\n    1d93:\t48 8b 84 24 d8 04 00 \tmov    0x4d8(%rsp),%rax\n    1d9a:\t00 \n    1d9b:\t4c 89 4c 24 10       \tmov    %r9,0x10(%rsp)\n    1da0:\t48 89 44 24 28       \tmov    %rax,0x28(%rsp)\n    1da5:\tf2 0f 11 04 24       \tmovsd  %xmm0,(%rsp)\n    1daa:\t64 48 8b 04 25 28 00 \tmov    %fs:0x28,%rax\n    1db1:\t00 00 \n    1db3:\t48 89 84 24 88 04 00 \tmov    %rax,0x488(%rsp)\n    1dba:\t00 \n    1dbb:\t31 c0                \txor    %eax,%eax\n    1dbd:\tf3 48 ab             \trep stos %rax,%es:(%rdi)\n    1dc0:\te8 4b f3 ff ff       \tcall   1110 <omp_get_max_threads@plt>\n    1dc5:\t4d 85 ff             \ttest   %r15,%r15\n    1dc8:\t4c 8b 4c 24 10       \tmov    0x10(%rsp),%r9\n    1dcd:\t44 8b 84 24 e8 04 00 \tmov    0x4e8(%rsp),%r8d\n    1dd4:\t00 \n    1dd5:\t89 c7                \tmov    %eax,%edi\n    1dd7:\t0f 84 98 01 00 00    \tje     1f75 <stream_triad_reps_observed+0x235>\n    1ddd:\t48 8d 44 24 40       \tlea    0x40(%rsp),%rax\n    1de2:\t89 7c 24 34          \tmov    %edi,0x34(%rsp)\n    1de6:\t45 31 ff             \txor    %r15d,%r15d\n    1de9:\t31 c9                \txor    %ecx,%ecx\n    1deb:\t48 89 44 24 10       \tmov    %rax,0x10(%rsp)\n    1df0:\t4c 89 4c 24 38       \tmov    %r9,0x38(%rsp)\n    1df5:\t0f 1f 00             \tnopl   (%rax)\n    1df8:\tf2 0f 10 3c 24       \tmovsd  (%rsp),%xmm7\n    1dfd:\t48 8b 74 24 10       \tmov    0x10(%rsp),%rsi\n    1e02:\t89 4c 24 70          \tmov    %ecx,0x70(%rsp)\n    1e06:\t31 d2                \txor    %edx,%edx\n    1e08:\t31 c9                \txor    %ecx,%ecx\n    1e0a:\t48 8d 3d 6f f6 ff ff \tlea    -0x991(%rip),%rdi        # 1480 <stream_triad_reps_observed._omp_fn.0>\n    1e11:\t4c 89 74 24 60       \tmov    %r14,0x60(%rsp)\n    1e16:\t49 83 c7 01          \tadd    $0x1,%r15\n    1e1a:\t4c 89 6c 24 50       \tmov    %r13,0x50(%rsp)\n    1e1f:\t4c 89 64 24 48       \tmov    %r12,0x48(%rsp)\n    1e24:\t48 89 6c 24 40       \tmov    %rbp,0x40(%rsp)\n    1e29:\t48 89 5c 24 68       \tmov    %rbx,0x68(%rsp)\n    1e2e:\tf2 0f 11 7c 24 58    \tmovsd  %xmm7,0x58(%rsp)\n    1e34:\te8 07 f3 ff ff       \tcall   1140 <GOMP_parallel@plt>\n    1e39:\t8b 4c 24 70          \tmov    0x70(%rsp),%ecx\n    1e3d:\t4c 39 7c 24 08       \tcmp    %r15,0x8(%rsp)\n    1e42:\t75 b4                \tjne    1df8 <stream_triad_reps_observed+0xb8>\n    1e44:\t8b 7c 24 34          \tmov    0x34(%rsp),%edi\n    1e48:\t4c 8b 4c 24 38       \tmov    0x38(%rsp),%r9\n    1e4d:\t44 8b 84 24 e8 04 00 \tmov    0x4e8(%rsp),%r8d\n    1e54:\t00 \n    1e55:\t4d 85 c9             \ttest   %r9,%r9\n    1e58:\t74 7c                \tje     1ed6 <stream_triad_reps_observed+0x196>\n    1e5a:\t45 85 c0             \ttest   %r8d,%r8d\n    1e5d:\t7e 77                \tjle    1ed6 <stream_triad_reps_observed+0x196>\n    1e5f:\t31 c0                \txor    %eax,%eax\n    1e61:\t31 d2                \txor    %edx,%edx\n    1e63:\t0f 1f 44 00 00       \tnopl   0x0(%rax,%rax,1)\n    1e68:\t80 3c 18 00          \tcmpb   $0x0,(%rax,%rbx,1)\n    1e6c:\t74 0f           ",
+      "nm_match": "0000000000001d40"
+    },
+    "serial_disassembly": {
+      "so": "/tmp/phase2_serial_kernels_e_k6g8w1/kernels_serial.so",
+      "symbol": "stream_triad_reps_pure_serial_observed",
+      "vector_class": "vector-xmm",
+      "nontemporal": false,
+      "has_zmm": false,
+      "has_ymm": false,
+      "has_xmm": true,
+      "disasm_excerpt": "0000000000001210 <stream_triad_reps_pure_serial_observed>:\n    1210:\tf3 0f 1e fa          \tendbr64\n    1214:\t41 57                \tpush   %r15\n    1216:\t31 c0                \txor    %eax,%eax\n    1218:\t49 89 cf             \tmov    %rcx,%r15\n    121b:\t41 56                \tpush   %r14\n    121d:\t4d 89 c6             \tmov    %r8,%r14\n    1220:\t41 55                \tpush   %r13\n    1222:\t4d 89 cd             \tmov    %r9,%r13\n    1225:\t41 54                \tpush   %r12\n    1227:\t49 89 f4             \tmov    %rsi,%r12\n    122a:\t55                   \tpush   %rbp\n    122b:\t48 89 d5             \tmov    %rdx,%rbp\n    122e:\t53                   \tpush   %rbx\n    122f:\t48 89 fb             \tmov    %rdi,%rbx\n    1232:\t48 83 ec 18          \tsub    $0x18,%rsp\n    1236:\tf2 0f 11 44 24 08    \tmovsd  %xmm0,0x8(%rsp)\n    123c:\te8 0f fe ff ff       \tcall   1050 <sched_getcpu@plt>\n    1241:\t41 89 c3             \tmov    %eax,%r11d\n    1244:\t4d 85 f6             \ttest   %r14,%r14\n    1247:\t0f 84 b2 00 00 00    \tje     12ff <stream_triad_reps_pure_serial_observed+0xef>\n    124d:\t4d 85 ff             \ttest   %r15,%r15\n    1250:\t0f 84 a9 00 00 00    \tje     12ff <stream_triad_reps_pure_serial_observed+0xef>\n    1256:\t49 8d 47 ff          \tlea    -0x1(%r15),%rax\n    125a:\tf2 0f 10 44 24 08    \tmovsd  0x8(%rsp),%xmm0\n    1260:\t48 83 f8 01          \tcmp    $0x1,%rax\n    1264:\t0f 86 ef 00 00 00    \tjbe    1359 <stream_triad_reps_pure_serial_observed+0x149>\n    126a:\t48 8d 45 08          \tlea    0x8(%rbp),%rax\n    126e:\t48 39 c3             \tcmp    %rax,%rbx\n    1271:\t0f 84 e2 00 00 00    \tje     1359 <stream_triad_reps_pure_serial_observed+0x149>\n    1277:\t49 8d 44 24 08       \tlea    0x8(%r12),%rax\n    127c:\t48 39 c3             \tcmp    %rax,%rbx\n    127f:\t0f 84 d4 00 00 00    \tje     1359 <stream_triad_reps_pure_serial_observed+0x149>\n    1285:\t4c 89 fa             \tmov    %r15,%rdx\n    1288:\t4c 89 f9             \tmov    %r15,%rcx\n    128b:\t66 0f 28 d0          \tmovapd %xmm0,%xmm2\n    128f:\t45 31 d2             \txor    %r10d,%r10d\n    1292:\t48 83 e2 fe          \tand    $0xfffffffffffffffe,%rdx\n    1296:\t48 d1 e9             \tshr    $1,%rcx\n    1299:\t66 0f 14 d2          \tunpcklpd %xmm2,%xmm2\n    129d:\t41 83 e7 01          \tand    $0x1,%r15d\n    12a1:\t48 c1 e2 03          \tshl    $0x3,%rdx\n    12a5:\t48 c1 e1 04          \tshl    $0x4,%rcx\n    12a9:\t49 8d 3c 14          \tlea    (%r12,%rdx,1),%rdi\n    12ad:\t48 8d 74 15 00       \tlea    0x0(%rbp,%rdx,1),%rsi\n    12b2:\t48 01 da             \tadd    %rbx,%rdx\n    12b5:\t0f 1f 00             \tnopl   (%rax)\n    12b8:\t31 c0                \txor    %eax,%eax\n    12ba:\t66 0f 1f 44 00 00    \tnopw   0x0(%rax,%rax,1)\n    12c0:\t66 0f 10 4c 05 00    \tmovupd 0x0(%rbp,%rax,1),%xmm1\n    12c6:\t66 41 0f 10 1c 04    \tmovupd (%r12,%rax,1),%xmm3\n    12cc:\t66 0f 59 ca          \tmulpd  %xmm2,%xmm1\n    12d0:\t66 0f 58 cb          \taddpd  %xmm3,%xmm1\n    12d4:\t0f 11 0c 03          \tmovups %xmm1,(%rbx,%rax,1)\n    12d8:\t48 83 c0 10          \tadd    $0x10,%rax\n    12dc:\t48 39 c1             \tcmp    %rax,%rcx\n    12df:\t75 df                \tjne    12c0 <stream_triad_reps_pure_serial_observed+0xb0>\n    12e1:\t4d 85 ff             \ttest   %r15,%r15\n    12e4:\t74 10                \tje     12f6 <stream_triad_reps_pure_serial_observed+0xe6>\n    12e6:\tf2 0f 10 0e          \tmovsd  (%rsi),%xmm1\n    12ea:\tf2 0f 59 c8          \tmulsd  %xmm0,%xmm1\n    12ee:\tf2 0f 58 0f          \taddsd  (%rdi),%xmm1\n    12f2:\tf2 0f 11 0a          \tmovsd  %xmm1,(%rdx)\n    12f6:\t49 83 c2 01          \tadd    $0x1,%r10\n    12fa:\t4d 39 d6             \tcmp    %r10,%r14\n    12fd:\t75 b9                \tjne    12b8 <stream_triad_reps_pure_serial_observed+0xa8>\n    12ff:\t4d 85 ed             \ttest   %r13,%r13\n    1302:\t74 08                \tje     130c <stream_triad_reps_pure_serial_observed+0xfc>\n    1304:\t41 c7 45 00 01 00 00 \tmovl   $0x1,0x0(%r13)\n    130b:\t00 \n    130c:\t48 83 7c 24 50 00    \tcmpq   $0x0,0x50(%rsp)\n    1312:\t74 0b                \tje     131f <stream_triad_reps_p",
+      "nm_match": "0000000000001210"
+    },
+    "physical_argument": "Working set=1342177272 vs L3_reported=335544320 (ratio=3.999999976158142). At \u22654\u00d7 L3 a triad is DRAM-bound; instruction-level codegen (vector vs scalar) cannot plausibly produce a sustained ~3\u00d7 bandwidth difference once both kernels miss in cache. If a 3\u00d7 gap remains after verified thread counts, the cause is unknown \u2014 not auto-vectorization.",
+    "vectorization_claim": "Both triad loops look vector-xmm; nontemporal stores absent in both. Auto-vectorization does NOT explain a 3\u00d7 gap."
+  },
+  "diag_b": {
+    "status": "OK",
+    "l3_reported_bytes": 335544320,
+    "fixed_threads_requested": 1,
+    "target_bytes_moved": 12079595448,
+    "points": [
+      {
+        "ratio_ws_over_l3": 0.25,
+        "working_set_bytes": 83886072,
+        "reps": 144,
+        "bytes_moved_per_iter": 83886072,
+        "bytes_moved_total": 12079594368,
+        "target_bytes_moved": 12079595448,
+        "pid": 3733,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 33.83021411505121,
+        "cv_pct": 0.2850060346400505,
+        "raw_gbs": [
+          33.91678099085222,
+          33.83021411505121,
+          33.68385414410415,
+          33.80292868278817,
+          33.916967548763964
+        ],
+        "raw_times_s": [
+          0.35615391599981194,
+          0.35706526500007385,
+          0.358616751999989,
+          0.357353484999976,
+          0.3561519570000655
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 0.5,
+        "working_set_bytes": 167772144,
+        "reps": 72,
+        "bytes_moved_per_iter": 167772144,
+        "bytes_moved_total": 12079594368,
+        "target_bytes_moved": 12079595448,
+        "pid": 3739,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 33.64254704133216,
+        "cv_pct": 0.35970239405235593,
+        "raw_gbs": [
+          33.38259569059487,
+          33.55729981342632,
+          33.64254704133216,
+          33.657810822813346,
+          33.6746761107327
+        ],
+        "raw_times_s": [
+          0.3618530589999409,
+          0.3599692000000232,
+          0.3590570700000626,
+          0.358894237999948,
+          0.3587144929999795
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 1.0,
+        "working_set_bytes": 335544312,
+        "reps": 36,
+        "bytes_moved_per_iter": 335544312,
+        "bytes_moved_total": 12079595232,
+        "target_bytes_moved": 12079595448,
+        "pid": 3745,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 25.01787710859835,
+        "cv_pct": 0.6452544791500775,
+        "raw_gbs": [
+          24.726110781456857,
+          25.08559506794005,
+          25.127454353030743,
+          25.01787710859835,
+          24.906968699019338
+        ],
+        "raw_times_s": [
+          0.48853599899985056,
+          0.4815351280001323,
+          0.4807329490001848,
+          0.4828385390001131,
+          0.48498857399999906
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 2.0,
+        "working_set_bytes": 671088624,
+        "reps": 18,
+        "bytes_moved_per_iter": 671088624,
+        "bytes_moved_total": 12079595232,
+        "target_bytes_moved": 12079595448,
+        "pid": 3751,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 17.20307009781694,
+        "cv_pct": 0.22478945052304042,
+        "raw_gbs": [
+          17.181171061351055,
+          17.17874756564378,
+          17.20307009781694,
+          17.24292098348246,
+          17.266096217562186
+        ],
+        "raw_times_s": [
+          0.7030717049999566,
+          0.7031708910001271,
+          0.7021767140001884,
+          0.700553882000122,
+          0.6996135710000999
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 4.0,
+        "working_set_bytes": 1342177272,
+        "reps": 9,
+        "bytes_moved_per_iter": 1342177272,
+        "bytes_moved_total": 12079595448,
+        "target_bytes_moved": 12079595448,
+        "pid": 3757,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.76453768807882,
+        "cv_pct": 0.1987908527465183,
+        "raw_gbs": [
+          15.721638475172316,
+          15.761296717897691,
+          15.775420003966868,
+          15.76453768807882,
+          15.809001052014143
+        ],
+        "raw_times_s": [
+          0.7683420189998742,
+          0.7664087329999347,
+          0.7657225890000063,
+          0.7662511700000323,
+          0.7640960620001351
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 8.0,
+        "working_set_bytes": 2684354544,
+        "reps": 4,
+        "bytes_moved_per_iter": 2684354544,
+        "bytes_moved_total": 10737418176,
+        "target_bytes_moved": 12079595448,
+        "pid": 3763,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.264879386995169,
+        "cv_pct": 1.4128014392352433,
+        "raw_gbs": [
+          15.264879386995169,
+          15.266794967397672,
+          15.26466289733028,
+          15.275508620764025,
+          14.788758587440194
+        ],
+        "raw_times_s": [
+          0.7034066829999119,
+          0.7033184239999173,
+          0.7034166589999131,
+          0.7029172280001603,
+          0.7260527049998018
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 16.0,
+        "working_set_bytes": 5368709112,
+        "reps": 2,
+        "bytes_moved_per_iter": 5368709112,
+        "bytes_moved_total": 10737418224,
+        "target_bytes_moved": 12079595448,
+        "pid": 3769,
+        "omp_num_threads_actual": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 14.886141375265682,
+        "cv_pct": 4.593947280088469,
+        "raw_gbs": [
+          14.886141375265682,
+          14.891594880601433,
+          13.416024281917446,
+          14.892408590198476,
+          14.117193421831162
+        ],
+        "raw_times_s": [
+          0.7213029860001825,
+          0.7210388349999448,
+          0.8003427839998949,
+          0.7209994380000353,
+          0.7605915639999239
+        ]
+      },
+      {
+        "ratio_ws_over_l3": 32.0,
+        "working_set_bytes": 10737418240,
+        "status": "SKIPPED",
+        "reason": "ws=10737418240 > 50% effective_mem=8396007424"
+      }
+    ],
+    "escape_point": {
+      "ratio_ws_over_l3": 4.0,
+      "pair_ratios": [
+        4.0,
+        8.0
+      ],
+      "pair_gbs": [
+        15.76453768807882,
+        15.264879386995169
+      ],
+      "rel_diff": 0.03169508113526814,
+      "floor_gbs": 14.886141375265682,
+      "flag": "OK",
+      "note": "escape = smallest near-floor consecutive pair within 5%: 4.0 & 8.0 (15.765 vs 15.265); floor=14.886 GB/s"
+    },
+    "working_set_policy": {
+      "working_set_bytes": 1342177280,
+      "rule": "working_set = escape_ratio * L3_reported = 4.0 * 335544320",
+      "from_escape": true
+    }
+  },
+  "diag_c": {
+    "omp_probe_verified": [
+      {
+        "threads_requested": 1,
+        "threads": 1,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.662169566849366,
+        "pid": 3775,
+        "n_distinct_cpus": 1
+      },
+      {
+        "threads_requested": 2,
+        "threads": 2,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 30.84890884273211,
+        "pid": 3781,
+        "n_distinct_cpus": 2
+      },
+      {
+        "threads_requested": 3,
+        "threads": 3,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 45.70233377327615,
+        "pid": 3789,
+        "n_distinct_cpus": 3
+      },
+      {
+        "threads_requested": 4,
+        "threads": 4,
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 60.155902968424066,
+        "pid": 3799,
+        "n_distinct_cpus": 4
+      }
+    ],
+    "serial_baseline_A1_gbs": 15.635979316006493,
+    "validity": {
+      "status": "VALID",
+      "flags": [],
+      "caveats": [],
+      "absolute_bounds_GBps_per_core": {
+        "lo": 1.0,
+        "hi": 60.0,
+        "note": "HEURISTIC \u2014 FLAG when exceeded, not a soft caveat"
+      },
+      "superlinear_vs_A1": {
+        "valid": true,
+        "superlinear": false,
+        "violations": [],
+        "flag": "OK",
+        "baseline_gbs": 15.635979316006493,
+        "baseline_label": "A1_serial"
+      },
+      "baseline_policy": "serial A1 baseline retained (Phase 2.3); OpenMP@1 must NOT replace it; SUPERLINEAR-vs-A1 is NOT discounted",
+      "cores": 4
+    },
+    "note": "Phase 2.3: serial A1 baseline retained; absolute bound is FLAG; SUPERLINEAR-vs-A1 is NOT discounted."
+  },
+  "primary_deliverable": {
+    "step1_thread_count_table": [
+      {
+        "cfg": "A1",
+        "pid": 3675,
+        "env_OMP_NUM_THREADS": null,
+        "requested_threads": null,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          2
+        ],
+        "thread_flag": "SERIAL_NO_OMP",
+        "status": "OK",
+        "median_gbs": 15.635979316006493,
+        "ratio_to_A1": 1.0
+      },
+      {
+        "cfg": "A2",
+        "pid": 3684,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.636139481275304,
+        "ratio_to_A1": 1.0000102433794247
+      },
+      {
+        "cfg": "A3",
+        "pid": 3690,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.651890704548626,
+        "ratio_to_A1": 1.001017613813664
+      },
+      {
+        "cfg": "A4",
+        "pid": 3696,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.637738068052508,
+        "ratio_to_A1": 1.0001124810931552
+      },
+      {
+        "cfg": "A5",
+        "pid": 3702,
+        "env_OMP_NUM_THREADS": "2",
+        "requested_threads": 2,
+        "omp_num_threads_actual": 2,
+        "omp_get_max_threads": 2,
+        "n_distinct_cpus": 2,
+        "cpu_ids": [
+          0,
+          1
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 31.089981337711187,
+        "ratio_to_A1": 1.988361631169753
+      },
+      {
+        "cfg": "A6",
+        "pid": 3710,
+        "env_OMP_NUM_THREADS": "1",
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "omp_get_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          3
+        ],
+        "thread_flag": "OK",
+        "status": "OK",
+        "median_gbs": 15.423815845953218,
+        "ratio_to_A1": 0.98643107247935
+      }
+    ],
+    "step3_conclusion": "Thread verification: A1=actual:1/req:None[SERIAL_NO_OMP], A2=actual:1/req:1[OK], A3=actual:1/req:1[OK], A4=actual:1/req:1[OK], A5=actual:2/req:2[OK], A6=actual:1/req:1[OK] A6 (verified OpenMP@1)=15.42 GB/s \u2248 A1=15.64 GB/s (ratio 0.99). Phase 2.2 conclusion is FALSIFIED \u2014 A1 is NOT a 3x outlier once OpenMP@1 is verified to run at 1 thread. Verified A2@1=15.64 vs A5@2=31.09 GB/s (ratio A5/A2=1.99 if a2>0)."
+  },
+  "note": "Phase 2.3 single-bug phase: verify OpenMP thread counts. BENCH 1\u20134 not re-run. Phase 2.2 OpenMP@1 baseline NOT adopted."
+}
