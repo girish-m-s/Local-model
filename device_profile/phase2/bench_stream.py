@@ -1,60 +1,60 @@
-"""BENCH 1 — STREAM-triad achievable memory bandwidth (Phase 2.1)."""
+"""BENCH 1 — STREAM triad bandwidth with verified OpenMP thread counts (Phase 2.4)."""
 
 from __future__ import annotations
 
 import os
-from typing import Any
+from typing import Any, Optional
 
 from .native import NativeKernels, numpy_available
+from .subprocess_run import run_worker
 from .util import (
-    assert_gbs_reconstructs,
     check_superlinear,
     effective_cores,
     effective_mem,
     ensure_quiet_load,
-    now,
-    pin_to_cpus,
-    rep_stats,
     resolve_working_set_bytes,
-    set_omp_threads,
     snapshot,
 )
 
 
-def run_bench1(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
+# Phase 2.3 DIAG B asymptotic floor on this class of host (GB/s, 1 thread).
+# Printed for audit alongside the 8×L3 policy; not a silent default for GB/s.
+DIAG_B_FLOOR_GBS_NOTE = (
+    "Phase 2.3 DIAG B floor ≈ 14.89 GB/s (1-thread asymptotic); "
+    "8×L3 was ~2.5% above floor vs ~5.8% at 4×L3"
+)
+
+
+def run_bench1(profile: Any, kernels: NativeKernels | None = None) -> dict[str, Any]:
+    _ = kernels  # parent process must not time OpenMP regions; workers compile fresh
     cores = effective_cores(profile)
     eff_mem = effective_mem(profile)
     max_alloc = eff_mem // 2 if eff_mem else 0
 
-    ws, ws_evid, suspect = resolve_working_set_bytes(profile)
+    ws, ws_evid, suspect, l3, ratio = resolve_working_set_bytes(profile)
     if max_alloc and ws > max_alloc:
         ws = max_alloc
         ws_evid += f"; capped to 50% effective_mem={max_alloc}"
 
     n = max(1, int(ws // (3 * 8)))
     actual_ws = n * 3 * 8
-    scalar = 3.0
-    bytes_per_iter = n * 8 * 3  # a write + b read + c read
-
+    bytes_per_iter = n * 8 * 3
     has_np, np_ver = numpy_available()
-    backend = (
-        f"numpy {np_ver} allocation + OpenMP-C stream_triad_reps"
-        if has_np
-        else f"mmap/ctypes allocation + OpenMP-C stream_triad_reps ({kernels.lib_path})"
-    )
 
     gate = ensure_quiet_load("bench1_pre")
     results: dict[str, Any] = {
         "name": "BENCH 1 — ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c)",
         "status": gate.status,
-        "backend": backend,
-        "backend_evidence": (
-            f"numpy_available={has_np} ({np_ver}); compile: {kernels.compile_cmd}; "
-            f"omp={kernels.omp}; lib={kernels.lib_path}"
+        "backend": (
+            f"subprocess + omp_set_num_threads + stream_triad_reps_observed; "
+            f"numpy_available={has_np} ({np_ver})"
         ),
         "working_set_bytes": actual_ws,
         "working_set_policy": ws_evid,
-        "l3_suspect_fallback": suspect,
+        "l3_reported_bytes": l3,
+        "ratio_ws_over_l3": (actual_ws / l3) if l3 else ratio,
+        "diag_b_floor_note": DIAG_B_FLOOR_GBS_NOTE,
+        "l3_suspect": suspect,
         "n_elements_per_array": n,
         "bytes_moved_per_iter": bytes_per_iter,
         "pre": gate.snapshot,
@@ -64,236 +64,248 @@ def run_bench1(profile: Any, kernels: NativeKernels) -> dict[str, Any]:
             "evidence": gate.evidence,
         },
         "thread_sweeps": [],
-        "cache_proof": {},
         "calibration": {},
-        "prefault": {},
         "saturation": {},
         "validity": {},
+        "recommendation": {},
         "post": None,
         "notes": [],
         "FAIL": [],
     }
 
     if not gate.ok:
-        results["notes"].append(
-            "BLOCKED: loadavg gate failed; bench not run. readings printed in quiet_gate."
-        )
+        results["notes"].append("BLOCKED: loadavg gate failed; bench not run.")
         results["post"] = snapshot("bench1_post_blocked")
         return results
 
-    l3 = None
-    if profile.cache.lscpu_l3_bytes and isinstance(profile.cache.lscpu_l3_bytes.value, int):
-        l3 = profile.cache.lscpu_l3_bytes.value
-    elif isinstance(profile.cache.l3_bytes.value, int):
-        l3 = profile.cache.l3_bytes.value
     results["cache_proof"] = {
         "working_set_bytes": actual_ws,
         "l3_bytes": l3,
-        "ratio_ws_over_l3": (actual_ws / l3) if l3 else None,
+        "ratio_ws_over_l3": results["ratio_ws_over_l3"],
         "evidence": (
-            f"working_set={actual_ws} vs L3={l3}; ratio="
-            + (f"{actual_ws/l3:.3f}x" if l3 else "n/a")
-            + ("; L3 SUSPECT → forced 512 MiB policy" if suspect else "")
-            + "; triad always writes `a`, so results cannot be pure register/L1 reuse"
+            f"Phase 2.4 policy: working_set = 8 * L3_reported; "
+            f"ws={actual_ws} L3={l3} ratio={results['ratio_ws_over_l3']}; "
+            f"{DIAG_B_FLOOR_GBS_NOTE}"
         ),
     }
 
-    import ctypes
-
-    if has_np:
-        import numpy as np
-
-        a = np.empty(n, dtype=np.float64)
-        b = np.empty(n, dtype=np.float64)
-        c = np.empty(n, dtype=np.float64)
-        ap = a.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-        bp = b.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-        cp = c.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
-    else:
-        import mmap as mmap_mod
-
-        nbytes = n * 8
-        mb = mmap_mod.mmap(-1, nbytes * 3)
-        a = (ctypes.c_double * n).from_buffer(memoryview(mb)[0:nbytes])
-        b = (ctypes.c_double * n).from_buffer(memoryview(mb)[nbytes : 2 * nbytes])
-        c = (ctypes.c_double * n).from_buffer(memoryview(mb)[2 * nbytes : 3 * nbytes])
-        ap = ctypes.cast(a, ctypes.POINTER(ctypes.c_double))
-        bp = ctypes.cast(b, ctypes.POINTER(ctypes.c_double))
-        cp = ctypes.cast(c, ctypes.POINTER(ctypes.c_double))
-
-    # Pre-fault: full write pass BEFORE timing (not just sparse touch).
-    pf0 = now()
-    if has_np:
-        import numpy as np
-
-        b[:] = np.linspace(0.0, 1.0, n, dtype=np.float64)
-        c[:] = np.linspace(1.0, 2.0, n, dtype=np.float64)
-        a[:] = 0.0
-    else:
-        for i in range(n):
-            b[i] = 1.0
-            c[i] = 2.0
-            a[i] = 0.0
-    # Force one triad to commit `a` pages too
-    _triad_reps(kernels, ap, bp, cp, scalar, n, 1, threads=1)
-    pf_dt = now() - pf0
-    results["prefault"] = {
-        "wall_time_s": pf_dt,
-        "evidence": (
-            f"full write of a,b,c ({actual_ws} bytes) + 1 serial triad before timing; "
-            f"prefault_wall_s={pf_dt}"
-        ),
-    }
+    # Calibrate reps at max threads in a fresh subprocess (~1.0s)
+    reps, cal = _calibrate_reps(n, bytes_per_iter, cores)
+    results["reps"] = reps
+    results["calibration"] = cal
 
     all_cpus = list(range(os.cpu_count() or cores))
-    pin_to_cpus(all_cpus)
-
-    # Calibration at MAX threads targeting ~1.0s; hold reps constant for all sweeps.
-    cal = _calibrate_reps(kernels, ap, bp, cp, scalar, n, cores, bytes_per_iter)
-    results["calibration"] = cal
-    reps = cal["reps"]
-    results["reps"] = reps
-    results["notes"].append(
-        f"reps held constant across thread sweep: {reps} "
-        f"(calibrated at threads={cores} targeting ~1.0s)"
-    )
-
     for t in range(1, cores + 1):
-        set_omp_threads(t)
-        aff_ev = pin_to_cpus(all_cpus)
+        row = run_worker(
+            {
+                "mode": "stream_point",
+                "n": n,
+                "reps": reps,
+                "bytes_moved_per_iter": bytes_per_iter,
+                "scalar": 3.0,
+                "requested_threads": t,
+                "affinity_cpus": all_cpus[: max(t, 1)],
+                "omp_proc_bind": "close",
+                "omp_places": "cores",
+            }
+        )
+        if row.get("status") != "OK" or not row.get("thread_count_applied"):
+            results["FAIL"].append(
+                f"threads={t}: THREAD COUNT NOT APPLIED "
+                f"(req={t} actual={row.get('omp_num_threads_actual')}); INVALID"
+            )
+            results["thread_sweeps"].append(
+                {
+                    "threads": t,
+                    "status": "INVALID",
+                    "thread_flag": row.get("thread_flag"),
+                    "pid": row.get("pid"),
+                    "requested_threads": t,
+                    "omp_num_threads_actual": row.get("omp_num_threads_actual"),
+                    "n_distinct_cpus": row.get("n_distinct_cpus"),
+                    "cpu_ids": row.get("cpu_ids"),
+                    "error": row.get("error"),
+                }
+            )
+            continue
 
-        # Discarded warmup (first timed rep)
-        t0 = now()
-        _triad_reps(kernels, ap, bp, cp, scalar, n, reps, threads=t)
-        warm_dt = now() - t0
-        warm_gbs = (reps * bytes_per_iter) / warm_dt / 1e9 if warm_dt > 0 else float("nan")
-
-        samples_gbs: list[float] = []
-        raw_times: list[float] = []
-        recon_checks: list[dict[str, Any]] = []
-        for _rep in range(5):
-            t0 = now()
-            _triad_reps(kernels, ap, bp, cp, scalar, n, reps, threads=t)
-            dt = now() - t0
-            gbs = (reps * bytes_per_iter) / dt / 1e9 if dt > 0 else float("nan")
-            chk = assert_gbs_reconstructs(gbs, reps, bytes_per_iter, dt)
-            if not chk["ok"]:
-                results["FAIL"].append(chk["message"])
-                results["status"] = "FAIL"
-            samples_gbs.append(gbs)
-            raw_times.append(dt)
-            recon_checks.append(chk)
-
-        stats = rep_stats(samples_gbs)
         results["thread_sweeps"].append(
             {
                 "threads": t,
+                "status": "OK",
+                "pid": row["pid"],
                 "reps": reps,
                 "bytes_moved_per_iter": bytes_per_iter,
                 "bytes_moved_per_timed_call": reps * bytes_per_iter,
-                "affinity_evidence": aff_ev,
-                "omp_num_threads": os.environ.get("OMP_NUM_THREADS"),
-                "discarded_warmup": {
-                    "label": "DISCARDED",
-                    "time_s": warm_dt,
-                    "gbs": warm_gbs,
-                    "reps": reps,
-                },
-                "raw_times_s": raw_times,
-                "raw_gbs": samples_gbs,
-                "reconstruction_checks": recon_checks,
-                "median_gbs": stats.median,
-                "min_gbs": stats.minimum,
-                "max_gbs": stats.maximum,
-                "mean_gbs": stats.mean,
-                "cv_pct": stats.cv_pct,
-                "noisy": stats.noisy,
+                "requested_threads": t,
+                "env_OMP_NUM_THREADS": row.get("env_OMP_NUM_THREADS"),
+                "omp_num_threads_actual": row["omp_num_threads_actual"],
+                "omp_max_threads": row.get("omp_max_threads"),
+                "n_distinct_cpus": row["n_distinct_cpus"],
+                "cpu_ids": row.get("cpu_ids"),
+                "thread_flag": row.get("thread_flag"),
+                "thread_count_applied": True,
+                "discarded_warmup": row.get("discarded_warmup"),
+                "raw_times_s": row["raw_times_s"],
+                "raw_gbs": row["raw_gbs"],
+                "reconstruction_checks": row.get("reconstruction_checks"),
+                "median_gbs": row["median_gbs"],
+                "min_gbs": row["min_gbs"],
+                "max_gbs": row["max_gbs"],
+                "mean_gbs": row["mean_gbs"],
+                "cv_pct": row["cv_pct"],
+                "noisy": row["noisy"],
+                "affinity_cpus": all_cpus[: max(t, 1)],
             }
         )
+        results["FAIL"].extend(row.get("FAIL") or [])
 
-    sweeps = results["thread_sweeps"]
-    meds = [s["median_gbs"] for s in sweeps]
-    ts = [s["threads"] for s in sweeps]
-    validity = check_superlinear(ts, meds)
+    ok_sweeps = [s for s in results["thread_sweeps"] if s.get("status") == "OK"]
+    if not ok_sweeps:
+        results["status"] = "INVALID"
+        results["saturation"] = {
+            "invalid": True,
+            "flag": "no verified thread sweeps",
+            "saturation_thread_count": None,
+        }
+        results["post"] = snapshot("bench1_post")
+        return results
+
+    ts = [s["threads"] for s in ok_sweeps]
+    meds = [s["median_gbs"] for s in ok_sweeps]
+    one = next(s["median_gbs"] for s in ok_sweeps if s["threads"] == 1)
+    validity = check_superlinear(ts, meds, baseline_gbs=one, baseline_label="verified_1thread")
     results["validity"] = validity
 
-    if not validity["valid"]:
-        results["saturation"] = {
-            "saturation_thread_count": None,
-            "bandwidth_saturated_median_gbs": None,
-            "bandwidth_1thread_median_gbs": meds[0] if meds else None,
-            "ratio_sat_over_1": None,
-            "peak_median_gbs": max(meds) if meds else None,
-            "rule": "NOT REPORTED — curve INVALID (see validity.flag)",
-            "invalid": True,
-            "flag": validity["flag"],
-        }
-    else:
-        peak = max(meds) if meds else 0.0
-        sat_threads = sweeps[0]["threads"] if sweeps else 1
-        for s in sweeps:
-            if peak > 0 and s["median_gbs"] >= 0.95 * peak:
-                sat_threads = s["threads"]
-                break
-        sat_gbs = next(s["median_gbs"] for s in sweeps if s["threads"] == sat_threads)
-        one = next(s["median_gbs"] for s in sweeps if s["threads"] == 1)
-        results["saturation"] = {
-            "saturation_thread_count": sat_threads,
-            "bandwidth_saturated_median_gbs": sat_gbs,
-            "bandwidth_1thread_median_gbs": one,
-            "ratio_sat_over_1": (sat_gbs / one) if one else None,
-            "peak_median_gbs": peak,
-            "rule": "saturation = lowest thread count whose median >= 95% of peak median",
-            "invalid": False,
-            "flag": "OK",
-        }
+    # Efficiency vs 1-thread: eff(n) = median(n) / (n * median(1))
+    eff_rows = []
+    for s in ok_sweeps:
+        t = s["threads"]
+        eff = (s["median_gbs"] / (t * one)) if (one and t) else None
+        eff_rows.append({"threads": t, "median_gbs": s["median_gbs"], "efficiency": eff})
+    results["efficiency_curve"] = eff_rows
 
-    if results["FAIL"] and results["status"] != "BLOCKED":
-        results["status"] = "FAIL"
-    elif results["status"] not in ("BLOCKED", "FAIL"):
-        results["status"] = "OK" if validity["valid"] else "INVALID"
+    max_t = max(ts)
+    max_eff = next(e["efficiency"] for e in eff_rows if e["threads"] == max_t)
+    peak = max(meds)
+    if max_eff is not None and max_eff > 0.90:
+        results["saturation"] = {
+            "invalid": False,
+            "no_saturation_observed": True,
+            "flag": "NO SATURATION OBSERVED — USE ALL PHYSICAL CORES",
+            "saturation_thread_count": max_t,
+            "bandwidth_saturated_median_gbs": next(
+                s["median_gbs"] for s in ok_sweeps if s["threads"] == max_t
+            ),
+            "bandwidth_1thread_median_gbs": one,
+            "ratio_sat_over_1": (
+                next(s["median_gbs"] for s in ok_sweeps if s["threads"] == max_t) / one
+            ),
+            "peak_median_gbs": peak,
+            "efficiency_at_max_cores": max_eff,
+            "rule": (
+                "if efficiency at max cores > 90%, do not invent a knee; "
+                "recommend all physical/effective cores"
+            ),
+        }
+        rec = max_t
+        rec_ev = (
+            f"NO SATURATION OBSERVED — USE ALL PHYSICAL CORES "
+            f"(eff@{max_t}={max_eff:.3f} > 0.90); recommended_thread_count={rec}"
+        )
+    else:
+        # Lowest thread count achieving >=95% of peak median
+        sat_t = ok_sweeps[0]["threads"]
+        for s in ok_sweeps:
+            if peak > 0 and s["median_gbs"] >= 0.95 * peak:
+                sat_t = s["threads"]
+                break
+        sat_gbs = next(s["median_gbs"] for s in ok_sweeps if s["threads"] == sat_t)
+        results["saturation"] = {
+            "invalid": bool(validity.get("superlinear")),
+            "no_saturation_observed": False,
+            "flag": validity.get("flag") if validity.get("superlinear") else "OK",
+            "saturation_thread_count": None if validity.get("superlinear") else sat_t,
+            "bandwidth_saturated_median_gbs": None if validity.get("superlinear") else sat_gbs,
+            "bandwidth_1thread_median_gbs": one,
+            "ratio_sat_over_1": (sat_gbs / one) if one and not validity.get("superlinear") else None,
+            "peak_median_gbs": peak,
+            "efficiency_at_max_cores": max_eff,
+            "rule": "lowest thread count with median >= 95% of peak (when efficiency saturates)",
+        }
+        rec = None if validity.get("superlinear") else sat_t
+        rec_ev = (
+            f"BENCH 1 bandwidth saturation thread count={rec} "
+            f"(eff@max={max_eff}); not from deleted BENCH 2"
+        )
+
+    # Max-efficiency thread count: among OK sweeps, maximize efficiency then GB/s
+    best = max(
+        ok_sweeps,
+        key=lambda s: (
+            (s["median_gbs"] / (s["threads"] * one)) if one else 0.0,
+            s["median_gbs"],
+        ),
+    )
+    # For sustained: prefer recommended (all cores if no sat) else sat
+    max_eff_threads = rec if rec is not None else best["threads"]
+    results["recommendation"] = {
+        "recommended_thread_count": rec,
+        "recommended_thread_count_evidence": rec_ev,
+        "max_efficiency_thread_count": max_eff_threads,
+        "max_efficiency_thread_count_evidence": (
+            f"from BENCH 1 verified curve; no_saturation="
+            f"{results['saturation'].get('no_saturation_observed')}"
+        ),
+    }
+
+    if results["FAIL"] or any(s.get("status") == "INVALID" for s in results["thread_sweeps"]):
+        results["status"] = "INVALID"
+    elif validity.get("superlinear"):
+        results["status"] = "INVALID"
+    else:
+        results["status"] = "OK"
 
     results["post"] = snapshot("bench1_post")
     return results
 
 
-def _calibrate_reps(
-    kernels, ap, bp, cp, scalar, n, max_threads, bytes_per_iter
-) -> dict[str, Any]:
-    """Pick reps at max threads targeting ~1.0s wall time."""
-    set_omp_threads(max_threads)
+def _calibrate_reps(n: int, bpi: int, max_threads: int) -> tuple[int, dict[str, Any]]:
     reps = 1
-    history: list[dict[str, Any]] = []
-    target = 1.0
-    for _ in range(12):
-        t0 = now()
-        _triad_reps(kernels, ap, bp, cp, scalar, n, reps, threads=max_threads)
-        dt = now() - t0
-        history.append({"reps": reps, "time_s": dt})
+    hist = []
+    for _ in range(10):
+        row = run_worker(
+            {
+                "mode": "stream_point",
+                "n": n,
+                "reps": reps,
+                "bytes_moved_per_iter": bpi,
+                "scalar": 3.0,
+                "requested_threads": max_threads,
+                "affinity_cpus": list(range(max_threads)),
+                "omp_proc_bind": "close",
+                "omp_places": "cores",
+            }
+        )
+        times = row.get("raw_times_s") or []
+        dt = float(sum(times) / len(times)) if times else 0.0
+        hist.append(
+            {
+                "reps": reps,
+                "mean_time_s": dt,
+                "pid": row.get("pid"),
+                "actual_threads": row.get("omp_num_threads_actual"),
+            }
+        )
+        if row.get("status") != "OK":
+            break
         if dt >= 0.85:
             break
-        # scale toward target
-        scale = target / max(dt, 1e-6)
-        reps = max(reps + 1, int(reps * scale))
-    return {
-        "target_s": target,
+        reps = max(reps + 1, int(reps * 1.0 / max(dt, 1e-6)))
+    return reps, {
+        "target_s": 1.0,
         "threads": max_threads,
         "reps": reps,
-        "history": history,
-        "evidence": (
-            f"calibrated at OMP_NUM_THREADS={max_threads}; "
-            f"final reps={reps}; last_time_s={history[-1]['time_s'] if history else None}; "
-            f"bytes_moved_per_timed_call={reps * bytes_per_iter}"
-        ),
+        "history": hist,
+        "evidence": f"calibrated in fresh subprocess at threads={max_threads}; reps={reps}",
     }
-
-
-def _triad_reps(kernels, ap, bp, cp, scalar, n, reps: int, threads: int) -> None:
-    set_omp_threads(threads)
-    # Always use the OpenMP entry point when available, even for 1 thread, so
-    # the 1-thread baseline shares the same compiled path as the multi-thread
-    # sweeps (serial vs OpenMP codegen differences can fake SUPERLINEAR).
-    if kernels.omp:
-        kernels.lib.stream_triad_reps(ap, bp, cp, float(scalar), int(n), int(reps))
-    else:
-        kernels.lib.stream_triad_reps_serial(ap, bp, cp, float(scalar), int(n), int(reps))

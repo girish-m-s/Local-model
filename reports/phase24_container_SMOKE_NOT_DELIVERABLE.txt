@@ -1,0 +1,1311 @@
+=== PHASE 2.4 MEASUREMENT HARNESS REPORT ===
+*** SMOKE_NOT_DELIVERABLE — container/smoke path; not a device deliverable ***
+  <- SMOKE_NOT_DELIVERABLE: PHASE2 overrides present: ['PHASE2_LOAD_THRESHOLD', 'PHASE2_QUIET_SLEEP_S', 'PHASE2_QUIET_ATTEMPTS', 'PHASE2_BENCH3_DURATION_S'] (PHASE2_ALLOW_OVERRIDES=1)
+HOST CLASS: container
+  <- /.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED
+*** NON-BARE-METAL HOST — bandwidth/thermal numbers may be unrepresentative of an edge target ***
+profile_effective_cores: 4
+profile_effective_mem_bytes: 16792014848
+usable_tier (from Phase 1.5): AVX512_VNNI
+total_runtime_s: 124.24
+kernel_compile: gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_thkenhsm/kernels.so
+  <- log: '/workspace/device_profile/phase2/kernels.c: In function ‘stream_triad_reps_observed’:\n/workspace/device_profile/phase2/kernels.c:74:23: warning: implicit declaration of function ‘sched_getcpu’; did you mean ‘sched_getparam’? [-Wimplicit-function-declaration]\n   74 |             int cpu = sched_getcpu();\n      |                       ^~~~~~~~~~~~\n      |                       sched_getparam'
+
+=== BENCH 1 — ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c) ===
+status: OK
+pre: loadavg=(0.03, 0.06, 0.08) MemAvailable=15918178304 MemFree=14768295936 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 0.03 0.06 0.08 5/230 5101
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=0.03 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14422164 kB
+  <- MemAvailable:   15545096 kB
+quiet_gate: status=OK readings=[(0.03, 0.06, 0.08)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=0.03 threshold=100.0; /proc/loadavg: 0.03 0.06 0.08 5/230 5101; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=0.03 > 100.0); MemTotal:       16398452 kB; MemFree:        14422164 kB; MemAvailable:   15545096 kB
+backend: subprocess + omp_set_num_threads + stream_triad_reps_observed; numpy_available=True (numpy 2.4.4)
+working_set_bytes: 2684354544
+  <- policy: working_set = 8 × L3_reported (L3=335544320 B, ws=2684354560 B, ratio=8.00×); DIAG B floor: 8× is 2.5% above STREAM floor (4× was 5.8%); L3_SUSPECT=True (logical_cores=4)
+l3_reported_bytes: 335544320 ratio_ws_over_l3: 7.999999952316284
+  <- Phase 2.3 DIAG B floor ≈ 14.89 GB/s (1-thread asymptotic); 8×L3 was ~2.5% above floor vs ~5.8% at 4×L3
+l3_suspect: True
+bytes_moved_per_iter: 2684354544
+reps (constant across sweep): 21
+calibration: calibrated in fresh subprocess at threads=4; reps=21
+  <- cal_step reps=1 mean_time_s=0.04724297559996558 actual_threads=4 pid=5102
+  <- cal_step reps=21 mean_time_s=1.229969195600006 actual_threads=4 pid=5118
+cache_proof: ws=2684354544 L3=335544320 ratio=7.999999952316284
+  <- Phase 2.4 policy: working_set = 8 * L3_reported; ws=2684354544 L3=335544320 ratio=7.999999952316284; Phase 2.3 DIAG B floor ≈ 14.89 GB/s (1-thread asymptotic); 8×L3 was ~2.5% above floor vs ~5.8% at 4×L3
+threads=1: reps=21 median=14.8417 min=14.6651 max=14.8552 mean=14.8109 CV%=0.55 GB/s
+  thread_verify: requested=1 omp_get_num_threads_actual=1 n_distinct_cpus=1 flag=OK
+  DISCARDED warmup: time_s=3.8981196790000467 gbs=14.46118900034914 actual=1 n_cpus=1
+  raw_gbs: [14.66510677914449, 14.841670338748642, 14.855183316444842, 14.841482934216977, 14.851091620664045]
+  raw_times_s: [3.8439164659998823, 3.7981874099996276, 3.794732399000168, 3.798235370000384, 3.7957779040002606]
+  bytes_moved_per_timed_call: 56371445424 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=14.66510677914449 expected=14.66510677914449 rel_err=0.0
+  reconstruct[OK]: reported=14.841670338748642 expected=14.841670338748642 rel_err=0.0
+  reconstruct[OK]: reported=14.855183316444842 expected=14.855183316444842 rel_err=0.0
+  reconstruct[OK]: reported=14.841482934216977 expected=14.841482934216977 rel_err=0.0
+  reconstruct[OK]: reported=14.851091620664045 expected=14.851091620664045 rel_err=0.0
+  <- env_OMP_NUM_THREADS=1; affinity=[0]
+threads=2: reps=21 median=28.8625 min=23.8119 max=29.4558 mean=27.6728 CV%=8.61 GB/s
+  thread_verify: requested=2 omp_get_num_threads_actual=2 n_distinct_cpus=2 flag=OK
+  DISCARDED warmup: time_s=1.9134302319998824 gbs=29.460935905189285 actual=2 n_cpus=2
+  raw_gbs: [29.45581336248188, 26.932751316577512, 23.811856234334478, 28.86252344445551, 29.301003847388387]
+  raw_times_s: [1.9137629889996788, 2.0930444410000746, 2.367368795999937, 1.953101763000177, 1.9238742030001958]
+  bytes_moved_per_timed_call: 56371445424 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=29.45581336248188 expected=29.45581336248188 rel_err=0.0
+  reconstruct[OK]: reported=26.932751316577512 expected=26.932751316577512 rel_err=0.0
+  reconstruct[OK]: reported=23.811856234334478 expected=23.811856234334478 rel_err=0.0
+  reconstruct[OK]: reported=28.86252344445551 expected=28.86252344445551 rel_err=0.0
+  reconstruct[OK]: reported=29.301003847388387 expected=29.301003847388387 rel_err=0.0
+  <- env_OMP_NUM_THREADS=2; affinity=[0, 1]
+threads=3: reps=21 median=34.4341 min=32.3425 max=40.7745 mean=35.4693 CV%=9.32 GB/s
+  thread_verify: requested=3 omp_get_num_threads_actual=3 n_distinct_cpus=3 flag=OK
+  DISCARDED warmup: time_s=1.3715116519997537 gbs=41.10168903181154 actual=3 n_cpus=3
+  raw_gbs: [36.326402463755386, 40.7745361092661, 34.434057295313, 33.4689515598228, 32.34251632266976]
+  raw_times_s: [1.5518036909998045, 1.3825159230000281, 1.637084034000054, 1.6842907469999773, 1.7429517499999747]
+  bytes_moved_per_timed_call: 56371445424 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=36.326402463755386 expected=36.326402463755386 rel_err=0.0
+  reconstruct[OK]: reported=40.7745361092661 expected=40.7745361092661 rel_err=0.0
+  reconstruct[OK]: reported=34.434057295313 expected=34.434057295313 rel_err=0.0
+  reconstruct[OK]: reported=33.4689515598228 expected=33.4689515598228 rel_err=0.0
+  reconstruct[OK]: reported=32.34251632266976 expected=32.34251632266976 rel_err=0.0
+  <- env_OMP_NUM_THREADS=3; affinity=[0, 1, 2]
+threads=4: reps=21 median=44.8841 min=42.0857 max=56.6459 mean=46.2328 CV%=13.01 NOISY GB/s
+  thread_verify: requested=4 omp_get_num_threads_actual=4 n_distinct_cpus=4 flag=OK
+  DISCARDED warmup: time_s=1.4602631640000254 gbs=38.60362078132857 actual=4 n_cpus=4
+  raw_gbs: [56.645924725039386, 45.366287374999736, 44.88406875597801, 42.182283065225306, 42.085677725131035]
+  raw_times_s: [0.9951544740001736, 1.2425844980002694, 1.2559343880002416, 1.3363772970001264, 1.3394448770000054]
+  bytes_moved_per_timed_call: 56371445424 (= reps * bytes_moved_per_iter)
+  reconstruct[OK]: reported=56.645924725039386 expected=56.645924725039386 rel_err=0.0
+  reconstruct[OK]: reported=45.366287374999736 expected=45.366287374999736 rel_err=0.0
+  reconstruct[OK]: reported=44.88406875597801 expected=44.88406875597801 rel_err=0.0
+  reconstruct[OK]: reported=42.182283065225306 expected=42.182283065225306 rel_err=0.0
+  reconstruct[OK]: reported=42.085677725131035 expected=42.085677725131035 rel_err=0.0
+  <- env_OMP_NUM_THREADS=4; affinity=[0, 1, 2, 3]
+validity: OK
+efficiency threads=1: median_gbs=14.841670338748642 eff=1.0
+efficiency threads=2: median_gbs=28.86252344445551 eff=0.9723475453130506
+efficiency threads=3: median_gbs=34.434057295313 eff=0.7733643745253422
+efficiency threads=4: median_gbs=44.88406875597801 eff=0.7560481356130558
+saturation_thread_count: 4 (rule: lowest thread count with median >= 95% of peak (when efficiency saturates))
+bandwidth_saturated / bandwidth_1thread: 44.88406875597801 / 14.841670338748642 = 3.0241925424522234
+recommended_thread_count (from BENCH 1 BW curve): 4  <- BENCH 1 bandwidth saturation thread count=4 (eff@max=0.7560481356130558); not from deleted BENCH 2
+max_efficiency_thread_count (BENCH 3 source): 4  <- from BENCH 1 verified curve; no_saturation=False
+post: loadavg=(1.45, 0.45, 0.22) MemAvailable=15848828928 MemFree=14698598400 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 1.45 0.45 0.22 1/226 5247
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14354100 kB
+  <- MemAvailable:   15477372 kB
+
+=== BENCH 2 — DELETED (Phase 2.4) ===
+status: DELETED
+  <- Kernels compile to SSE2 (vector-xmm; no ymm/zmm; no -march). They cannot exercise the detected AVX512_VNNI tier. A hand-rolled dot product also does not predict llama.cpp VNNI GEMM. Compute throughput deferred to Phase 4 against a real engine. recommended_thread_count now comes from BENCH 1 bandwidth curve.
+
+=== BENCH 3 — SUSTAINED VS BURST (thermal, STREAM/DRAM-bound) ===
+status: THERMAL_BLIND
+pre: loadavg=(1.45, 0.45, 0.22) MemAvailable=15848828928 MemFree=14698598400 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 1.45 0.45 0.22 1/226 5247
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14354100 kB
+  <- MemAvailable:   15477372 kB
+quiet_gate: status=OK readings=[(1.45, 0.45, 0.22)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=1.45 threshold=100.0; /proc/loadavg: 1.45 0.45 0.22 1/226 5247; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0); MemTotal:       16398452 kB; MemFree:        14354100 kB; MemAvailable:   15477372 kB
+kernel: stream_triad_reps_observed via fresh subprocess + omp_set_num_threads (same STREAM kernel as BENCH 1)
+threads (BENCH 1 max-efficiency / recommended): 4
+thread_verify: requested=4 actual=4 n_distinct_cpus=4 applied=True flag=OK
+duration_s: 20.0; bucket_s: 10.0
+battery_dual_run: NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only
+THERMAL BLIND — RESULT NOT MEANINGFUL
+  <- zero thermal zones and zero cpufreq scaling_cur_freq readable; sustained/peak conclusion SKIPPED
+  <- THERMAL BLIND — RESULT NOT MEANINGFUL; 180s STREAM skipped after thread-count verify
+  <- no thermal_zone* readable
+  <- no scaling_cur_freq readable
+post: loadavg=(1.45, 0.45, 0.22) MemAvailable=15828492288 MemFree=14678261760 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 1.45 0.45 0.22 1/226 5259
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14334240 kB
+  <- MemAvailable:   15457512 kB
+
+=== BENCH 4 — mmap / PAGE-FAULT COST ===
+status: OK
+pre: loadavg=(1.45, 0.45, 0.22) MemAvailable=15828492288 MemFree=14678261760 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 1.45 0.45 0.22 1/226 5259
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14334240 kB
+  <- MemAvailable:   15457512 kB
+quiet_gate: status=OK readings=[(1.45, 0.45, 0.22)]
+  <- PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)
+  <- PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)
+  <- PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)
+  <- attempt 1/1: loadavg1=1.45 threshold=100.0; /proc/loadavg: 1.45 0.45 0.22 1/226 5259; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0); MemTotal:       16398452 kB; MemFree:        14334240 kB; MemAvailable:   15457512 kB
+thread_control: Each file measured in a fresh subprocess; omp_set_num_threads(1) verified via tiny observed triad before timed serial stride_touch.
+cached_file_bytes: 6716805939 (0.4x effective_mem=16792014848)
+oversized_file_bytes: 25188022272 (1.5x effective_mem)
+disk free/total on /home/ubuntu/.cache/localmodel: 252737167360 / 270436077568
+-- file: cached_0.4x_mem path=/home/ubuntu/.cache/localmodel/phase24_mmap_cached.bin --
+  thread_verify: requested=1 actual=1 n_distinct_cpus=1 flag=OK
+  write: 4.858623463000185s (1.3824503977619194 GB/s file_size/time)
+  <- os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase24_mmap_cached.bin', POSIX_FADV_DONTNEED) OK
+  cold: 2.4878323200000523s effective_read_gbs=2.69986411945957 pages_per_second=659146.5135399341
+    io_basis_gbs=2.69986411945957 file_basis_gbs=2.699862802248609 (both printed for audit)
+    minflt_delta=153735 (before=10447 after=164182) majflt_delta=1 (before=0 after=1)
+    io_read_bytes_delta=6716809216 (before=75776 after=6716884992)
+    <- /proc/self/stat minflt=10447 majflt=0; raw_tail=['10447', '5602', '0', '0']
+    <- /proc/self/stat minflt=164182 majflt=1; raw_tail=['164182', '5602', '1', '0']
+    <- /proc/self/io read_bytes=75776; raw_line='read_bytes: 75776'
+    <- /proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time; block I/O observed via read_bytes delta
+  warm: 1.108996317999754s effective_read_gbs=6.056653056445486 pages_per_second=1478675.7840257895
+    io_basis_gbs=None file_basis_gbs=6.056653056445486 (both printed for audit)
+    minflt_delta=102491 (before=164182 after=266673) majflt_delta=0 (before=1 after=1)
+    io_read_bytes_delta=0 (before=6716884992 after=6716884992)
+    <- /proc/self/stat minflt=164182 majflt=1; raw_tail=['164182', '5602', '1', '0']
+    <- /proc/self/stat minflt=266673 majflt=1; raw_tail=['266673', '5602', '1', '0']
+    <- /proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'
+    <- /proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'
+    <- bandwidth_basis: file_bytes / time; FULLY CACHED (io read_bytes delta = 0 is the proof)
+-- file: oversized_1.5x_mem path=/home/ubuntu/.cache/localmodel/phase24_mmap_oversized.bin --
+  thread_verify: requested=1 actual=1 n_distinct_cpus=1 flag=OK
+  write: 17.241987934000008s (1.4608537233882968 GB/s file_size/time)
+  <- os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase24_mmap_oversized.bin', POSIX_FADV_DONTNEED) OK
+  cold: 12.49882924800022s effective_read_gbs=2.0152306924290544 pages_per_second=491999.6807688121
+    io_basis_gbs=2.0152306924290544 file_basis_gbs=2.0152305285737078 (both printed for audit)
+    minflt_delta=576510 (before=10326 after=586836) majflt_delta=1 (before=0 after=1)
+    io_read_bytes_delta=25188024320 (before=75776 after=25188100096)
+    <- /proc/self/stat minflt=10326 majflt=0; raw_tail=['10326', '5623', '0', '0']
+    <- /proc/self/stat minflt=586836 majflt=1; raw_tail=['586836', '5623', '1', '0']
+    <- /proc/self/io read_bytes=75776; raw_line='read_bytes: 75776'
+    <- /proc/self/io read_bytes=25188100096; raw_line='read_bytes: 25188100096'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time; block I/O observed via read_bytes delta
+  warm: 11.228557391000322s effective_read_gbs=2.243211077158333 pages_per_second=547658.9543843587
+    io_basis_gbs=2.243211077158333 file_basis_gbs=2.243210894766248 (both printed for audit)
+    minflt_delta=576511 (before=586836 after=1163347) majflt_delta=1 (before=1 after=2)
+    io_read_bytes_delta=25188024320 (before=25188100096 after=50376124416)
+    <- /proc/self/stat minflt=586836 majflt=1; raw_tail=['586836', '5623', '1', '0']
+    <- /proc/self/stat minflt=1163347 majflt=2; raw_tail=['1163347', '5623', '2', '0']
+    <- /proc/self/io read_bytes=25188100096; raw_line='read_bytes: 25188100096'
+    <- /proc/self/io read_bytes=50376124416; raw_line='read_bytes: 50376124416'
+    <- bandwidth_basis: /proc/self/io read_bytes delta / time; block I/O observed via read_bytes delta
+delta (cached - oversized): {'cold_read_gbs_cached_minus_oversized': 0.6846334270305157, 'warm_read_gbs_cached_minus_oversized': 3.8134419792871532, 'warm_cliff_ratio_cached_over_oversized': 2.6999924876075263, 'cold_pages_per_second_cached_minus_oversized': 167146.832771122, 'deliverable': 'cached vs oversized warm effective_read_gbs; cliff_ratio = warm_cached / warm_oversized. FULLY CACHED passes use file_bytes/time when io_read_bytes_delta==0 (Phase 2.2/2.4 fix).'}
+warm_cliff_ratio (cached/oversized): 2.6999924876075263
+note: Two files: cached=0.4*effective_mem, oversized=1.5*effective_mem. When io_read_bytes_delta==0 → FULLY CACHED; bandwidth_basis = file_bytes/time. Else effective = read_bytes delta / time. pages_per_second = pages touched / time (not a bandwidth).
+post: loadavg=(1.32, 0.57, 0.27) MemAvailable=15932051456 MemFree=15345725440 OK threshold=100.0 OVERRIDE
+  <- /proc/loadavg: 1.32 0.57 0.27 1/227 5271
+  <- load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.32 > 100.0)
+  <- MemTotal:       16398452 kB
+  <- MemFree:        14986060 kB
+  <- MemAvailable:   15558644 kB
+
+=== SECTION D — DERIVED OUTPUT ===
+measured_bandwidth_GBps (BENCH1 saturated / max-core median): 44.88406875597801
+model_GiB uses 2^30 bytes (GGUF convention). measured_bandwidth_GBps uses decimal 1e9 bytes/s (STREAM convention). upper_tok_s = BW_bytes_per_s / model_bytes.
+predicted_decode_tok_s(model_bytes) = measured_bandwidth_GBps * 1e9 / model_bytes
+UPPER BOUND assuming perfect bandwidth utilization. Real engines typically hit 40-70% of it. GiB = 2^30.
+ model_GiB     bytes(2^30)     upper_tok_s  realistic_0.55x  upper_if_1e9
+       0.5       536870912           83.60           45.98         89.77
+       1.0      1073741824           41.80           22.99         44.88
+       2.0      2147483648           20.90           11.50         22.44
+       4.0      4294967296           10.45            5.75         11.22
+       8.0      8589934592            5.23            2.87          5.61
+      16.0     17179869184            2.61            1.44          2.81
+0.55x realistic band: UNVALIDATED ASSUMPTION — to be checked in Phase 4 against a real engine.
+
+-- KV-cache extension (weights-only model is incomplete) --
+PRIMARY=GQA (n_kv_heads=8); SECONDARY=MHA (n_kv_heads=32, ~4x KV). UPPER BOUND with perfect bandwidth utilization. GiB = 2^30.
+PRIMARY GQA config: {'name': 'representative_dense_7B_GQA_primary', 'attention': 'GQA', 'n_layers': 32, 'n_kv_heads': 8, 'head_dim': 128, 'bytes_per_element': 2, 'model_weight_GiB': 7.0, 'note': 'PRIMARY: GQA (n_kv_heads=8). Dense decode: every weight every token + KV up to n_ctx. NOT a real GGUF measurement.'}
+  [GQA] n_ctx=512 n_kv_heads=8: kv_bytes=67108864 total_bytes/token=7583301632 kv_share=0.008849557522123894 upper_tok_s=5.918803040429818 (weights_only=5.971649496147942)
+  [GQA] n_ctx=4096 n_kv_heads=8: kv_bytes=536870912 total_bytes/token=8053063680 kv_share=0.06666666666666667 upper_tok_s=5.573539529738079 (weights_only=5.971649496147942)
+  [GQA] n_ctx=32768 n_kv_heads=8: kv_bytes=4294967296 total_bytes/token=11811160064 kv_share=0.36363636363636365 upper_tok_s=3.800140588457781 (weights_only=5.971649496147942)
+SECONDARY MHA config: {'name': 'representative_dense_7B_MHA_secondary', 'attention': 'MHA', 'n_layers': 32, 'n_kv_heads': 32, 'head_dim': 128, 'bytes_per_element': 2, 'model_weight_GiB': 7.0, 'note': 'SECONDARY: full MHA (n_kv_heads=32). Overstates KV ~4x vs GQA; kept for comparison only.'}
+  [MHA] n_ctx=512 n_kv_heads=32: kv_bytes=268435456 total_bytes/token=7784628224 kv_share=0.034482758620689655 upper_tok_s=5.7657305480049095 (weights_only=5.971649496147942)
+  [MHA] n_ctx=4096 n_kv_heads=32: kv_bytes=2147483648 total_bytes/token=9663676416 kv_share=0.2222222222222222 upper_tok_s=4.644616274781733 (weights_only=5.971649496147942)
+  [MHA] n_ctx=32768 n_kv_heads=32: kv_bytes=17179869184 total_bytes/token=24696061952 kv_share=0.6956521739130435 upper_tok_s=1.8174585423058953 (weights_only=5.971649496147942)
+
+MoE: WRONG FOR MoE: this model assumes every weight is read every token. Mixture-of-Experts models only activate a subset of experts per token, so weight bytes/token are much smaller and MoE will be systematically UNDERRATED (predicted tok/s too low) by BW/model_bytes. FLAG FOR PHASE 3 selection policy.
+Prefill/TTFT: OPEN GAP: prefill / time-to-first-token is compute-bound (or mixed), not bandwidth-bound. Nothing in this harness predicts TTFT.
+
+bench3_thread_source: BENCH 3 used max_efficiency_thread_count=4 from BENCH 1 (not deleted BENCH 2 knee)
+recommended_thread_count: 4  <- BENCH 1 bandwidth saturation thread count=4 (eff@max=0.7560481356130558); not from deleted BENCH 2
+recommended_thread_count_sustained: None  <- THERMAL BLIND — RESULT NOT MEANINGFUL; recommended_thread_count_sustained NOT concluded from BENCH 3
+
+=== SELF-CRITIQUE ===
+- measurements blocked or contaminated:
+  - no bench BLOCKED by loadavg>0.3 after retries (or gate not exercised)
+- likely wrong under virtualization:
+  - BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers
+  - BENCH 3 thermal/cpufreq often absent under KVM — THERMAL BLIND path
+  - BENCH 4 overlay FS + virtio block ≠ bare-metal NVMe latency
+  - steal time / noisy neighbors can still inflate CV (see NOISY tags)
+- where a benchmark may have been served from cache rather than RAM:
+  - BENCH 1 working_set=2684354544 vs L3=335544320 ratio=7.999999952316284; Phase 2.3 DIAG B floor ≈ 14.89 GB/s (1-thread asymptotic); 8×L3 was ~2.5% above floor vs ~5.8% at 4×L3
+  - BENCH 2 DELETED — no compute microbench cache analysis
+  - BENCH 4: io_read_bytes_delta==0 → FULLY CACHED (file_bytes/time basis)
+- ISA tier verification:
+  - BENCH 2 deleted; scalar STREAM/mmap kernels do not exercise Phase 1.5 usable_tier=AVX512_VNNI
+  - Compute throughput deferred to Phase 4 real-engine measurement
+- other:
+  - total_runtime_s=124.2 budget=600 over=False
+  - 0.55x decode band is an unvalidated assumption pending Phase 4
+  - Phase 2.4: omp_set_num_threads in fresh subprocess; actual!=requested → INVALID; WS=8×L3; BENCH 2 deleted
+  - SMOKE_NOT_DELIVERABLE: PHASE2 overrides present: ['PHASE2_LOAD_THRESHOLD', 'PHASE2_QUIET_SLEEP_S', 'PHASE2_QUIET_ATTEMPTS', 'PHASE2_BENCH3_DURATION_S'] (PHASE2_ALLOW_OVERRIDES=1)
+  - SMOKE_NOT_DELIVERABLE: container/smoke path
+
+=== PHASE 2.4 JSON ===
+{
+  "phase": "2.4",
+  "smoke_not_deliverable": true,
+  "override_notes": [
+    "SMOKE_NOT_DELIVERABLE: PHASE2 overrides present: ['PHASE2_LOAD_THRESHOLD', 'PHASE2_QUIET_SLEEP_S', 'PHASE2_QUIET_ATTEMPTS', 'PHASE2_BENCH3_DURATION_S'] (PHASE2_ALLOW_OVERRIDES=1)"
+  ],
+  "host_class": "container",
+  "host_class_evidence": "/.dockerenv: EXISTS; /run/.containerenv: ABSENT; /proc/1/cgroup: '0::/\\n'; systemd-detect-virt: docker; lscpu Hypervisor vendor: KVM; DMI sys_vendor: UNDETECTED; DMI product_name: UNDETECTED",
+  "effective_cores": 4,
+  "effective_mem_bytes": 16792014848,
+  "usable_tier": "AVX512_VNNI",
+  "kernel_compile_cmd": "gcc -O3 -fPIC -shared -fopenmp /workspace/device_profile/phase2/kernels.c -o /tmp/phase2_kernels_thkenhsm/kernels.so",
+  "kernel_compile_log": "/workspace/device_profile/phase2/kernels.c: In function \u2018stream_triad_reps_observed\u2019:\n/workspace/device_profile/phase2/kernels.c:74:23: warning: implicit declaration of function \u2018sched_getcpu\u2019; did you mean \u2018sched_getparam\u2019? [-Wimplicit-function-declaration]\n   74 |             int cpu = sched_getcpu();\n      |                       ^~~~~~~~~~~~\n      |                       sched_getparam",
+  "total_runtime_s": 124.23707962036133,
+  "runtime_budget_s": 600,
+  "runtime_over_budget": false,
+  "bench1": {
+    "name": "BENCH 1 \u2014 ACHIEVABLE MEMORY BANDWIDTH (STREAM triad a=b+s*c)",
+    "status": "OK",
+    "backend": "subprocess + omp_set_num_threads + stream_triad_reps_observed; numpy_available=True (numpy 2.4.4)",
+    "working_set_bytes": 2684354544,
+    "working_set_policy": "working_set = 8 \u00d7 L3_reported (L3=335544320 B, ws=2684354560 B, ratio=8.00\u00d7); DIAG B floor: 8\u00d7 is 2.5% above STREAM floor (4\u00d7 was 5.8%); L3_SUSPECT=True (logical_cores=4)",
+    "l3_reported_bytes": 335544320,
+    "ratio_ws_over_l3": 7.999999952316284,
+    "diag_b_floor_note": "Phase 2.3 DIAG B floor \u2248 14.89 GB/s (1-thread asymptotic); 8\u00d7L3 was ~2.5% above floor vs ~5.8% at 4\u00d7L3",
+    "l3_suspect": true,
+    "n_elements_per_array": 111848106,
+    "bytes_moved_per_iter": 2684354544,
+    "pre": "SystemSnapshot(when='bench1_pre_attempt1', loadavg_1_5_15=(0.03, 0.06, 0.08), mem_available_bytes=15918178304, mem_free_bytes=14768295936, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 0.03 0.06 0.08 5/230 5101', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=0.03 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14422164 kB', 'MemAvailable:   15545096 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          0.03,
+          0.06,
+          0.08
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=0.03 threshold=100.0; /proc/loadavg: 0.03 0.06 0.08 5/230 5101; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=0.03 > 100.0); MemTotal:       16398452 kB; MemFree:        14422164 kB; MemAvailable:   15545096 kB"
+      ]
+    },
+    "thread_sweeps": [
+      {
+        "threads": 1,
+        "status": "OK",
+        "pid": 5166,
+        "reps": 21,
+        "bytes_moved_per_iter": 2684354544,
+        "bytes_moved_per_timed_call": 56371445424,
+        "requested_threads": 1,
+        "env_OMP_NUM_THREADS": "1",
+        "omp_num_threads_actual": 1,
+        "omp_max_threads": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 3.8981196790000467,
+          "gbs": 14.46118900034914,
+          "omp_num_threads_actual": 1,
+          "n_distinct_cpus": 1
+        },
+        "raw_times_s": [
+          3.8439164659998823,
+          3.7981874099996276,
+          3.794732399000168,
+          3.798235370000384,
+          3.7957779040002606
+        ],
+        "raw_gbs": [
+          14.66510677914449,
+          14.841670338748642,
+          14.855183316444842,
+          14.841482934216977,
+          14.851091620664045
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 14.66510677914449,
+            "expected_gbs": 14.66510677914449,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 3.8439164659998823,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.841670338748642,
+            "expected_gbs": 14.841670338748642,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 3.7981874099996276,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.855183316444842,
+            "expected_gbs": 14.855183316444842,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 3.794732399000168,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.841482934216977,
+            "expected_gbs": 14.841482934216977,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 3.798235370000384,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 14.851091620664045,
+            "expected_gbs": 14.851091620664045,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 3.7957779040002606,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 14.841670338748642,
+        "min_gbs": 14.66510677914449,
+        "max_gbs": 14.855183316444842,
+        "mean_gbs": 14.810906997843798,
+        "cv_pct": 0.551771419271688,
+        "noisy": false,
+        "affinity_cpus": [
+          0
+        ]
+      },
+      {
+        "threads": 2,
+        "status": "OK",
+        "pid": 5172,
+        "reps": 21,
+        "bytes_moved_per_iter": 2684354544,
+        "bytes_moved_per_timed_call": 56371445424,
+        "requested_threads": 2,
+        "env_OMP_NUM_THREADS": "2",
+        "omp_num_threads_actual": 2,
+        "omp_max_threads": 2,
+        "n_distinct_cpus": 2,
+        "cpu_ids": [
+          0,
+          1
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 1.9134302319998824,
+          "gbs": 29.460935905189285,
+          "omp_num_threads_actual": 2,
+          "n_distinct_cpus": 2
+        },
+        "raw_times_s": [
+          1.9137629889996788,
+          2.0930444410000746,
+          2.367368795999937,
+          1.953101763000177,
+          1.9238742030001958
+        ],
+        "raw_gbs": [
+          29.45581336248188,
+          26.932751316577512,
+          23.811856234334478,
+          28.86252344445551,
+          29.301003847388387
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 29.45581336248188,
+            "expected_gbs": 29.45581336248188,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.9137629889996788,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 26.932751316577512,
+            "expected_gbs": 26.932751316577512,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 2.0930444410000746,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 23.811856234334478,
+            "expected_gbs": 23.811856234334478,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 2.367368795999937,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 28.86252344445551,
+            "expected_gbs": 28.86252344445551,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.953101763000177,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 29.301003847388387,
+            "expected_gbs": 29.301003847388387,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.9238742030001958,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 28.86252344445551,
+        "min_gbs": 23.811856234334478,
+        "max_gbs": 29.45581336248188,
+        "mean_gbs": 27.67278964104755,
+        "cv_pct": 8.608584800465174,
+        "noisy": false,
+        "affinity_cpus": [
+          0,
+          1
+        ]
+      },
+      {
+        "threads": 3,
+        "status": "OK",
+        "pid": 5180,
+        "reps": 21,
+        "bytes_moved_per_iter": 2684354544,
+        "bytes_moved_per_timed_call": 56371445424,
+        "requested_threads": 3,
+        "env_OMP_NUM_THREADS": "3",
+        "omp_num_threads_actual": 3,
+        "omp_max_threads": 3,
+        "n_distinct_cpus": 3,
+        "cpu_ids": [
+          0,
+          1,
+          2
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 1.3715116519997537,
+          "gbs": 41.10168903181154,
+          "omp_num_threads_actual": 3,
+          "n_distinct_cpus": 3
+        },
+        "raw_times_s": [
+          1.5518036909998045,
+          1.3825159230000281,
+          1.637084034000054,
+          1.6842907469999773,
+          1.7429517499999747
+        ],
+        "raw_gbs": [
+          36.326402463755386,
+          40.7745361092661,
+          34.434057295313,
+          33.4689515598228,
+          32.34251632266976
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 36.326402463755386,
+            "expected_gbs": 36.326402463755386,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.5518036909998045,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 40.7745361092661,
+            "expected_gbs": 40.7745361092661,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.3825159230000281,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 34.434057295313,
+            "expected_gbs": 34.434057295313,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.637084034000054,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 33.4689515598228,
+            "expected_gbs": 33.4689515598228,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.6842907469999773,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 32.34251632266976,
+            "expected_gbs": 32.34251632266976,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.7429517499999747,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 34.434057295313,
+        "min_gbs": 32.34251632266976,
+        "max_gbs": 40.7745361092661,
+        "mean_gbs": 35.46929275016541,
+        "cv_pct": 9.321965127551401,
+        "noisy": false,
+        "affinity_cpus": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "threads": 4,
+        "status": "OK",
+        "pid": 5190,
+        "reps": 21,
+        "bytes_moved_per_iter": 2684354544,
+        "bytes_moved_per_timed_call": 56371445424,
+        "requested_threads": 4,
+        "env_OMP_NUM_THREADS": "4",
+        "omp_num_threads_actual": 4,
+        "omp_max_threads": 4,
+        "n_distinct_cpus": 4,
+        "cpu_ids": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "discarded_warmup": {
+          "label": "DISCARDED",
+          "time_s": 1.4602631640000254,
+          "gbs": 38.60362078132857,
+          "omp_num_threads_actual": 4,
+          "n_distinct_cpus": 4
+        },
+        "raw_times_s": [
+          0.9951544740001736,
+          1.2425844980002694,
+          1.2559343880002416,
+          1.3363772970001264,
+          1.3394448770000054
+        ],
+        "raw_gbs": [
+          56.645924725039386,
+          45.366287374999736,
+          44.88406875597801,
+          42.182283065225306,
+          42.085677725131035
+        ],
+        "reconstruction_checks": [
+          {
+            "ok": true,
+            "reported_gbs": 56.645924725039386,
+            "expected_gbs": 56.645924725039386,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 0.9951544740001736,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 45.366287374999736,
+            "expected_gbs": 45.366287374999736,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.2425844980002694,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 44.88406875597801,
+            "expected_gbs": 44.88406875597801,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.2559343880002416,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 42.182283065225306,
+            "expected_gbs": 42.182283065225306,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.3363772970001264,
+            "message": "OK"
+          },
+          {
+            "ok": true,
+            "reported_gbs": 42.085677725131035,
+            "expected_gbs": 42.085677725131035,
+            "rel_err": 0.0,
+            "reps": 21,
+            "bytes_moved_per_iter": 2684354544,
+            "time_s": 1.3394448770000054,
+            "message": "OK"
+          }
+        ],
+        "median_gbs": 44.88406875597801,
+        "min_gbs": 42.085677725131035,
+        "max_gbs": 56.645924725039386,
+        "mean_gbs": 46.23284832927469,
+        "cv_pct": 13.005172296043469,
+        "noisy": true,
+        "affinity_cpus": [
+          0,
+          1,
+          2,
+          3
+        ]
+      }
+    ],
+    "calibration": {
+      "target_s": 1.0,
+      "threads": 4,
+      "reps": 21,
+      "history": [
+        {
+          "reps": 1,
+          "mean_time_s": 0.04724297559996558,
+          "pid": 5102,
+          "actual_threads": 4
+        },
+        {
+          "reps": 21,
+          "mean_time_s": 1.229969195600006,
+          "pid": 5118,
+          "actual_threads": 4
+        }
+      ],
+      "evidence": "calibrated in fresh subprocess at threads=4; reps=21"
+    },
+    "saturation": {
+      "invalid": false,
+      "no_saturation_observed": false,
+      "flag": "OK",
+      "saturation_thread_count": 4,
+      "bandwidth_saturated_median_gbs": 44.88406875597801,
+      "bandwidth_1thread_median_gbs": 14.841670338748642,
+      "ratio_sat_over_1": 3.0241925424522234,
+      "peak_median_gbs": 44.88406875597801,
+      "efficiency_at_max_cores": 0.7560481356130558,
+      "rule": "lowest thread count with median >= 95% of peak (when efficiency saturates)"
+    },
+    "validity": {
+      "valid": true,
+      "superlinear": false,
+      "violations": [],
+      "flag": "OK",
+      "baseline_gbs": 14.841670338748642,
+      "baseline_label": "verified_1thread"
+    },
+    "recommendation": {
+      "recommended_thread_count": 4,
+      "recommended_thread_count_evidence": "BENCH 1 bandwidth saturation thread count=4 (eff@max=0.7560481356130558); not from deleted BENCH 2",
+      "max_efficiency_thread_count": 4,
+      "max_efficiency_thread_count_evidence": "from BENCH 1 verified curve; no_saturation=False"
+    },
+    "post": "SystemSnapshot(when='bench1_post', loadavg_1_5_15=(1.45, 0.45, 0.22), mem_available_bytes=15848828928, mem_free_bytes=14698598400, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 1.45 0.45 0.22 1/226 5247', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14354100 kB', 'MemAvailable:   15477372 kB'])",
+    "notes": [],
+    "FAIL": [],
+    "cache_proof": {
+      "working_set_bytes": 2684354544,
+      "l3_bytes": 335544320,
+      "ratio_ws_over_l3": 7.999999952316284,
+      "evidence": "Phase 2.4 policy: working_set = 8 * L3_reported; ws=2684354544 L3=335544320 ratio=7.999999952316284; Phase 2.3 DIAG B floor \u2248 14.89 GB/s (1-thread asymptotic); 8\u00d7L3 was ~2.5% above floor vs ~5.8% at 4\u00d7L3"
+    },
+    "reps": 21,
+    "efficiency_curve": [
+      {
+        "threads": 1,
+        "median_gbs": 14.841670338748642,
+        "efficiency": 1.0
+      },
+      {
+        "threads": 2,
+        "median_gbs": 28.86252344445551,
+        "efficiency": 0.9723475453130506
+      },
+      {
+        "threads": 3,
+        "median_gbs": 34.434057295313,
+        "efficiency": 0.7733643745253422
+      },
+      {
+        "threads": 4,
+        "median_gbs": 44.88406875597801,
+        "efficiency": 0.7560481356130558
+      }
+    ]
+  },
+  "bench2": {
+    "name": "BENCH 2 \u2014 DELETED (Phase 2.4)",
+    "status": "DELETED",
+    "reason": "Kernels compile to SSE2 (vector-xmm; no ymm/zmm; no -march). They cannot exercise the detected AVX512_VNNI tier. A hand-rolled dot product also does not predict llama.cpp VNNI GEMM. Compute throughput deferred to Phase 4 against a real engine. recommended_thread_count now comes from BENCH 1 bandwidth curve."
+  },
+  "bench3": {
+    "name": "BENCH 3 \u2014 SUSTAINED VS BURST (thermal, STREAM/DRAM-bound)",
+    "status": "THERMAL_BLIND",
+    "kernel": "stream_triad_reps_observed via fresh subprocess + omp_set_num_threads (same STREAM kernel as BENCH 1)",
+    "sat_threads": 4,
+    "duration_s": 20.0,
+    "duration_override_env": "20",
+    "bucket_s": 10.0,
+    "n_elements_per_array": 111848106,
+    "reps_per_call": 21,
+    "bytes_moved_per_iter": 2684354544,
+    "on_ac_power_at_profile": "UNDETECTED (reason: /sys/class/power_supply absent or empty)",
+    "battery_dual_run": "NOT DONE: no readable AC/battery sysfs on this host to gate dual runs; single run only",
+    "pre": "SystemSnapshot(when='bench3_pre_attempt1', loadavg_1_5_15=(1.45, 0.45, 0.22), mem_available_bytes=15848828928, mem_free_bytes=14698598400, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 1.45 0.45 0.22 1/226 5247', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14354100 kB', 'MemAvailable:   15477372 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          1.45,
+          0.45,
+          0.22
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=1.45 threshold=100.0; /proc/loadavg: 1.45 0.45 0.22 1/226 5247; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0); MemTotal:       16398452 kB; MemFree:        14354100 kB; MemAvailable:   15477372 kB"
+      ]
+    },
+    "buckets": [],
+    "post": "SystemSnapshot(when='bench3_post_thermal_blind', loadavg_1_5_15=(1.45, 0.45, 0.22), mem_available_bytes=15828492288, mem_free_bytes=14678261760, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 1.45 0.45 0.22 1/226 5259', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14334240 kB', 'MemAvailable:   15457512 kB'])",
+    "summary": {
+      "flag": "THERMAL BLIND \u2014 RESULT NOT MEANINGFUL",
+      "explanation": "zero thermal zones and zero cpufreq scaling_cur_freq readable; sustained/peak conclusion SKIPPED",
+      "conclusion_skipped": true
+    },
+    "thermal_blind": true,
+    "requested_threads": 4,
+    "omp_num_threads_actual": 4,
+    "n_distinct_cpus": 4,
+    "thread_count_applied": true,
+    "pid": 5248,
+    "omp_max_threads": 4,
+    "cpu_ids": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "thread_flag": "OK",
+    "thermal_probe": {
+      "temps_C": {},
+      "freqs_kHz": {},
+      "evidence": [
+        "no thermal_zone* readable",
+        "no scaling_cur_freq readable"
+      ],
+      "thermal_blind": true
+    },
+    "notes": [
+      "THERMAL BLIND \u2014 RESULT NOT MEANINGFUL; 180s STREAM skipped after thread-count verify"
+    ]
+  },
+  "bench4": {
+    "name": "BENCH 4 \u2014 mmap / PAGE-FAULT COST",
+    "status": "OK",
+    "cache_dir": "/home/ubuntu/.cache/localmodel",
+    "effective_mem_bytes": 16792014848,
+    "cached_file_bytes": 6716805939,
+    "oversized_file_bytes": 25188022272,
+    "required_bytes_total": 31904828211,
+    "disk_total": 270436077568,
+    "disk_free": 252737167360,
+    "pre": "SystemSnapshot(when='bench4_pre_attempt1', loadavg_1_5_15=(1.45, 0.45, 0.22), mem_available_bytes=15828492288, mem_free_bytes=14678261760, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 1.45 0.45 0.22 1/226 5259', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14334240 kB', 'MemAvailable:   15457512 kB'])",
+    "quiet_gate": {
+      "status": "OK",
+      "readings": [
+        [
+          1.45,
+          0.45,
+          0.22
+        ]
+      ],
+      "evidence": [
+        "PHASE2_LOAD_THRESHOLD=100.0 (OVERRIDE)",
+        "PHASE2_QUIET_ATTEMPTS=1 (OVERRIDE)",
+        "PHASE2_QUIET_SLEEP_S=0.0 (OVERRIDE)",
+        "attempt 1/1: loadavg1=1.45 threshold=100.0; /proc/loadavg: 1.45 0.45 0.22 1/226 5259; load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.45 > 100.0); MemTotal:       16398452 kB; MemFree:        14334240 kB; MemAvailable:   15457512 kB"
+      ]
+    },
+    "files": {
+      "cached": {
+        "label": "cached_0.4x_mem",
+        "path": "/home/ubuntu/.cache/localmodel/phase24_mmap_cached.bin",
+        "file_bytes": 6716805939,
+        "status": "OK",
+        "pid": 5260,
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "write_seconds": 4.858623463000185,
+        "write_gbs_file_size_over_time": 1.3824503977619194,
+        "fadvise_evidence": "os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase24_mmap_cached.bin', POSIX_FADV_DONTNEED) OK",
+        "stride": 4096,
+        "pages": 1639846,
+        "cold": {
+          "seconds": 2.4878323200000523,
+          "checksum": 50835226,
+          "minflt_before": 10447,
+          "minflt_after": 164182,
+          "minflt_delta": 153735,
+          "majflt_before": 0,
+          "majflt_after": 1,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 75776,
+          "io_read_bytes_after": 6716884992,
+          "io_read_bytes_delta": 6716809216,
+          "io_basis_gbs": 2.69986411945957,
+          "file_basis_gbs": 2.699862802248609,
+          "effective_read_gbs": 2.69986411945957,
+          "pages_per_second": 659146.5135399341,
+          "fault_evidence": [
+            "/proc/self/stat minflt=10447 majflt=0; raw_tail=['10447', '5602', '0', '0']",
+            "/proc/self/stat minflt=164182 majflt=1; raw_tail=['164182', '5602', '1', '0']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=75776; raw_line='read_bytes: 75776'",
+            "/proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time",
+          "bandwidth_note": "block I/O observed via read_bytes delta",
+          "timed_kernel": "stride_touch_addr (serial; no OpenMP parallel region)",
+          "omp_num_threads_actual": 1,
+          "n_distinct_cpus": 1
+        },
+        "warm": {
+          "seconds": 1.108996317999754,
+          "checksum": 50835226,
+          "minflt_before": 164182,
+          "minflt_after": 266673,
+          "minflt_delta": 102491,
+          "majflt_before": 1,
+          "majflt_after": 1,
+          "majflt_delta": 0,
+          "io_read_bytes_before": 6716884992,
+          "io_read_bytes_after": 6716884992,
+          "io_read_bytes_delta": 0,
+          "io_basis_gbs": null,
+          "file_basis_gbs": 6.056653056445486,
+          "effective_read_gbs": 6.056653056445486,
+          "pages_per_second": 1478675.7840257895,
+          "fault_evidence": [
+            "/proc/self/stat minflt=164182 majflt=1; raw_tail=['164182', '5602', '1', '0']",
+            "/proc/self/stat minflt=266673 majflt=1; raw_tail=['266673', '5602', '1', '0']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'",
+            "/proc/self/io read_bytes=6716884992; raw_line='read_bytes: 6716884992'"
+          ],
+          "bandwidth_basis": "file_bytes / time",
+          "bandwidth_note": "FULLY CACHED (io read_bytes delta = 0 is the proof)",
+          "timed_kernel": "stride_touch_addr (serial; no OpenMP parallel region)",
+          "omp_num_threads_actual": 1,
+          "n_distinct_cpus": 1
+        },
+        "note": "OpenMP verified at requested_threads via tiny triad before mmap; timed mmap kernel is serial stride_touch."
+      },
+      "oversized": {
+        "label": "oversized_1.5x_mem",
+        "path": "/home/ubuntu/.cache/localmodel/phase24_mmap_oversized.bin",
+        "file_bytes": 25188022272,
+        "status": "OK",
+        "pid": 5266,
+        "requested_threads": 1,
+        "omp_num_threads_actual": 1,
+        "n_distinct_cpus": 1,
+        "cpu_ids": [
+          0
+        ],
+        "thread_flag": "OK",
+        "thread_count_applied": true,
+        "write_seconds": 17.241987934000008,
+        "write_gbs_file_size_over_time": 1.4608537233882968,
+        "fadvise_evidence": "os.posix_fadvise('/home/ubuntu/.cache/localmodel/phase24_mmap_oversized.bin', POSIX_FADV_DONTNEED) OK",
+        "stride": 4096,
+        "pages": 6149420,
+        "cold": {
+          "seconds": 12.49882924800022,
+          "checksum": 190632020,
+          "minflt_before": 10326,
+          "minflt_after": 586836,
+          "minflt_delta": 576510,
+          "majflt_before": 0,
+          "majflt_after": 1,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 75776,
+          "io_read_bytes_after": 25188100096,
+          "io_read_bytes_delta": 25188024320,
+          "io_basis_gbs": 2.0152306924290544,
+          "file_basis_gbs": 2.0152305285737078,
+          "effective_read_gbs": 2.0152306924290544,
+          "pages_per_second": 491999.6807688121,
+          "fault_evidence": [
+            "/proc/self/stat minflt=10326 majflt=0; raw_tail=['10326', '5623', '0', '0']",
+            "/proc/self/stat minflt=586836 majflt=1; raw_tail=['586836', '5623', '1', '0']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=75776; raw_line='read_bytes: 75776'",
+            "/proc/self/io read_bytes=25188100096; raw_line='read_bytes: 25188100096'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time",
+          "bandwidth_note": "block I/O observed via read_bytes delta",
+          "timed_kernel": "stride_touch_addr (serial; no OpenMP parallel region)",
+          "omp_num_threads_actual": 1,
+          "n_distinct_cpus": 1
+        },
+        "warm": {
+          "seconds": 11.228557391000322,
+          "checksum": 190632020,
+          "minflt_before": 586836,
+          "minflt_after": 1163347,
+          "minflt_delta": 576511,
+          "majflt_before": 1,
+          "majflt_after": 2,
+          "majflt_delta": 1,
+          "io_read_bytes_before": 25188100096,
+          "io_read_bytes_after": 50376124416,
+          "io_read_bytes_delta": 25188024320,
+          "io_basis_gbs": 2.243211077158333,
+          "file_basis_gbs": 2.243210894766248,
+          "effective_read_gbs": 2.243211077158333,
+          "pages_per_second": 547658.9543843587,
+          "fault_evidence": [
+            "/proc/self/stat minflt=586836 majflt=1; raw_tail=['586836', '5623', '1', '0']",
+            "/proc/self/stat minflt=1163347 majflt=2; raw_tail=['1163347', '5623', '2', '0']"
+          ],
+          "io_evidence": [
+            "/proc/self/io read_bytes=25188100096; raw_line='read_bytes: 25188100096'",
+            "/proc/self/io read_bytes=50376124416; raw_line='read_bytes: 50376124416'"
+          ],
+          "bandwidth_basis": "/proc/self/io read_bytes delta / time",
+          "bandwidth_note": "block I/O observed via read_bytes delta",
+          "timed_kernel": "stride_touch_addr (serial; no OpenMP parallel region)",
+          "omp_num_threads_actual": 1,
+          "n_distinct_cpus": 1
+        },
+        "note": "OpenMP verified at requested_threads via tiny triad before mmap; timed mmap kernel is serial stride_touch."
+      }
+    },
+    "delta": {
+      "cold_read_gbs_cached_minus_oversized": 0.6846334270305157,
+      "warm_read_gbs_cached_minus_oversized": 3.8134419792871532,
+      "warm_cliff_ratio_cached_over_oversized": 2.6999924876075263,
+      "cold_pages_per_second_cached_minus_oversized": 167146.832771122,
+      "deliverable": "cached vs oversized warm effective_read_gbs; cliff_ratio = warm_cached / warm_oversized. FULLY CACHED passes use file_bytes/time when io_read_bytes_delta==0 (Phase 2.2/2.4 fix)."
+    },
+    "post": "SystemSnapshot(when='bench4_post', loadavg_1_5_15=(1.32, 0.57, 0.27), mem_available_bytes=15932051456, mem_free_bytes=15345725440, mem_total_bytes=16792014848, contaminated=False, load_threshold=100.0, threshold_overridden=True, evidence=['/proc/loadavg: 1.32 0.57 0.27 1/227 5271', 'load_threshold=100.0 (OVERRIDE); contaminated=False (loadavg1=1.32 > 100.0)', 'MemTotal:       16398452 kB', 'MemFree:        14986060 kB', 'MemAvailable:   15558644 kB'])",
+    "thread_control": "Each file measured in a fresh subprocess; omp_set_num_threads(1) verified via tiny observed triad before timed serial stride_touch.",
+    "note": "Two files: cached=0.4*effective_mem, oversized=1.5*effective_mem. When io_read_bytes_delta==0 \u2192 FULLY CACHED; bandwidth_basis = file_bytes/time. Else effective = read_bytes delta / time. pages_per_second = pages touched / time (not a bandwidth)."
+  },
+  "derived": {
+    "measured_bandwidth_GBps": 44.88406875597801,
+    "bandwidth_saturation_threads": 4,
+    "predictions": [
+      {
+        "model_GiB": 0.5,
+        "model_bytes": 536870912,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 83.60309294607119,
+        "realistic_0_55x_tok_s": 45.98170112033915,
+        "decimal_GB_alias": 0.5,
+        "decimal_GB_bytes_1e9": 500000000,
+        "upper_tok_s_if_decimal_GB": 89.76813751195601
+      },
+      {
+        "model_GiB": 1,
+        "model_bytes": 1073741824,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 41.80154647303559,
+        "realistic_0_55x_tok_s": 22.990850560169577,
+        "decimal_GB_alias": 1,
+        "decimal_GB_bytes_1e9": 1000000000,
+        "upper_tok_s_if_decimal_GB": 44.88406875597801
+      },
+      {
+        "model_GiB": 2,
+        "model_bytes": 2147483648,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 20.900773236517797,
+        "realistic_0_55x_tok_s": 11.495425280084788,
+        "decimal_GB_alias": 2,
+        "decimal_GB_bytes_1e9": 2000000000,
+        "upper_tok_s_if_decimal_GB": 22.442034377989003
+      },
+      {
+        "model_GiB": 4,
+        "model_bytes": 4294967296,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 10.450386618258898,
+        "realistic_0_55x_tok_s": 5.747712640042394,
+        "decimal_GB_alias": 4,
+        "decimal_GB_bytes_1e9": 4000000000,
+        "upper_tok_s_if_decimal_GB": 11.221017188994502
+      },
+      {
+        "model_GiB": 8,
+        "model_bytes": 8589934592,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 5.225193309129449,
+        "realistic_0_55x_tok_s": 2.873856320021197,
+        "decimal_GB_alias": 8,
+        "decimal_GB_bytes_1e9": 8000000000,
+        "upper_tok_s_if_decimal_GB": 5.610508594497251
+      },
+      {
+        "model_GiB": 16,
+        "model_bytes": 17179869184,
+        "model_bytes_basis": "GiB = 2^30",
+        "upper_tok_s": 2.6125966545647246,
+        "realistic_0_55x_tok_s": 1.4369281600105985,
+        "decimal_GB_alias": 16,
+        "decimal_GB_bytes_1e9": 16000000000,
+        "upper_tok_s_if_decimal_GB": 2.8052542972486254
+      }
+    ],
+    "prediction_units_note": "model_GiB uses 2^30 bytes (GGUF convention). measured_bandwidth_GBps uses decimal 1e9 bytes/s (STREAM convention). upper_tok_s = BW_bytes_per_s / model_bytes.",
+    "kv_cache_predictions": {
+      "primary_config": {
+        "name": "representative_dense_7B_GQA_primary",
+        "attention": "GQA",
+        "n_layers": 32,
+        "n_kv_heads": 8,
+        "head_dim": 128,
+        "bytes_per_element": 2,
+        "model_weight_GiB": 7.0,
+        "note": "PRIMARY: GQA (n_kv_heads=8). Dense decode: every weight every token + KV up to n_ctx. NOT a real GGUF measurement."
+      },
+      "secondary_config": {
+        "name": "representative_dense_7B_MHA_secondary",
+        "attention": "MHA",
+        "n_layers": 32,
+        "n_kv_heads": 32,
+        "head_dim": 128,
+        "bytes_per_element": 2,
+        "model_weight_GiB": 7.0,
+        "note": "SECONDARY: full MHA (n_kv_heads=32). Overstates KV ~4x vs GQA; kept for comparison only."
+      },
+      "primary_GQA_rows": [
+        {
+          "attention": "GQA",
+          "n_ctx": 512,
+          "n_kv_heads": 8,
+          "kv_bytes": 67108864,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 7583301632,
+          "kv_share_of_total": 0.008849557522123894,
+          "upper_tok_s_weights_plus_kv": 5.918803040429818,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "GQA",
+          "n_ctx": 4096,
+          "n_kv_heads": 8,
+          "kv_bytes": 536870912,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 8053063680,
+          "kv_share_of_total": 0.06666666666666667,
+          "upper_tok_s_weights_plus_kv": 5.573539529738079,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "GQA",
+          "n_ctx": 32768,
+          "n_kv_heads": 8,
+          "kv_bytes": 4294967296,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 11811160064,
+          "kv_share_of_total": 0.36363636363636365,
+          "upper_tok_s_weights_plus_kv": 3.800140588457781,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        }
+      ],
+      "secondary_MHA_rows": [
+        {
+          "attention": "MHA",
+          "n_ctx": 512,
+          "n_kv_heads": 32,
+          "kv_bytes": 268435456,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 7784628224,
+          "kv_share_of_total": 0.034482758620689655,
+          "upper_tok_s_weights_plus_kv": 5.7657305480049095,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "MHA",
+          "n_ctx": 4096,
+          "n_kv_heads": 32,
+          "kv_bytes": 2147483648,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 9663676416,
+          "kv_share_of_total": 0.2222222222222222,
+          "upper_tok_s_weights_plus_kv": 4.644616274781733,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "MHA",
+          "n_ctx": 32768,
+          "n_kv_heads": 32,
+          "kv_bytes": 17179869184,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 24696061952,
+          "kv_share_of_total": 0.6956521739130435,
+          "upper_tok_s_weights_plus_kv": 1.8174585423058953,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        }
+      ],
+      "rows": [
+        {
+          "attention": "GQA",
+          "n_ctx": 512,
+          "n_kv_heads": 8,
+          "kv_bytes": 67108864,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 7583301632,
+          "kv_share_of_total": 0.008849557522123894,
+          "upper_tok_s_weights_plus_kv": 5.918803040429818,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "GQA",
+          "n_ctx": 4096,
+          "n_kv_heads": 8,
+          "kv_bytes": 536870912,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 8053063680,
+          "kv_share_of_total": 0.06666666666666667,
+          "upper_tok_s_weights_plus_kv": 5.573539529738079,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        },
+        {
+          "attention": "GQA",
+          "n_ctx": 32768,
+          "n_kv_heads": 8,
+          "kv_bytes": 4294967296,
+          "model_weight_bytes": 7516192768,
+          "bytes_per_token_total": 11811160064,
+          "kv_share_of_total": 0.36363636363636365,
+          "upper_tok_s_weights_plus_kv": 3.800140588457781,
+          "upper_tok_s_weights_only": 5.971649496147942,
+          "formula": "kv_bytes(n_ctx)=2*n_layers*n_kv_heads*head_dim*n_ctx*bytes_per_element; tok_s = BW / (model_bytes + kv_bytes)"
+        }
+      ],
+      "note": "PRIMARY=GQA (n_kv_heads=8); SECONDARY=MHA (n_kv_heads=32, ~4x KV). UPPER BOUND with perfect bandwidth utilization. GiB = 2^30."
+    },
+    "moe_note": "WRONG FOR MoE: this model assumes every weight is read every token. Mixture-of-Experts models only activate a subset of experts per token, so weight bytes/token are much smaller and MoE will be systematically UNDERRATED (predicted tok/s too low) by BW/model_bytes. FLAG FOR PHASE 3 selection policy.",
+    "prefill_note": "OPEN GAP: prefill / time-to-first-token is compute-bound (or mixed), not bandwidth-bound. Nothing in this harness predicts TTFT.",
+    "recommended_thread_count": 4,
+    "recommended_thread_count_evidence": "BENCH 1 bandwidth saturation thread count=4 (eff@max=0.7560481356130558); not from deleted BENCH 2",
+    "recommended_thread_count_sustained": null,
+    "recommended_thread_count_sustained_evidence": "THERMAL BLIND \u2014 RESULT NOT MEANINGFUL; recommended_thread_count_sustained NOT concluded from BENCH 3",
+    "bench3_thread_source": "BENCH 3 used max_efficiency_thread_count=4 from BENCH 1 (not deleted BENCH 2 knee)"
+  },
+  "self_critique": {
+    "measurements blocked or contaminated": [
+      "no bench BLOCKED by loadavg>0.3 after retries (or gate not exercised)"
+    ],
+    "likely wrong under virtualization": [
+      "BENCH 1 GB/s reflects guest/cgroup memory path, not host DRAM controllers",
+      "BENCH 3 thermal/cpufreq often absent under KVM \u2014 THERMAL BLIND path",
+      "BENCH 4 overlay FS + virtio block \u2260 bare-metal NVMe latency",
+      "steal time / noisy neighbors can still inflate CV (see NOISY tags)"
+    ],
+    "where a benchmark may have been served from cache rather than RAM": [
+      "BENCH 1 working_set=2684354544 vs L3=335544320 ratio=7.999999952316284; Phase 2.3 DIAG B floor \u2248 14.89 GB/s (1-thread asymptotic); 8\u00d7L3 was ~2.5% above floor vs ~5.8% at 4\u00d7L3",
+      "BENCH 2 DELETED \u2014 no compute microbench cache analysis",
+      "BENCH 4: io_read_bytes_delta==0 \u2192 FULLY CACHED (file_bytes/time basis)"
+    ],
+    "ISA tier verification": [
+      "BENCH 2 deleted; scalar STREAM/mmap kernels do not exercise Phase 1.5 usable_tier=AVX512_VNNI",
+      "Compute throughput deferred to Phase 4 real-engine measurement"
+    ],
+    "other": [
+      "total_runtime_s=124.2 budget=600 over=False",
+      "0.55x decode band is an unvalidated assumption pending Phase 4",
+      "Phase 2.4: omp_set_num_threads in fresh subprocess; actual!=requested \u2192 INVALID; WS=8\u00d7L3; BENCH 2 deleted",
+      "SMOKE_NOT_DELIVERABLE: PHASE2 overrides present: ['PHASE2_LOAD_THRESHOLD', 'PHASE2_QUIET_SLEEP_S', 'PHASE2_QUIET_ATTEMPTS', 'PHASE2_BENCH3_DURATION_S'] (PHASE2_ALLOW_OVERRIDES=1)",
+      "SMOKE_NOT_DELIVERABLE: container/smoke path"
+    ]
+  }
+}
