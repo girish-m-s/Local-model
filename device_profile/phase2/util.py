@@ -201,9 +201,11 @@ def rep_stats(samples: Sequence[float], cv_noisy_pct: float = 10.0) -> RepStats:
 
 def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
     """
-    BENCH 1 buffer policy (Phase 2.2): working_set = max(4 * L3_reported, 1 GiB).
-    Replaces the old 512 MiB SUSPECT fallback that left ratio_ws_over_l3≈1.6.
-    Returns (bytes, evidence, used_suspect_flag).
+    Interim buffer sizing for diagnostics/benches before DIAG B escape is known.
+    Phase 2.3: the authoritative policy is set FROM the DIAG B escape point
+    (see diag.run_diag_b); this helper must not invent a floor that disagrees
+    with a measured escape. Uses max(4*L3, 1 GiB) only as a pre-escape default
+    matching the observed near-floor consecutive pair at 4×/8× on this host.
     """
     l3 = None
     if profile.cache.lscpu_l3_bytes is not None and isinstance(
@@ -229,15 +231,16 @@ def resolve_working_set_bytes(profile: Any) -> tuple[int, str, bool]:
         ws = GIB
         evid = (
             f"L3 undetected (logical_cores={logical}); "
-            f"working_set = 1 GiB floor (Phase 2.2); old 512 MiB SUSPECT fallback retired"
+            f"working_set = 1 GiB pre-escape default; authoritative policy from DIAG B escape"
         )
         return ws, evid, True
 
     ws = max(4 * l3, GIB)
     evid = (
-        f"working_set = max(4 * L3_reported, 1 GiB) = max(4*{l3}, {GIB}) = {ws}"
+        f"pre-escape default working_set = max(4 * L3_reported, 1 GiB) = "
+        f"max(4*{l3}, {GIB}) = {ws}"
         + (f"; L3_SUSPECT=True (logical_cores={logical})" if suspect else "")
-        + "; floor justified by DIAG B (512 MiB left ws inside reported L3)"
+        + "; authoritative policy MUST come from DIAG B escape (Phase 2.3 Step 5)"
     )
     return ws, evid, suspect
 
@@ -416,34 +419,30 @@ def evaluate_curve_validity(
     cores: int,
 ) -> dict[str, Any]:
     """
-    DIAG C / Phase 2.2: validity that does not solely depend on OMP_NUM_THREADS=1.
-    - absolute plausibility (heuristic 1..60 GB/s per core)
-    - monotonicity beyond noise
-    - efficiency vs A1 serial baseline
-    May return VALID-WITH-CAVEAT.
+    Phase 2.3: do NOT discount SUPERLINEAR-vs-A1 or adopt OpenMP@1 as baseline.
+    Keep serial baseline. Absolute per-core bound is a FLAG, not a footnote.
     """
     flags: list[str] = []
-    caveats: list[str] = []
-    # Absolute per-core plausibility (HEURISTIC bounds)
+    # Absolute per-core plausibility (HEURISTIC bounds) — FLAG when fired
     abs_lo, abs_hi = 1.0, 60.0
     for t, m in zip(thread_counts, medians):
         per_core = m / max(t, 1)
         if per_core > abs_hi:
             flags.append(
-                f"threads={t}: per-core={per_core:.3f} GB/s > {abs_hi} "
-                f"(HEURISTIC absolute upper bound)"
+                f"FLAG absolute: threads={t}: per-core={per_core:.3f} GB/s > {abs_hi} "
+                f"(HEURISTIC upper bound)"
             )
         if per_core < abs_lo:
             flags.append(
-                f"threads={t}: per-core={per_core:.3f} GB/s < {abs_lo} "
-                f"(HEURISTIC absolute lower bound)"
+                f"FLAG absolute: threads={t}: per-core={per_core:.3f} GB/s < {abs_lo} "
+                f"(HEURISTIC lower bound)"
             )
 
     # Monotonicity: allow 5% noise
     for i in range(1, len(medians)):
         if medians[i] + 1e-12 < medians[i - 1] * 0.95:
             flags.append(
-                f"non-monotonic: threads {thread_counts[i-1]}→{thread_counts[i]} "
+                f"FLAG non-monotonic: threads {thread_counts[i-1]}→{thread_counts[i]} "
                 f"{medians[i-1]:.3f}→{medians[i]:.3f} (>5% drop)"
             )
 
@@ -454,74 +453,27 @@ def evaluate_curve_validity(
         baseline_label="A1_serial",
     )
     if sl["superlinear"]:
-        flags.extend(sl["violations"])
+        flags.extend([f"FLAG {v}" for v in sl["violations"]])
 
-    # OMP_NUM_THREADS=1 vs A1 caveat (informational, not hard INVALID alone)
-    one_omp = None
-    for t, m in zip(thread_counts, medians):
-        if t == 1:
-            one_omp = m
-            break
-    a1_is_slow_outlier = False
-    if one_omp is not None and serial_baseline_gbs > 0:
-        r = one_omp / serial_baseline_gbs
-        if r > 1.5:
-            a1_is_slow_outlier = True
-            caveats.append(
-                f"OMP_NUM_THREADS=1 / A1_serial = {r:.3f} — A1 pure-serial is the "
-                f"SLOW outlier (codegen); do NOT use A1 as efficiency baseline; "
-                f"prefer OpenMP@1. SUPERLINEAR-vs-A1 flags are discounted."
-            )
-        elif r < 0.5:
-            caveats.append(
-                f"OMP_NUM_THREADS=1 / A1_serial = {r:.3f} — 1-thread OpenMP point "
-                f"is slow vs pure serial; prefer A1 for efficiency baseline"
-            )
-
-    # If A1 is the slow outlier, re-evaluate efficiency vs OpenMP@1 instead.
-    sl_omp1 = None
-    if a1_is_slow_outlier and one_omp and one_omp > 0:
-        sl_omp1 = check_superlinear(
-            thread_counts,
-            medians,
-            baseline_gbs=one_omp,
-            baseline_label="OMP_NUM_THREADS=1",
-        )
-        # Drop A1-superlinear from hard flags; keep as caveat only
-        flags = [f for f in flags if "A1_serial" not in f]
-        if sl_omp1["superlinear"]:
-            flags.extend(sl_omp1["violations"])
-        elif not flags:
-            status_hint = "VALID-WITH-CAVEAT"
-        else:
-            status_hint = None
-    else:
-        status_hint = None
-
-    hard_super = any("SUPERLINEAR" in f for f in flags)
-    if hard_super:
+    if flags:
         status = "INVALID"
-    elif flags:
-        status = "VALID-WITH-CAVEAT"
-        caveats.extend(flags)
-        flags = []
-    elif caveats or status_hint:
-        status = "VALID-WITH-CAVEAT"
     else:
         status = "VALID"
 
     return {
         "status": status,
         "flags": flags,
-        "caveats": caveats,
+        "caveats": [],
         "absolute_bounds_GBps_per_core": {
             "lo": abs_lo,
             "hi": abs_hi,
-            "note": "HEURISTIC — not ISA/DRAM derived",
+            "note": "HEURISTIC — FLAG when exceeded, not a soft caveat",
         },
         "superlinear_vs_A1": sl,
-        "superlinear_vs_OMP1": sl_omp1,
-        "a1_is_slow_outlier": a1_is_slow_outlier,
+        "baseline_policy": (
+            "serial A1 baseline retained (Phase 2.3); "
+            "OpenMP@1 must NOT replace it; SUPERLINEAR-vs-A1 is NOT discounted"
+        ),
         "cores": cores,
     }
 

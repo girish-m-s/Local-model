@@ -15,7 +15,7 @@ python3 -m device_profile
 # Phase 2.1 — synthetic measurement harness (no model downloads)
 python3 -m device_profile.phase2
 
-# Phase 2.2 — baseline diagnostic (DIAG A/B/C; may run in container)
+# Phase 2.2 / 2.3 — diagnostics (may run in container)
 python3 -m device_profile.phase2 --diag
 ```
 
@@ -25,8 +25,9 @@ Phase 2.1 measures STREAM bandwidth, compute thread knee, 180s sustained
 DRAM-bound thermal, and mmap fault cost; total runtime budget 10 minutes.
 
 **Phase 2.1 deliverable requires bare-metal x86 (AC + battery) and one ARM
-host.** Phase 2.2 diagnostics may run in the container; DIAG A conclusion
-is the Phase 2.2 deliverable.
+host.** Phase 2.3 verifies OpenMP thread counts inside the parallel region;
+its Step 1 table + Step 3 restatement are the deliverable. Phase 2.2's
+OpenMP@1-baseline claim was FALSIFIED under verified thread counts.
 
 ## Design rules
 
